@@ -8,7 +8,7 @@ The simulator lets equipment planners and enthusiasts sketch a crop-handling lin
 
 ## Current Development Status
 
-**Stage 4 of 15 complete** — repository/design documentation, application shell, the 3D scene with camera controls, and element placement (place/select/move/rotate/duplicate/delete with grid snapping) are in place. Conveyor rendering is next. See [docs/ROADMAP.md](docs/ROADMAP.md) for the full stage list and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md) for the precise current state.
+**Stage 5 of 15 complete** — repository/design documentation, application shell, the 3D scene with camera controls, element placement (place/select/move/rotate/duplicate/delete with grid snapping), and parametric conveyor rendering are in place. Conveyor physics is next. See [docs/ROADMAP.md](docs/ROADMAP.md) for the full stage list and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md) for the precise current state.
 
 ## Main Features
 
@@ -110,7 +110,7 @@ npm run format:check  # Prettier check only (used by CI)
 
 ## Known Limitations
 
-- Elements render as placeholder boxes and nothing simulates yet: conveyor geometry, physics, spawning, and save/load are stages 5–15 of the roadmap.
+- Conveyors render as proper machines; other element types are placeholder boxes. Nothing simulates yet: physics, spawning, and save/load are stages 6–15 of the roadmap.
 - Physics is an approximation: crops are simple convex bodies, not deformable grains. See [docs/PHYSICS_SPECIFICATION.md](docs/PHYSICS_SPECIFICATION.md).
 - Current issues are tracked in [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
 

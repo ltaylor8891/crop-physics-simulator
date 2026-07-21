@@ -5,6 +5,7 @@ import { useSceneStore } from '../state/sceneStore';
 import { useUiStore } from '../state/uiStore';
 import type { SceneElement } from '../types/elements';
 import { clampToBuildArea, snapPositionXZ } from '../utilities/snap';
+import { ConveyorMesh } from './elements/ConveyorMesh';
 import { intersectGround } from './groundRay';
 
 const SELECTION_COLOR = '#4f9cf0';
@@ -85,29 +86,35 @@ function PlacedElement({ element }: { element: SceneElement }) {
     useUiStore.getState().select(element.id);
   };
 
+  // Pointer/click handlers sit on the group so every child mesh of a
+  // type-specific visual participates in selection and dragging.
   return (
     <group
       position={[element.position.x, element.position.y, element.position.z]}
       rotation={[0, element.rotationYaw, 0]}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onClick={handleClick}
     >
-      <mesh
-        position={[bounds.center.x, bounds.center.y, bounds.center.z]}
-        castShadow
-        receiveShadow
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onClick={handleClick}
-      >
-        <boxGeometry args={[bounds.size.x, bounds.size.y, bounds.size.z]} />
-        <meshStandardMaterial
-          color={descriptor.color}
-          transparent={descriptor.translucent}
-          opacity={descriptor.translucent ? 0.35 : 1}
-          emissive={selected ? SELECTION_COLOR : '#000000'}
-          emissiveIntensity={selected ? 0.4 : 0}
-        />
-      </mesh>
+      {element.type === 'conveyor' ? (
+        <ConveyorMesh properties={element.properties} selected={selected} />
+      ) : (
+        <mesh
+          position={[bounds.center.x, bounds.center.y, bounds.center.z]}
+          castShadow
+          receiveShadow
+        >
+          <boxGeometry args={[bounds.size.x, bounds.size.y, bounds.size.z]} />
+          <meshStandardMaterial
+            color={descriptor.color}
+            transparent={descriptor.translucent}
+            opacity={descriptor.translucent ? 0.35 : 1}
+            emissive={selected ? SELECTION_COLOR : '#000000'}
+            emissiveIntensity={selected ? 0.4 : 0}
+          />
+        </mesh>
+      )}
     </group>
   );
 }

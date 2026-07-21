@@ -8,7 +8,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 2   | Application shell                   | Complete    |
 | 3   | 3D scene and camera                 | Complete    |
 | 4   | Element placement                   | Complete    |
-| 5   | Conveyor rendering                  | Not started |
+| 5   | Conveyor rendering                  | Complete    |
 | 6   | Conveyor physics                    | Not started |
 | 7   | Properties editor                   | Not started |
 | 8   | Crop spawning                       | Not started |
@@ -58,7 +58,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: parametric conveyor mesh (belt, frame, skirts, direction chevrons) driven by length/width/beltHeight/incline; ghost + selection visuals.
 - **Acceptance criteria**: property changes update geometry immediately; incline pivots about the infeed end; direction indicator matches local +X.
 - **Dependencies**: Stage 4.
-- **Status**: Not started.
+- **Status**: Complete. Geometry is derived reactively from properties (verified via dev-seeded property overrides and unit tests in `src/rendering/elements/conveyorGeometry.test.ts`); flat, rotated, and 15°-inclined conveyors verified visually in a headless browser. The placement ghost remains a bounding box rather than a translucent conveyor mesh (acceptable; revisit if it confuses users).
 
 ## Stage 6 — Conveyor physics
 
