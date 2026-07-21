@@ -8,6 +8,7 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Fixed
 
+- Spawning stuck on **THROTTLED**: crop body/collider binding now retries until the pool is ready (and no longer reports throttle while unbound). Floor despawn after `floorDespawnSeconds` returns crops to the pool so the cap can recover.
 - Belt speed accuracy: riders now travel at the labelled m/min (converted to m/s) via per-step contact velocity injection on a fixed belt collider (ADR-016), instead of relying on friction against a pinned kinematic belt. Removed debug-ball linear damping that systematically undershot belt speed.
 
 ### Added

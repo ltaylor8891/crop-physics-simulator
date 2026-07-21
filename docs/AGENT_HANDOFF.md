@@ -21,11 +21,11 @@ _Last updated: 2026-07-21_
 
 ## Work Currently In Progress
 
-- Nothing; Stage 8 ready to merge after a quick interactive check.
+- Floor despawn is live for the ground plane; collection/despawn zones still to do.
 
 ## Next Recommended Task
 
-- **Stage 9 — Crop physics**: per-type InstancedMesh, proper capsule colliders, CCD/sleeping polish, performance at 1–2k bodies. Also hand-verify KI-004 / KI-005 and Stage 8 spawn visually (`?seed=spawn`).
+- Finish Stage 10 (user-placed collection/despawn zones), or Stage 9 crop-physics polish. Hand-check `?seed=spawn`: crops should emit, THROTTLED should clear after floor spills recycle.
 
 ## Important Files
 
@@ -50,7 +50,7 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Uncommitted Work
 
-- None after Stage 8 commit.
+- None after throttle/floor-despawn fix commit.
 
 ## Architectural Constraints (do not violate)
 

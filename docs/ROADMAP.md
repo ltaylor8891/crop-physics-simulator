@@ -13,7 +13,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 7   | Properties editor                   | Complete    |
 | 8   | Crop spawning                       | Complete    |
 | 9   | Crop physics                        | Not started |
-| 10  | Floor despawning                    | Not started |
+| 10  | Floor despawning                    | In progress |
 | 11  | Elevators                           | Not started |
 | 12  | Saving and loading                  | Not started |
 | 13  | Statistics                          | Not started |
@@ -98,7 +98,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: floor-contact detection, per-crop despawn timers on simulation time, spilled-mass accounting, user-placed despawn zones (immediate).
 - **Acceptance criteria**: floor-touching crops vanish 3.0 s (±1 step) after first contact; timers pause with the simulation; spilled mass matches despawned crop masses exactly.
 - **Dependencies**: Stage 9.
-- **Status**: Not started.
+- **Status**: In progress — ground-plane floor despawn + spilled mass wired (height-based contact); user-placed despawn/collection zones still outstanding.
 
 ## Stage 11 — Elevators
 

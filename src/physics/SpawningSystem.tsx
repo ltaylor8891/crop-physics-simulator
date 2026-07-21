@@ -18,7 +18,7 @@ const STATS_HZ = 4;
 const spawnerAccumulators = new Map<ElementId, SpawnerRuntimeState>();
 
 /**
- * Fixed-step crop emission for every enabled spawner (docs/ROADMAP.md §Stage 8).
+ * Fixed-step crop emission + floor despawn (docs/ROADMAP.md §Stage 8 / §Stage 10).
  * Does not run while `<Physics paused>` — play/pause gates spawning automatically.
  */
 export function SpawningSystem() {
@@ -47,6 +47,19 @@ export function SpawningSystem() {
   }, []);
 
   useAfterPhysicsStep(() => {
+    // Pool bodies may still be mounting — wait without showing THROTTLED.
+    if (!cropRuntime.isBound) return;
+
+    cropSpawnStats.simulationTime += PHYSICS_DT;
+    const floorDespawnSeconds = useSimulationStore.getState().settings.floorDespawnSeconds;
+    const spilled = cropRuntime.tickFloorDespawn(
+      cropSpawnStats.simulationTime,
+      floorDespawnSeconds,
+    );
+    if (spilled > 0) {
+      cropSpawnStats.spilledMassKg += spilled;
+    }
+
     const elements = useSceneStore.getState().elements;
     const spawners = Object.values(elements).filter(
       (el): el is SpawnerElement => el.type === 'spawner',
@@ -106,6 +119,7 @@ export function SpawningSystem() {
         ...prev,
         activeCrops: cropRuntime.pool.activeCount,
         totalMassSpawnedKg: cropSpawnStats.massSpawnedKg,
+        spilledMassKg: cropSpawnStats.spilledMassKg,
         throttled,
       });
     }
