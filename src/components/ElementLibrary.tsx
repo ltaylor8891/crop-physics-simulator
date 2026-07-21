@@ -1,38 +1,41 @@
-import type { ElementType } from '../types/elements';
+import { ELEMENT_DESCRIPTORS, ELEMENT_TYPES } from '../elements/registry';
+import { useUiStore } from '../state/uiStore';
 
-interface LibraryEntry {
-  type: ElementType;
-  label: string;
-  /** Placement arrives in Stage 4; entries are visible but disabled until then. */
-  available: boolean;
-}
-
-const LIBRARY_ENTRIES: LibraryEntry[] = [
-  { type: 'conveyor', label: 'Belt conveyor', available: false },
-  { type: 'elevator', label: 'Bucket elevator', available: false },
-  { type: 'spawner', label: 'Crop spawner', available: false },
-  { type: 'collectionZone', label: 'Collection zone', available: false },
-  { type: 'despawnZone', label: 'Despawn zone', available: false },
-];
-
-/** Left-hand element library (docs/UI_UX_SPECIFICATION.md §Left-Hand Element Library). */
+/**
+ * Left-hand element library (docs/UI_UX_SPECIFICATION.md §Left-Hand Element Library).
+ * Clicking an entry enters placement mode; clicking the active entry cancels it.
+ */
 export function ElementLibrary() {
+  const placementType = useUiStore((s) => s.placementType);
+  const startPlacement = useUiStore((s) => s.startPlacement);
+  const cancelPlacement = useUiStore((s) => s.cancelPlacement);
+
   return (
     <aside className="panel element-library" aria-label="Element library">
       <h2>Elements</h2>
       <ul>
-        {LIBRARY_ENTRIES.map((entry) => (
-          <li key={entry.type}>
-            <button
-              type="button"
-              disabled={!entry.available}
-              title={entry.available ? `Place ${entry.label}` : 'Coming soon (Stage 4)'}
-            >
-              {entry.label}
-            </button>
-          </li>
-        ))}
+        {ELEMENT_TYPES.map((type) => {
+          const descriptor = ELEMENT_DESCRIPTORS[type];
+          const active = placementType === type;
+          return (
+            <li key={type}>
+              <button
+                type="button"
+                className={active ? 'active' : undefined}
+                aria-pressed={active}
+                title={`Place ${descriptor.label.toLowerCase()} — click a position in the scene`}
+                onClick={() => (active ? cancelPlacement() : startPlacement(type))}
+              >
+                {descriptor.label}
+              </button>
+            </li>
+          );
+        })}
       </ul>
+      <p className="hint">
+        Click an element, then click the ground to place it. Shift-click places repeatedly; Escape
+        or right-click cancels.
+      </p>
     </aside>
   );
 }
