@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   beltColliderLocalCenter,
   beltOrientationQuaternion,
+  beltWorldNormal,
   beltWorldVelocity,
   rotateYaw,
+  velocityWithBeltSurface,
 } from './beltVelocity';
 
 describe('beltWorldVelocity', () => {
@@ -36,6 +38,51 @@ describe('beltWorldVelocity', () => {
     expect(v.x).toBeCloseTo(0, 10);
     expect(v.y).toBeCloseTo(0, 10);
     expect(v.z).toBeCloseTo(0, 10);
+  });
+
+  it('maps 60 m/min to exactly 1 m/s', () => {
+    const v = beltWorldVelocity(60, 0, 0);
+    expect(v.x).toBeCloseTo(1, 10);
+  });
+});
+
+describe('beltWorldNormal', () => {
+  it('is world +Y on a flat belt', () => {
+    const n = beltWorldNormal(0, 0);
+    expect(n.x).toBeCloseTo(0, 10);
+    expect(n.y).toBeCloseTo(1, 10);
+    expect(n.z).toBeCloseTo(0, 10);
+  });
+
+  it('pitches with the belt incline', () => {
+    const inclineDeg = 30;
+    const n = beltWorldNormal(inclineDeg, 0);
+    const incline = (inclineDeg * Math.PI) / 180;
+    expect(n.x).toBeCloseTo(-Math.sin(incline), 10);
+    expect(n.y).toBeCloseTo(Math.cos(incline), 10);
+    expect(n.z).toBeCloseTo(0, 10);
+  });
+});
+
+describe('velocityWithBeltSurface', () => {
+  it('forces flat-belt XZ speed while preserving vertical velocity', () => {
+    const next = velocityWithBeltSurface(
+      { x: 0.1, y: -2, z: 0.2 },
+      { x: 1.5, y: 0, z: 0 },
+      { x: 0, y: 1, z: 0 },
+    );
+    expect(next.x).toBeCloseTo(1.5, 10);
+    expect(next.y).toBeCloseTo(-2, 10);
+    expect(next.z).toBeCloseTo(0, 10);
+  });
+
+  it('leaves an already-matched rider unchanged', () => {
+    const surface = { x: Math.cos(Math.PI / 6), y: Math.sin(Math.PI / 6), z: 0 };
+    const normal = { x: -Math.sin(Math.PI / 6), y: Math.cos(Math.PI / 6), z: 0 };
+    const next = velocityWithBeltSurface(surface, surface, normal);
+    expect(next.x).toBeCloseTo(surface.x, 10);
+    expect(next.y).toBeCloseTo(surface.y, 10);
+    expect(next.z).toBeCloseTo(surface.z, 10);
   });
 });
 

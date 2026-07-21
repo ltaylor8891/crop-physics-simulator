@@ -22,7 +22,6 @@ export function DebugBalls() {
           position={[ball.position.x, ball.position.y, ball.position.z]}
           colliders={false}
           mass={BALL_MASS}
-          linearDamping={0.05}
           ccd
           collisionGroups={CROP_COLLISION_GROUPS}
         >

@@ -56,7 +56,7 @@ The scene description in the store is the single source of truth. Rendering and 
 ## Physics Architecture
 
 - One Rapier world (`<Physics>` from `@react-three/rapier`) wraps the scene content.
-- **Machines** are `fixed` rigid bodies with cuboid/compound colliders. Belts additionally set a **contact surface velocity** on their top collider — the belt geometry never moves (ADR-006).
+- **Machines** are `fixed` rigid bodies with cuboid/compound colliders. Belts additionally apply a **contact surface velocity** each physics step on bodies resting on the top collider — the belt geometry never moves (ADR-016).
 - **Crops** are dynamic rigid bodies (ball or capsule colliders) drawn from a fixed-size pool.
 - **Sensors** (intersection-only colliders) implement spawner volumes, elevator intakes, collection zones, despawn zones, and floor-contact detection.
 - Collision layers separate crops, machines, and sensors — see `PHYSICS_SPECIFICATION.md` for the exact interaction matrix and material parameters.
@@ -90,7 +90,7 @@ Rules: store data is serialisable plain objects only; components subscribe with 
 
 ## Conveyor Motion
 
-Belts do not move geometrically. Each belt's top-surface collider is assigned a contact surface velocity of `beltSpeed` (m/s) along the element's local +X, rotated by yaw into world space. Rapier's contact solver then drags any body resting on that collider as though the surface were moving. Inclined belts rotate the surface-velocity vector with the belt pitch so crops are carried up the slope. Full behavioural detail: `PHYSICS_SPECIFICATION.md`; rationale and rejected alternatives: ADR-006.
+Belts do not move geometrically. Each belt's top-surface collider is `fixed`; after each physics step, contacting dynamic bodies have their tangential velocity set to `beltSpeed` (m/s) along the element's local +X, rotated by yaw/incline into world space (ADR-016). Inclined belts pitch that vector with the belt so crops are carried up the slope. Full behavioural detail: `PHYSICS_SPECIFICATION.md`; rationale and rejected alternatives: ADR-006 / ADR-016.
 
 ## Crop Spawning Calculation
 

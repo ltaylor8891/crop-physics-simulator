@@ -20,7 +20,7 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 - **Reproduction**: n/a (research task)
 - **Suspected cause**: Binding library lags the raw Rapier API.
 - **Proposed resolution**: At Stage 6 start, spike both approaches; record the outcome in ADR-006's consequences and `PHYSICS_SPECIFICATION.md`.
-- **Status**: Closed — no contact-surface-velocity API; implemented via `kinematicVelocity` + pinned translation (see ADR-006).
+- **Status**: Closed — no contact-surface-velocity API; Stage 6 used kinematic-velocity + pin; revised to fixed collider + per-step contact velocity injection (ADR-016) after m/min accuracy feedback.
 
 ### KI-003 — No browser-based automated tests
 

@@ -7,13 +7,14 @@ _Last updated: 2026-07-21_
 ## Current Project State
 
 - Stages 1–7 complete: docs, shell, 3D scene, placement, conveyor rendering, conveyor physics, and a full properties editor.
-- Properties panel edits name, position X/Z (and Y for spawners), rotation (degrees), and type-specific fields from `PROPERTY_FIELDS`. Invalid numbers revert with an inline range message.
-- Conveyor physics uses kinematic-velocity belts; toolbar **Drop ball** / **Reset** for Stage 6 testing.
+- **Belt speed accuracy fix**: belts are `fixed`; after each physics step, contacting dynamics get tangential velocity = `beltSpeed_mPerMin / 60` (ADR-016). Debug balls no longer use linear damping that undershot speed.
+- Properties panel edits name, position X/Z (and Y for spawners), rotation (degrees), and type-specific fields from `PROPERTY_FIELDS`.
+- Toolbar **Drop ball** / **Reset** for Stage 6 testing.
 - Dev hooks: `window.__cropSim`, `?seed=conveyors` / `?seed=physics`.
 
 ## Current Branch
 
-- `main` after merging `feature/properties-editor`. Use focused feature branches for stage-sized changes.
+- `main`. Use focused feature branches for stage-sized changes.
 
 ## Last Completed Stage
 
@@ -21,20 +22,18 @@ _Last updated: 2026-07-21_
 
 ## Work Currently In Progress
 
-- Nothing in progress; the tree is clean at the last commit.
+- Nothing in progress; tree clean after belt-speed fix commit.
 
 ## Next Recommended Task
 
-- **Stage 8 — Crop spawning**: crop type presets are already in `src/elements/cropTypes.ts`; build `CropPool` skeleton and spawn accumulator on the fixed step (`src/simulation/spawning.ts`) using `src/utilities/flow.ts`. While testing, hand-verify KI-004 (drag-move) and KI-005 (ball rides belt). Acceptance criteria in `docs/ROADMAP.md` §Stage 8.
+- Hand-check KI-005 with the new mechanism, then **Stage 8 — Crop spawning** per `docs/ROADMAP.md`.
 
 ## Important Files
 
-- `src/elements/propertySchema.ts` — editor field definitions + path get/set
-- `src/components/PropertiesPanel.tsx` + `src/components/fields/` — form UI
-- `src/utilities/validation.ts` — parse/constrain helpers (unit-tested)
-- `src/physics/` — Rapier world, conveyor colliders, debug balls
-- `src/rendering/elements/ConveyorMesh.tsx` — parametric conveyor visuals
-- `docs/DECISIONS.md`, `docs/PHYSICS_SPECIFICATION.md`, `docs/AGENT_HANDOFF.md`
+- `src/physics/ConveyorColliders.tsx` — fixed belt + contact velocity injection
+- `src/physics/beltVelocity.ts` — m/min → m/s, normal, `velocityWithBeltSurface`
+- `docs/DECISIONS.md` — ADR-006 / ADR-016
+- `src/elements/propertySchema.ts`, `src/components/PropertiesPanel.tsx`
 
 ## Commands
 
@@ -44,12 +43,12 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Test Status
 
-- **Passing**: 61 unit tests.
-- **Failing**: none.
+- **Passing**: 66 unit tests.
+- **Failing**: none known.
 
 ## Known Errors
 
-- None. Open verification gaps: KI-004, KI-005. Viewport crash from Stage 6 Zustand loop fixed (`dc809d7`).
+- None. Open verification gaps: KI-004, KI-005.
 
 ## Uncommitted Work
 
@@ -59,12 +58,11 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 - 1 world unit = 1 metre; Y-up; flow along local +X; yaw radians CCW about +Y.
 - Fixed physics timestep 1/60 s; simulation on fixed steps only.
-- Conveyors via kinematic-velocity + pinned translation (ADR-006).
+- Conveyors: fixed deck + per-step tangential velocity injection (ADR-016).
 - Zustand selectors must return stable references (no new arrays/objects from the selector itself).
 - Stores hold serialisable plain data only.
 
 ## Suggested Starting Point for the Next Agent
 
 1. Read `AGENTS.md` and this file; confirm `git status` / recent log.
-2. `npm ci && npm run test && npm run typecheck && npm run dev`.
-3. Start Stage 8 (crop spawning) per `docs/ROADMAP.md`.
+2. Hand-verify belt travel time at a known m/min, then Stage 8.

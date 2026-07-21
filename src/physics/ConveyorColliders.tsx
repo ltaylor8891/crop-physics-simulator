@@ -4,7 +4,7 @@ import {
   RigidBody,
   useAfterPhysicsStep,
   useRapier,
-  type RapierRigidBody,
+  type RapierCollider,
 } from '@react-three/rapier';
 import {
   BELT_THICKNESS,
@@ -17,8 +17,10 @@ import { degreesToRadians } from '../utilities/units';
 import {
   beltColliderLocalCenter,
   beltOrientationQuaternion,
+  beltWorldNormal,
   beltWorldVelocity,
   rotateYaw,
+  velocityWithBeltSurface,
 } from './beltVelocity';
 import { MACHINE_COLLISION_GROUPS } from './collisionGroups';
 import { Materials } from './materials';
@@ -26,11 +28,11 @@ import { Materials } from './materials';
 /**
  * Physics colliders for every placed conveyor (docs/PHYSICS_SPECIFICATION.md §Conveyor).
  *
- * Mechanism (ADR-006 / KI-002): each belt is a `kinematicVelocity` body whose
- * linear velocity equals the belt surface velocity. After every physics step the
- * body is pinned back to its home translation so the mesh never drifts — contacts
- * still see the tangential velocity. Rapier has no dedicated contact-surface-velocity
- * API in the bound version; this is the supported equivalent.
+ * Mechanism (ADR-016 / ADR-006): the belt deck is a `fixed` collider. After each
+ * physics step, dynamic bodies in contact have their tangential velocity set to
+ * the belt surface velocity (`beltSpeed` m/min → m/s). Rapier has no dedicated
+ * contact-surface-velocity API in the bound version; this matches the product
+ * intent without friction slip or kinematic teleport drift.
  */
 export function ConveyorColliders() {
   // Select the elements record (stable reference); filtering must not run inside
@@ -57,7 +59,7 @@ export function ConveyorColliders() {
 function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
   const { properties, position, rotationYaw } = conveyor;
   const { length, width, beltHeight, inclineDeg, beltSpeed, skirts } = properties;
-  const beltRef = useRef<RapierRigidBody>(null);
+  const beltColliderRef = useRef<RapierCollider>(null);
   const { world } = useRapier();
 
   const localCenter = useMemo(
@@ -79,10 +81,23 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
     [beltSpeed, inclineDeg, rotationYaw],
   );
 
+  const worldNormal = useMemo(
+    () => beltWorldNormal(inclineDeg, rotationYaw),
+    [inclineDeg, rotationYaw],
+  );
+
   const orientation = useMemo(
     () => beltOrientationQuaternion(rotationYaw, inclineDeg),
     [rotationYaw, inclineDeg],
   );
+
+  // Keep latest vectors for the after-step callback without re-subscribing.
+  const surfaceVelRef = useRef(worldLinvel);
+  const normalRef = useRef(worldNormal);
+  useEffect(() => {
+    surfaceVelRef.current = worldLinvel;
+    normalRef.current = worldNormal;
+  }, [worldLinvel, worldNormal]);
 
   // Wake sleeping dynamics when a stopped belt starts (ADR-006).
   const previousSpeedRef = useRef(beltSpeed);
@@ -96,26 +111,47 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
   }, [beltSpeed, world]);
 
   useAfterPhysicsStep(() => {
-    const body = beltRef.current;
-    if (!body) return;
-    body.setTranslation(homeWorld, true);
-    body.setLinvel(worldLinvel, true);
+    const collider = beltColliderRef.current;
+    if (!collider) return;
+
+    const surfaceVel = surfaceVelRef.current;
+    const speedSq =
+      surfaceVel.x * surfaceVel.x +
+      surfaceVel.y * surfaceVel.y +
+      surfaceVel.z * surfaceVel.z;
+    // Stopped belt: leave friction to hold (do not snap tangential vel to zero).
+    if (speedSq < 1e-12) return;
+
+    const normal = normalRef.current;
+    world.contactPairsWith(collider, (other) => {
+      const body = other.parent();
+      if (!body || !body.isDynamic()) return;
+
+      let hasContact = false;
+      world.contactPair(collider, other, (manifold) => {
+        if (manifold.numContacts() > 0) hasContact = true;
+      });
+      if (!hasContact) return;
+
+      const current = body.linvel();
+      const next = velocityWithBeltSurface(current, surfaceVel, normal);
+      body.setLinvel(next, true);
+    });
   });
 
   return (
     <>
       <RigidBody
-        ref={beltRef}
-        type="kinematicVelocity"
+        type="fixed"
         position={[homeWorld.x, homeWorld.y, homeWorld.z]}
         quaternion={orientation}
-        linearVelocity={[worldLinvel.x, worldLinvel.y, worldLinvel.z]}
         friction={Materials.belt.friction}
         restitution={Materials.belt.restitution}
         collisionGroups={MACHINE_COLLISION_GROUPS}
         colliders={false}
       >
         <CuboidCollider
+          ref={beltColliderRef}
           args={[length / 2, BELT_THICKNESS / 2, width / 2]}
           collisionGroups={MACHINE_COLLISION_GROUPS}
           friction={Materials.belt.friction}

@@ -28,7 +28,7 @@ Rapier interaction groups (16-bit membership/filter):
 
 ## Crop-to-Machine Collision
 
-- Machines use cuboid colliders. **Belt surfaces** are `kinematicVelocity` bodies (pinned each step — see §Conveyor Surface Velocity); **skirts, casings, and the ground** are `fixed`.
+- Machines use cuboid colliders. **Belt surfaces**, **skirts, casings, and the ground** are `fixed`. Belt conveyance uses per-step contact velocity injection (see §Conveyor Surface Velocity), not a moving kinematic body.
 - Contact is solved with Rapier's default solver; machine colliders use the friction/restitution in the materials table below combined with the crop's values (Rapier default combine rule: average).
 - Colliders must be thick enough (≥ 0.05 m) that crops at maximum supported speed (300 m/min = 5 m/s) cannot tunnel through at the fixed timestep. Continuous collision detection (CCD) is enabled on crop bodies as a backstop.
 
@@ -49,10 +49,10 @@ High belt friction + zero belt restitution is what makes surface-velocity convey
 
 ## Conveyor Surface Velocity
 
-- The belt collider is a **`kinematicVelocity` rigid body** whose linear velocity equals the belt vector; after every fixed physics step its translation is reset to the home pose so the belt never drifts. Contacts therefore see a moving surface while the geometry stays put. This is the Rapier-compatible implementation of contact surface velocity (ADR-006 / KI-002): the bound engine has no dedicated contact-surface-velocity or contact-modification API.
-- Belt vector = local `+X * (beltSpeed_mPerMin / 60)`, pitched by incline and yawed into world space (`src/physics/beltVelocity.ts`).
+- The belt deck is a **`fixed`** cuboid collider. After every fixed physics step, dynamic bodies in contact with it have their **tangential** linear velocity set to the belt vector while the component along the belt normal is preserved (`velocityWithBeltSurface` in `src/physics/beltVelocity.ts`). This is the Rapier-compatible implementation of contact surface velocity (ADR-016 / ADR-006): the bound engine has no dedicated contact-surface-velocity or contact-modification API.
+- Belt vector = local `+X * (beltSpeed_mPerMin / 60)`, pitched by incline and yawed into world space.
 - Side skirts are separate **`fixed`** colliders (no surface velocity).
-- Expected behaviour: a crop dropped on a running belt reaches belt speed within a few timesteps and travels without sliding once matched; when the belt is stopped (`linvel = 0`), crops decelerate by friction rather than instantly freezing.
+- Expected behaviour: a crop on a running belt travels at the labelled speed (e.g. 60 m/min → 1 m/s along the belt). When the belt is stopped, injection is skipped and crops decelerate by friction rather than instantly freezing.
 - Starting a stopped belt wakes sleeping dynamic bodies in the world so settled piles resume.
 
 ## Inclined Conveyor Behaviour

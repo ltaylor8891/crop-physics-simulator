@@ -6,10 +6,14 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ## [Unreleased]
 
+### Fixed
+
+- Belt speed accuracy: riders now travel at the labelled m/min (converted to m/s) via per-step contact velocity injection on a fixed belt collider (ADR-016), instead of relying on friction against a pinned kinematic belt. Removed debug-ball linear damping that systematically undershot belt speed.
+
 ### Added
 
 - Properties editor (roadmap Stage 7): schema-driven fields for every element type — editable name, position, rotation, and equipment properties with range validation (invalid input reverts and shows the constraint). Conveyor edits update mesh and physics live.
-- Conveyor physics (roadmap Stage 6): Rapier world with fixed 1/60 s timestep, ground collider, belt and skirt colliders with documented collision groups/materials. Belts use kinematic-velocity surface motion (translation pinned each step — ADR-006). Toolbar **Drop ball** / **Reset** for temporary test balls.
+- Conveyor physics (roadmap Stage 6): Rapier world with fixed 1/60 s timestep, ground collider, belt and skirt colliders with documented collision groups/materials. Belts use contact velocity injection for surface motion (ADR-016). Toolbar **Drop ball** / **Reset** for temporary test balls.
 - Parametric conveyor rendering (roadmap Stage 5): belt surface, frame rails, vertical support legs that follow the belt line, optional side skirts, and amber direction chevrons pointing to the discharge end. Incline pivots about the infeed end so the infeed stays at the configured belt height.
 - Dev-only debugging hooks: `window.__cropSim` store access and `?seed=conveyors` / `?seed=physics` demo seeding (excluded from production builds).
 - Element placement (roadmap Stage 4): place belt conveyors, bucket elevators, crop spawners, collection zones, and despawn zones from the library with a ghost preview, grid snapping (0.5 m / 15°), Shift for repeated placement, and Escape/right-click to cancel.

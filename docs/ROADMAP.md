@@ -66,7 +66,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: Rapier world wiring, machine colliders with collision groups per `PHYSICS_SPECIFICATION.md`, contact surface velocity along the belt (flat + inclined), a temporary debug "drop test ball" button.
 - **Acceptance criteria**: test ball dropped on a running belt reaches belt speed and is carried to discharge, including on ±20° inclines; stopped belts hold the ball; ADR-006 consequences updated with the mechanism actually used.
 - **Dependencies**: Stage 5.
-- **Status**: Complete. Mechanism: `kinematicVelocity` belt + per-step translation pin (ADR-006 / KI-002 closed). Toolbar **Drop ball** / **Reset** enabled. Hand-verify conveyance on flat and inclined belts when next in the viewport (acceptance criterion is interactive).
+- **Status**: Complete. Mechanism: fixed belt + per-step contact velocity injection (ADR-016; supersedes kinematic pin). Toolbar **Drop ball** / **Reset** enabled. Hand-verify conveyance on flat and inclined belts when next in the viewport (acceptance criterion is interactive).
 
 ## Stage 7 — Properties editor
 

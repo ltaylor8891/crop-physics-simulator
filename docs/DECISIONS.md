@@ -60,19 +60,19 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
 ## ADR-006 — Conveyors use contact surface velocity, not moving geometry or force fields
 
 - **Date**: 2026-07-21
-- **Status**: Accepted
+- **Status**: Accepted (mechanism superseded by ADR-016)
 - **Context**: Crops must ride belts realistically. Physically moving belt geometry (kinematic bodies translating and teleporting back) causes contact popping; custom force fields poorly reproduce static grip.
 - **Options considered**:
   1. Contact surface velocity on a static belt collider (contacts solved as if the surface moved)
   2. Kinematic belt segments translating with wrap-around teleport
   3. Per-step impulse/force applied to bodies overlapping a belt volume
   4. `kinematicVelocity` rigid body with belt linvel, translation pinned each step (Rapier-compatible surface-velocity equivalent)
-- **Decision**: Option 4 as the Stage 6 implementation of the surface-velocity intent. Spike (KI-002) confirmed that `@dimforge/rapier3d-compat` / `@react-three/rapier` expose **no** contact-modification / contact-surface-velocity API — `PhysicsHooks` only filter contact/intersection pairs. Setting `linearVelocity` on a `kinematicVelocity` body makes the solver treat contacts as if the surface moved; pinning translation after each step keeps the belt visually and spatially fixed.
+- **Decision**: Product decision — surface-velocity intent (not moving geometry). Stage 6 initially used option 4; **ADR-016** replaces that mechanism with per-step contact velocity injection on a fixed collider after interactive testing showed friction slip undershooting labelled m/min speeds.
 - **Consequences**:
   - Belt speed changes from zero must explicitly wake sleeping bodies (implemented in `ConveyorColliders`).
-  - Implementation lives in `src/physics/ConveyorColliders.tsx` + `src/physics/beltVelocity.ts`.
+  - Implementation lives in `src/physics/ConveyorColliders.tsx` + `src/physics/beltVelocity.ts` (see ADR-016).
   - Side skirts remain `fixed` (no surface velocity).
-  - If a future Rapier release adds true contact surface velocity, prefer migrating to it and superseding this ADR's mechanism note — the product decision (surface velocity, not moving geometry) stands.
+  - If a future Rapier release adds true contact surface velocity, prefer migrating to it — the product decision (surface velocity, not moving geometry) stands.
 
 ## ADR-007 — Zustand for state management
 
@@ -91,3 +91,19 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
 - **Options considered**: Vite + Vitest; Next.js (SSR unneeded — fully client-side app); CRA (deprecated); webpack custom.
 - **Decision**: Vite 8 + Vitest 4, plain client-side SPA, no SSR.
 - **Consequences**: Simple static hosting of `dist/`. Tests run in Node (jsdom where needed) — R3F/WASM rendering is explicitly out of unit-test scope (see TECHNICAL_DESIGN §Testing).
+
+## ADR-016 — Belt surface velocity via per-step contact velocity injection
+
+- **Date**: 2026-07-21
+- **Status**: Accepted (supersedes ADR-006 mechanism)
+- **Context**: The Stage 6 `kinematicVelocity` + pinned-translation belt (ADR-006 option 4) transferred motion only through friction. With Rapier's default average friction combine and any linear damping, riders systematically undershot the labelled belt speed (m/min → m/s). The product expects 60 m/min ≈ 1 m/s travel along the belt.
+- **Options considered**:
+  1. Keep kinematic pin; raise friction combine to Max / remove damping
+  2. `kinematicPositionBased` + `setNextKinematicTranslation(home + v·dt)` then snap home
+  3. Fixed belt collider; after each physics step set contacting dynamics' tangential velocity to `beltWorldVelocity`
+- **Decision**: Option 3. Conversion remains `beltSpeed_mPerMin / 60`. Tangential velocity is forced; the component along the belt normal is preserved so settle/bounce still work. Stopped belts (`beltSpeed === 0`) skip injection so friction holds riders instead of snapping them to zero.
+- **Consequences**:
+  - Carriage speed matches the UI value regardless of friction slip.
+  - Belts are `fixed` rigid bodies (skirts unchanged).
+  - Still not a native Rapier contact-surface-velocity API (KI-002 remains closed with this workaround).
+  - Docs: `PHYSICS_SPECIFICATION.md` §Conveyor Surface Velocity; code: `ConveyorColliders.tsx`, `beltVelocity.ts`.
