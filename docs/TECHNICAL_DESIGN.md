@@ -5,7 +5,7 @@ How the simulator is built. The functional scope lives in `PRODUCT_SCOPE.md`; de
 ## Technology Stack
 
 - **TypeScript** (strict mode) throughout; no plain JS source files.
-- **React 19 + Vite 7** for the application shell and build.
+- **React 19 + Vite 8** for the application shell and build.
 - **three.js via React Three Fiber (R3F)** for rendering; `@react-three/drei` for camera controls, grid, and helpers.
 - **Rapier** physics (Rust compiled to WebAssembly) via `@react-three/rapier`.
 - **Zustand** for application state.
@@ -18,7 +18,7 @@ See ADR-001…ADR-007 in `DECISIONS.md` for why each was chosen.
 Three layers with one-way knowledge:
 
 1. **Domain layer** (`src/types`, `src/utilities`, `src/serialization`) — pure TypeScript, no React/three/Rapier imports. Defines scene elements, settings, unit conversions, save format. Fully unit-testable.
-2. **State layer** (`src/state`) — Zustand stores holding the *design-time* description of the scene (elements + properties), simulation settings, UI state (selection, placement mode), and live statistics. Stores contain plain data, never three.js or Rapier objects.
+2. **State layer** (`src/state`) — Zustand stores holding the _design-time_ description of the scene (elements + properties), simulation settings, UI state (selection, placement mode), and live statistics. Stores contain plain data, never three.js or Rapier objects.
 3. **Presentation/simulation layer** (`src/app`, `src/components`, `src/rendering`, `src/physics`, `src/simulation`, `src/elements`) — React components subscribe to the stores and materialise elements into meshes and physics bodies. Runtime physics objects live inside the R3F/Rapier component tree, keyed by element ID.
 
 ```mermaid

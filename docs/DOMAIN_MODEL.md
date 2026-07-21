@@ -6,13 +6,13 @@ Core concepts and terminology. Use these terms consistently in code, documentati
 
 A **scene element** is any user-placed object in the layout. All elements share:
 
-| Field | Type | Meaning |
-| --- | --- | --- |
-| `id` | `ElementId` (string) | Unique, stable identifier (see below) |
-| `type` | string enum | `"conveyor" \| "elevator" \| "spawner" \| "collectionZone" \| "despawnZone"` |
-| `name` | string | User-editable label (defaults to e.g. "Conveyor 1") |
-| `position` | `{x, y, z}` metres | Element origin in world space |
-| `rotationYaw` | number, radians | Rotation about world +Y (see conventions below) |
+| Field         | Type                 | Meaning                                                                      |
+| ------------- | -------------------- | ---------------------------------------------------------------------------- |
+| `id`          | `ElementId` (string) | Unique, stable identifier (see below)                                        |
+| `type`        | string enum          | `"conveyor" \| "elevator" \| "spawner" \| "collectionZone" \| "despawnZone"` |
+| `name`        | string               | User-editable label (defaults to e.g. "Conveyor 1")                          |
+| `position`    | `{x, y, z}` metres   | Element origin in world space                                                |
+| `rotationYaw` | number, radians      | Rotation about world +Y (see conventions below)                              |
 
 Type-specific properties are nested under a `properties` object per element. Crops are **not** scene elements — they are runtime-only bodies and are never saved.
 
@@ -73,20 +73,20 @@ The saved JSON document containing scene metadata, simulation settings, all elem
 - Right-handed, **Y-up** (three.js default). Ground plane is XZ at y = 0.
 - 1 world unit = 1 metre.
 - An element's **flow direction is its local +X**.
-- `rotationYaw` is the only stored rotation for elements: radians, counter-clockwise about +Y when viewed from above (standard mathematical direction), 0 = flow along world +X. Conveyor incline is a *property* (`inclineDeg`), not part of the stored rotation.
+- `rotationYaw` is the only stored rotation for elements: radians, counter-clockwise about +Y when viewed from above (standard mathematical direction), 0 = flow along world +X. Conveyor incline is a _property_ (`inclineDeg`), not part of the stored rotation.
 - Internally angles are radians; the UI displays and accepts degrees.
 
 ## Dimensions and Units
 
-| Quantity | Unit stored | Unit displayed |
-| --- | --- | --- |
-| Length/position | metres (m) | m |
-| Mass | kilograms (kg) | kg (crops), tonnes (aggregates) |
-| Time | seconds (s) | s |
-| Angle | radians | degrees |
-| Belt speed | metres per minute | m/min |
-| Throughput | tonnes per hour | t/h |
-| Velocity (physics) | metres per second | — |
+| Quantity           | Unit stored       | Unit displayed                  |
+| ------------------ | ----------------- | ------------------------------- |
+| Length/position    | metres (m)        | m                               |
+| Mass               | kilograms (kg)    | kg (crops), tonnes (aggregates) |
+| Time               | seconds (s)       | s                               |
+| Angle              | radians           | degrees                         |
+| Belt speed         | metres per minute | m/min                           |
+| Throughput         | tonnes per hour   | t/h                             |
+| Velocity (physics) | metres per second | —                               |
 
 All conversions go through `src/utilities/flow.ts` / `src/utilities/units.ts`.
 
@@ -94,13 +94,13 @@ All conversions go through `src/utilities/flow.ts` / `src/utilities/units.ts`.
 
 The units below are related but **not interchangeable**. Definitions, with conversions as implemented in `src/utilities/flow.ts`:
 
-| Term | Symbol/unit | Meaning |
-| --- | --- | --- |
-| **Tonnes per hour** | t/h | User-facing *mass* throughput of a spawner, elevator cap, or statistic. 1 t/h = 1000 kg / 3600 s. |
-| **Kilograms per second** | kg/s | The same mass flow in SI base units, used internally: `kgPerS = tPerH * 1000 / 3600` ≈ `tPerH × 0.2778`. |
-| **Crops per second** | crops/s | *Count* rate at which discrete crop bodies must be spawned to realise a mass flow: `cropsPerS = kgPerS / cropMassKg`. Depends on the crop type's mass — 10 t/h of 0.5 kg potatoes is ~5.6 crops/s, but 10 t/h of 0.03 kg wheat clumps is ~92.6 crops/s. |
-| **Metres per minute** | m/min | User-facing *belt speed* unit (industry convention). Converted for physics: `mPerS = mPerMin / 60`. |
-| **Belt velocity** (surface velocity) | m/s vector | The velocity assigned to a conveyor's top-surface **contact**, world-space, along the belt's rotated local +X (and up the incline for pitched belts). The belt mesh itself is static; only contacting bodies are dragged. Magnitude = belt speed converted to m/s. |
-| **Initial crop velocity** | m/s vector | The velocity a crop body is given at the moment it spawns (small downward value + random jitter) or when re-emitted at an elevator discharge (`dischargeVelocity` horizontally). Distinct from belt velocity: it applies once at emission, whereas belt velocity acts continuously through contact. |
+| Term                                 | Symbol/unit | Meaning                                                                                                                                                                                                                                                                                             |
+| ------------------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tonnes per hour**                  | t/h         | User-facing _mass_ throughput of a spawner, elevator cap, or statistic. 1 t/h = 1000 kg / 3600 s.                                                                                                                                                                                                   |
+| **Kilograms per second**             | kg/s        | The same mass flow in SI base units, used internally: `kgPerS = tPerH * 1000 / 3600` ≈ `tPerH × 0.2778`.                                                                                                                                                                                            |
+| **Crops per second**                 | crops/s     | _Count_ rate at which discrete crop bodies must be spawned to realise a mass flow: `cropsPerS = kgPerS / cropMassKg`. Depends on the crop type's mass — 10 t/h of 0.5 kg potatoes is ~5.6 crops/s, but 10 t/h of 0.03 kg wheat clumps is ~92.6 crops/s.                                             |
+| **Metres per minute**                | m/min       | User-facing _belt speed_ unit (industry convention). Converted for physics: `mPerS = mPerMin / 60`.                                                                                                                                                                                                 |
+| **Belt velocity** (surface velocity) | m/s vector  | The velocity assigned to a conveyor's top-surface **contact**, world-space, along the belt's rotated local +X (and up the incline for pitched belts). The belt mesh itself is static; only contacting bodies are dragged. Magnitude = belt speed converted to m/s.                                  |
+| **Initial crop velocity**            | m/s vector  | The velocity a crop body is given at the moment it spawns (small downward value + random jitter) or when re-emitted at an elevator discharge (`dischargeVelocity` horizontally). Distinct from belt velocity: it applies once at emission, whereas belt velocity acts continuously through contact. |
 
-**Key distinction**: t/h, kg/s and crops/s describe *how much material* moves; m/min, belt velocity and initial crop velocity describe *how fast surfaces or bodies* move. A belt's speed does not by itself determine throughput — throughput also depends on how much material is on the belt (burden depth), which in this simulator emerges from the spawner rate and the physics rather than being prescribed.
+**Key distinction**: t/h, kg/s and crops/s describe _how much material_ moves; m/min, belt velocity and initial crop velocity describe _how fast surfaces or bodies_ move. A belt's speed does not by itself determine throughput — throughput also depends on how much material is on the belt (burden depth), which in this simulator emerges from the spawner rate and the physics rather than being prescribed.

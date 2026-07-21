@@ -84,5 +84,5 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
 - **Status**: Accepted
 - **Context**: Need fast dev server with WASM/ESM support and a test runner sharing the same transform pipeline.
 - **Options considered**: Vite + Vitest; Next.js (SSR unneeded — fully client-side app); CRA (deprecated); webpack custom.
-- **Decision**: Vite 7 + Vitest 3, plain client-side SPA, no SSR.
+- **Decision**: Vite 8 + Vitest 4, plain client-side SPA, no SSR.
 - **Consequences**: Simple static hosting of `dist/`. Tests run in Node (jsdom where needed) — R3F/WASM rendering is explicitly out of unit-test scope (see TECHNICAL_DESIGN §Testing).

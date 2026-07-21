@@ -2,23 +2,23 @@
 
 Development stages, in order. Statuses: **Not started** · **In progress** · **Blocked** · **Complete**. Update this file whenever a stage changes state; `docs/AGENT_HANDOFF.md` points at the current stage.
 
-| # | Stage | Status |
-| --- | --- | --- |
-| 1 | Repository and design documentation | Complete |
-| 2 | Application shell | Complete |
-| 3 | 3D scene and camera | Complete |
-| 4 | Element placement | Not started |
-| 5 | Conveyor rendering | Not started |
-| 6 | Conveyor physics | Not started |
-| 7 | Properties editor | Not started |
-| 8 | Crop spawning | Not started |
-| 9 | Crop physics | Not started |
-| 10 | Floor despawning | Not started |
-| 11 | Elevators | Not started |
-| 12 | Saving and loading | Not started |
-| 13 | Statistics | Not started |
-| 14 | Performance optimisation | Not started |
-| 15 | Testing and release preparation | Not started |
+| #   | Stage                               | Status      |
+| --- | ----------------------------------- | ----------- |
+| 1   | Repository and design documentation | Complete    |
+| 2   | Application shell                   | Complete    |
+| 3   | 3D scene and camera                 | Complete    |
+| 4   | Element placement                   | Not started |
+| 5   | Conveyor rendering                  | Not started |
+| 6   | Conveyor physics                    | Not started |
+| 7   | Properties editor                   | Not started |
+| 8   | Crop spawning                       | Not started |
+| 9   | Crop physics                        | Not started |
+| 10  | Floor despawning                    | Not started |
+| 11  | Elevators                           | Not started |
+| 12  | Saving and loading                  | Not started |
+| 13  | Statistics                          | Not started |
+| 14  | Performance optimisation            | Not started |
+| 15  | Testing and release preparation     | Not started |
 
 ## Stage 1 — Repository and design documentation
 

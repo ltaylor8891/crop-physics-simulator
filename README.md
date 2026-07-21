@@ -24,16 +24,16 @@ Planned feature set (see [docs/PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md) for the 
 
 ## Technology Stack
 
-| Concern | Choice |
-| --- | --- |
-| Language | TypeScript (strict) |
-| UI framework | React 19 |
-| Build tool | Vite 7 |
-| 3D rendering | three.js via React Three Fiber (`@react-three/fiber`, `@react-three/drei`) |
-| Physics | Rapier (WASM) via `@react-three/rapier` |
-| State management | Zustand |
-| Testing | Vitest |
-| Lint/format | ESLint (flat config) + Prettier |
+| Concern          | Choice                                                                     |
+| ---------------- | -------------------------------------------------------------------------- |
+| Language         | TypeScript (strict)                                                        |
+| UI framework     | React 19                                                                   |
+| Build tool       | Vite 8                                                                     |
+| 3D rendering     | three.js via React Three Fiber (`@react-three/fiber`, `@react-three/drei`) |
+| Physics          | Rapier (WASM) via `@react-three/rapier`                                    |
+| State management | Zustand                                                                    |
+| Testing          | Vitest                                                                     |
+| Lint/format      | ESLint (flat config) + Prettier                                            |
 
 Rationale for each choice is recorded in [docs/DECISIONS.md](docs/DECISIONS.md).
 
@@ -114,15 +114,15 @@ npm run format:check  # Prettier check only (used by CI)
 
 ## Design Documents
 
-| Document | Contents |
-| --- | --- |
-| [docs/PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md) | Authoritative functional scope |
-| [docs/TECHNICAL_DESIGN.md](docs/TECHNICAL_DESIGN.md) | Architecture, rendering, physics, state |
-| [docs/DOMAIN_MODEL.md](docs/DOMAIN_MODEL.md) | Domain terminology and unit definitions |
-| [docs/PHYSICS_SPECIFICATION.md](docs/PHYSICS_SPECIFICATION.md) | Intended physics behaviour in detail |
-| [docs/UI_UX_SPECIFICATION.md](docs/UI_UX_SPECIFICATION.md) | Screen layout, workflows, shortcuts |
-| [docs/SAVE_FILE_FORMAT.md](docs/SAVE_FILE_FORMAT.md) | Versioned JSON layout format |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Development stages and status |
-| [docs/DECISIONS.md](docs/DECISIONS.md) | Architecture Decision Records |
-| [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) | Bugs, debt, limitations |
-| [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md) | Current state and next task for any agent |
+| Document                                                       | Contents                                  |
+| -------------------------------------------------------------- | ----------------------------------------- |
+| [docs/PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md)                 | Authoritative functional scope            |
+| [docs/TECHNICAL_DESIGN.md](docs/TECHNICAL_DESIGN.md)           | Architecture, rendering, physics, state   |
+| [docs/DOMAIN_MODEL.md](docs/DOMAIN_MODEL.md)                   | Domain terminology and unit definitions   |
+| [docs/PHYSICS_SPECIFICATION.md](docs/PHYSICS_SPECIFICATION.md) | Intended physics behaviour in detail      |
+| [docs/UI_UX_SPECIFICATION.md](docs/UI_UX_SPECIFICATION.md)     | Screen layout, workflows, shortcuts       |
+| [docs/SAVE_FILE_FORMAT.md](docs/SAVE_FILE_FORMAT.md)           | Versioned JSON layout format              |
+| [docs/ROADMAP.md](docs/ROADMAP.md)                             | Development stages and status             |
+| [docs/DECISIONS.md](docs/DECISIONS.md)                         | Architecture Decision Records             |
+| [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)                   | Bugs, debt, limitations                   |
+| [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md)                 | Current state and next task for any agent |

@@ -27,10 +27,10 @@ Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.j
 
 ```jsonc
 {
-  "name": "North intake line",            // 1–64 chars
-  "createdAt": "2026-07-21T19:00:00Z",     // ISO 8601 UTC
-  "modifiedAt": "2026-07-21T19:45:00Z",    // ISO 8601 UTC
-  "appVersion": "0.1.0"                    // writer version, informational only
+  "name": "North intake line", // 1–64 chars
+  "createdAt": "2026-07-21T19:00:00Z", // ISO 8601 UTC
+  "modifiedAt": "2026-07-21T19:45:00Z", // ISO 8601 UTC
+  "appVersion": "0.1.0", // writer version, informational only
 }
 ```
 
@@ -38,9 +38,9 @@ Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.j
 
 ```jsonc
 {
-  "gravity": 9.81,             // m/s², 0–20
-  "maxActiveCrops": 2000,      // 100–5000
-  "floorDespawnSeconds": 3     // 0.5–30
+  "gravity": 9.81, // m/s², 0–20
+  "maxActiveCrops": 2000, // 100–5000
+  "floorDespawnSeconds": 3, // 0.5–30
 }
 ```
 
@@ -61,7 +61,7 @@ Every element shares the common envelope; `properties` is a tagged union discrim
 
 ### Position Format
 
-Object `{x, y, z}` of finite numbers, metres, world space. `y` is normally 0 (element origins sit at ground level; height above ground is a *property* such as `beltHeight`). Origin point per element type is defined in `DOMAIN_MODEL.md`.
+Object `{x, y, z}` of finite numbers, metres, world space. `y` is normally 0 (element origins sit at ground level; height above ground is a _property_ such as `beltHeight`). Origin point per element type is defined in `DOMAIN_MODEL.md`.
 
 ### Rotation Format
 
@@ -77,12 +77,12 @@ Dimensions are type-specific properties in metres: scalars (`length`, `width`, `
 
 ```jsonc
 {
-  "length": 6,          // m, 1–50
-  "width": 0.8,         // m, 0.3–3
-  "beltHeight": 0.75,   // m, 0.2–5 (top of belt above ground)
-  "inclineDeg": 0,      // degrees, -30–30
-  "beltSpeed": 90,      // m/min, 0–300
-  "skirts": true
+  "length": 6, // m, 1–50
+  "width": 0.8, // m, 0.3–3
+  "beltHeight": 0.75, // m, 0.2–5 (top of belt above ground)
+  "inclineDeg": 0, // degrees, -30–30
+  "beltSpeed": 90, // m/min, 0–300
+  "skirts": true,
 }
 ```
 
@@ -90,11 +90,11 @@ Dimensions are type-specific properties in metres: scalars (`length`, `width`, `
 
 ```jsonc
 {
-  "height": 8,               // m, 1–30
-  "footprint": { "x": 1.2, "z": 1.2 },  // m, each 0.5–4
-  "transportSpeed": 2,       // m/s, 0.5–5
-  "dischargeRateCap": 60,    // t/h, 0.1–500
-  "dischargeVelocity": 1.5   // m/s horizontal at discharge, 0–5
+  "height": 8, // m, 1–30
+  "footprint": { "x": 1.2, "z": 1.2 }, // m, each 0.5–4
+  "transportSpeed": 2, // m/s, 0.5–5
+  "dischargeRateCap": 60, // t/h, 0.1–500
+  "dischargeVelocity": 1.5, // m/s horizontal at discharge, 0–5
 }
 ```
 
@@ -102,10 +102,10 @@ Dimensions are type-specific properties in metres: scalars (`length`, `width`, `
 
 ```jsonc
 {
-  "cropType": "potato",      // preset id: wheatClump | potato | sugarBeet
-  "throughput": 40,          // t/h, 0.1–500
-  "emitArea": { "x": 0.6, "z": 0.6 },  // m, each 0.1–3
-  "enabled": true
+  "cropType": "potato", // preset id: wheatClump | potato | sugarBeet
+  "throughput": 40, // t/h, 0.1–500
+  "emitArea": { "x": 0.6, "z": 0.6 }, // m, each 0.1–3
+  "enabled": true,
 }
 ```
 
@@ -117,7 +117,7 @@ Both use:
 
 ```jsonc
 {
-  "size": { "x": 2, "y": 2, "z": 2 }   // m, each 0.5–20
+  "size": { "x": 2, "y": 2, "z": 2 }, // m, each 0.5–20
 }
 ```
 
@@ -125,8 +125,8 @@ Both use:
 
 ```jsonc
 {
-  "position": { "x": 18, "y": 14, "z": 18 },  // m
-  "target":   { "x": 0,  "y": 0,  "z": 0 }    // orbit target, m
+  "position": { "x": 18, "y": 14, "z": 18 }, // m
+  "target": { "x": 0, "y": 0, "z": 0 }, // orbit target, m
 }
 ```
 

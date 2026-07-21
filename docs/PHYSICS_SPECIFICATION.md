@@ -12,14 +12,14 @@ Intended physics behaviour, in enough detail for an agent to reproduce it withou
 
 Rapier interaction groups (16-bit membership/filter):
 
-| Group | Bit | Collides with |
-| --- | --- | --- |
-| `CROP` | 0 | `CROP`, `MACHINE`, `SENSOR` |
-| `MACHINE` | 1 | `CROP` |
-| `SENSOR` | 2 | `CROP` (intersection events only, no contact forces) |
+| Group     | Bit | Collides with                                        |
+| --------- | --- | ---------------------------------------------------- |
+| `CROP`    | 0   | `CROP`, `MACHINE`, `SENSOR`                          |
+| `MACHINE` | 1   | `CROP`                                               |
+| `SENSOR`  | 2   | `CROP` (intersection events only, no contact forces) |
 
 - Machines never collide with machines — overlapping placement is allowed by design (users often intersect a conveyor discharge with an elevator intake).
-- Sensors (spawner volumes, elevator intakes, collection/despawn zones, floor-contact detection) are Rapier *sensor* colliders: they generate intersection events but exert no forces.
+- Sensors (spawner volumes, elevator intakes, collection/despawn zones, floor-contact detection) are Rapier _sensor_ colliders: they generate intersection events but exert no forces.
 
 ## Crop-to-Crop Collision
 
@@ -36,14 +36,14 @@ Rapier interaction groups (16-bit membership/filter):
 
 Default material values (plausible defaults, **not measured** — tune freely but record changes here):
 
-| Surface / body | Friction | Restitution |
-| --- | --- | --- |
-| Belt top surface | 0.9 | 0.0 |
-| Machine casing / skirts | 0.4 | 0.1 |
-| Ground plane | 0.6 | 0.2 |
-| Wheat-clump crop (ball r≈0.06 m, 0.03 kg) | 0.5 | 0.15 |
-| Potato crop (capsule ≈0.08×0.05 m, 0.25 kg) | 0.6 | 0.25 |
-| Sugar-beet crop (ball r≈0.09 m, 0.9 kg) | 0.7 | 0.2 |
+| Surface / body                              | Friction | Restitution |
+| ------------------------------------------- | -------- | ----------- |
+| Belt top surface                            | 0.9      | 0.0         |
+| Machine casing / skirts                     | 0.4      | 0.1         |
+| Ground plane                                | 0.6      | 0.2         |
+| Wheat-clump crop (ball r≈0.06 m, 0.03 kg)   | 0.5      | 0.15        |
+| Potato crop (capsule ≈0.08×0.05 m, 0.25 kg) | 0.6      | 0.25        |
+| Sugar-beet crop (ball r≈0.09 m, 0.9 kg)     | 0.7      | 0.2         |
 
 High belt friction + zero belt restitution is what makes surface-velocity conveyance behave like a real belt grip.
 

@@ -102,18 +102,18 @@ Screen layout, interaction workflows, and input behaviour. Dark theme by default
 
 ## Keyboard Shortcuts
 
-| Key | Action |
-| --- | --- |
-| `Space` | Play / pause simulation |
-| `Escape` | Cancel placement / deselect |
-| `Delete` / `Backspace` | Delete selected element |
-| `Ctrl+D` | Duplicate selected element |
-| `R` / `Shift+R` | Rotate selection +15° / −15° |
-| `G` | Toggle grid snap |
-| `Ctrl+S` | Save layout |
-| `Ctrl+O` | Load layout |
-| `F` | Frame camera on selection (or whole scene if none) |
-| `?` | Shortcut overlay |
+| Key                    | Action                                             |
+| ---------------------- | -------------------------------------------------- |
+| `Space`                | Play / pause simulation                            |
+| `Escape`               | Cancel placement / deselect                        |
+| `Delete` / `Backspace` | Delete selected element                            |
+| `Ctrl+D`               | Duplicate selected element                         |
+| `R` / `Shift+R`        | Rotate selection +15° / −15°                       |
+| `G`                    | Toggle grid snap                                   |
+| `Ctrl+S`               | Save layout                                        |
+| `Ctrl+O`               | Load layout                                        |
+| `F`                    | Frame camera on selection (or whole scene if none) |
+| `?`                    | Shortcut overlay                                   |
 
 Shortcuts are suppressed while a text/number input has focus. `Ctrl+S`/`Ctrl+O` call `preventDefault` to override the browser.
 
