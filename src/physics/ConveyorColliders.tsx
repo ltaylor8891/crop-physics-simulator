@@ -19,6 +19,7 @@ import {
   beltOrientationQuaternion,
   beltWorldNormal,
   beltWorldVelocity,
+  isBeltTopContact,
   rotateYaw,
   velocityWithBeltSurface,
 } from './beltVelocity';
@@ -125,13 +126,17 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
     const normal = normalRef.current;
     world.contactPairsWith(collider, (other) => {
       const body = other.parent();
-      if (!body || !body.isDynamic()) return;
+      if (!body || !body.isDynamic() || !body.isEnabled()) return;
 
-      let hasContact = false;
-      world.contactPair(collider, other, (manifold) => {
-        if (manifold.numContacts() > 0) hasContact = true;
+      // Only top-surface contacts — side/end hits must not get belt speed
+      // (piles near discharge / overlapping collection zones were jumping).
+      let onTop = false;
+      world.contactPair(collider, other, (manifold, flipped) => {
+        if (manifold.numContacts() <= 0) return;
+        const n = manifold.normal();
+        if (isBeltTopContact(n, normal, flipped)) onTop = true;
       });
-      if (!hasContact) return;
+      if (!onTop) return;
 
       const current = body.linvel();
       const next = velocityWithBeltSurface(current, surfaceVel, normal);

@@ -4,6 +4,7 @@ import {
   beltOrientationQuaternion,
   beltWorldNormal,
   beltWorldVelocity,
+  isBeltTopContact,
   rotateYaw,
   velocityWithBeltSurface,
 } from './beltVelocity';
@@ -83,6 +84,23 @@ describe('velocityWithBeltSurface', () => {
     expect(next.x).toBeCloseTo(surface.x, 10);
     expect(next.y).toBeCloseTo(surface.y, 10);
     expect(next.z).toBeCloseTo(surface.z, 10);
+  });
+});
+
+describe('isBeltTopContact', () => {
+  const up = { x: 0, y: 1, z: 0 };
+
+  it('accepts a contact normal aligned with the belt up', () => {
+    expect(isBeltTopContact({ x: 0, y: 1, z: 0 }, up, false)).toBe(true);
+  });
+
+  it('rejects a side-hit normal', () => {
+    expect(isBeltTopContact({ x: 1, y: 0, z: 0 }, up, false)).toBe(false);
+  });
+
+  it('accounts for a flipped manifold', () => {
+    // Normal reported as crop→belt (−Y); flipped restores belt→crop.
+    expect(isBeltTopContact({ x: 0, y: -1, z: 0 }, up, true)).toBe(true);
   });
 });
 

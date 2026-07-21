@@ -168,10 +168,11 @@ class CropRuntime {
 
     const body = bucket.bodies[handle.slot];
     if (body) {
+      // Disable before parking so the teleport cannot shove neighbours.
       body.setLinvel({ x: 0, y: 0, z: 0 }, true);
       body.setAngvel({ x: 0, y: 0, z: 0 }, true);
-      body.setTranslation({ x: 0, y: PARK_Y - handle.slot * 0.02, z: 0 }, true);
       body.setEnabled(false);
+      body.setTranslation({ x: 0, y: PARK_Y - handle.slot * 0.02, z: 0 }, false);
     }
     bucket.floorContactAt[handle.slot] = null;
     bucket.pool.release(handle.slot);

@@ -60,6 +60,26 @@ export function velocityWithBeltSurface(
 }
 
 /**
+ * True when a contact normal is a top-of-belt support contact (not a side/end hit).
+ * `contactNormal` is Rapier's world normal from collider1→collider2; pass
+ * `flipped` from `contactPair` so the direction is belt→other.
+ */
+export function isBeltTopContact(
+  contactNormal: Vec3,
+  beltNormal: Vec3,
+  flipped: boolean,
+  minAlignment = 0.55,
+): boolean {
+  const sign = flipped ? -1 : 1;
+  const alignment =
+    sign *
+    (contactNormal.x * beltNormal.x +
+      contactNormal.y * beltNormal.y +
+      contactNormal.z * beltNormal.z);
+  return alignment >= minAlignment;
+}
+
+/**
  * World-space centre of the belt slab collider (element origin at footprint centre,
  * yaw applied separately by the RigidBody). Matches ConveyorMesh geometry: the belt
  * pivots about the infeed end at `beltHeight`, and the collider centre sits half a
