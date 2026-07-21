@@ -58,7 +58,12 @@ export function CropBodies() {
       }
 
       const mesh = meshRef.current;
-      if (mesh) mesh.count = capacity;
+      if (mesh) {
+        mesh.count = capacity;
+        // Instance matrices live far from the mesh origin; default frustum
+        // culling uses the base geometry bounds and hides all crops at some angles.
+        mesh.frustumCulled = false;
+      }
 
       return ready === capacity;
     };
@@ -100,7 +105,12 @@ export function CropBodies() {
         />,
       ]}
     >
-      <instancedMesh ref={meshRef} args={[undefined, undefined, capacity]} castShadow>
+      <instancedMesh
+        ref={meshRef}
+        args={[undefined, undefined, capacity]}
+        castShadow
+        frustumCulled={false}
+      >
         <sphereGeometry args={[DEFAULT_RADIUS, 10, 10]} />
         <meshStandardMaterial color="#d9b45b" />
       </instancedMesh>
