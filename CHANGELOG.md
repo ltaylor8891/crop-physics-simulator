@@ -14,6 +14,8 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Added
 
+- Crop physics (roadmap Stage 9): one instanced pool per crop type (ball / capsule / ball) with preset friction, restitution, mass, CCD, and light linear damping; global active cap still `maxActiveCrops`.
+- Floor and zone despawn (roadmap Stage 10): ground contact despawn after `floorDespawnSeconds`; immediate collection/despawn zone volumes with collected vs spilled mass accounting.
 - Save / load layouts (roadmap Stage 12): **New**, **Load**, **Save** in the toolbar; Ctrl+S / Ctrl+O; drag-drop JSON onto the window; schema-validated parse with migration scaffold; load errors leave the scene untouched; camera pose round-trips.
 - Crop spawning (roadmap Stage 8): enabled spawners emit crops on the fixed physics step at the configured t/h rate (fractional accumulator). `CropPool` + pooled Rapier bodies (`InstancedRigidBodies`); position/velocity jitter; throttle when the pool is full; **Reset** clears crops. Dev seed `?seed=spawn`. Long-run mass rate covered by unit tests within 1%.
 - Properties editor (roadmap Stage 7): schema-driven fields for every element type — editable name, position, rotation, and equipment properties with range validation (invalid input reverts and shows the constraint). Conveyor edits update mesh and physics live.

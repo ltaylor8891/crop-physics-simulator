@@ -6,7 +6,7 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 
 ### KI-001 — Most product features not yet implemented
 
-- **Description**: Stages 9–11 and 13–15 of the roadmap (crop physics polish, elevators, statistics, etc.) are designed but not fully built. Placement through crop spawning and save/load are in place. Floor despawn for the ground plane exists; collection/despawn zones do not.
+- **Description**: Stages 11 and 13–15 of the roadmap (elevators, statistics, performance, release) are designed but not fully built. Stages 1–10 and 12 are in place.
 - **Severity**: High (expected at this phase, not a defect)
 - **Reproduction**: Run the app; elements can be placed and arranged but nothing simulates yet.
 - **Suspected cause**: n/a — project phase.

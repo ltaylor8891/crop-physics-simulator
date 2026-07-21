@@ -12,8 +12,8 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 6   | Conveyor physics                    | Complete    |
 | 7   | Properties editor                   | Complete    |
 | 8   | Crop spawning                       | Complete    |
-| 9   | Crop physics                        | Not started |
-| 10  | Floor despawning                    | In progress |
+| 9   | Crop physics                        | Complete    |
+| 10  | Floor despawning                    | Complete    |
 | 11  | Elevators                           | Not started |
 | 12  | Saving and loading                  | Complete    |
 | 13  | Statistics                          | Not started |
@@ -90,7 +90,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: instanced crop rendering (one InstancedMesh per crop type), full pool implementation with cap + throttling, CCD, sleeping, material table from `PHYSICS_SPECIFICATION.md`.
 - **Acceptance criteria**: 1 000 active crops at ≥ 60 FPS mid-range / 2 000 at ≥ 30 FPS; crops don't tunnel through belts at 300 m/min; piles settle and sleep.
 - **Dependencies**: Stage 8.
-- **Status**: Not started.
+- **Status**: Complete. Per-type `InstancedRigidBodies` (ball / potato capsule / sugar-beet ball), preset materials, CCD, linear damping 0.05, global `maxActiveCrops` cap. FPS targets remain a Stage 14 hand-check on mid-range hardware.
 
 ## Stage 10 — Floor despawning
 
@@ -98,7 +98,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: floor-contact detection, per-crop despawn timers on simulation time, spilled-mass accounting, user-placed despawn zones (immediate).
 - **Acceptance criteria**: floor-touching crops vanish 3.0 s (±1 step) after first contact; timers pause with the simulation; spilled mass matches despawned crop masses exactly.
 - **Dependencies**: Stage 9.
-- **Status**: In progress — ground-plane floor despawn + spilled mass wired (height-based contact); user-placed despawn/collection zones still outstanding.
+- **Status**: Complete. Ground-plane timer despawn + immediate collection/despawn zone volumes (`zoneVolume.ts`). Collection credits session “Out” t/h average until Stage 13 rolling windows.
 
 ## Stage 11 — Elevators
 

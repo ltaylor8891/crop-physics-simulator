@@ -1,9 +1,11 @@
 /**
- * Bridges the logical CropPool to Rapier bodies bound by CropBodies.
- * Accessed from the fixed physics step (SpawningSystem) and Toolbar reset.
+ * Bridges per-type CropPools to Rapier bodies bound by CropBodies (ADR-005 / Stage 9).
+ * Global active count is capped at `maxActiveCrops`; each crop type has its own
+ * InstancedRigidBodies pool of that capacity.
  */
 
 import type { RapierCollider, RapierRigidBody } from '@react-three/rapier';
+import { CROP_TYPES, type CropTypePreset } from '../elements/cropTypes';
 import { useSimulationStore } from '../state/simulationStore';
 import type { CropTypeId, Vec3 } from '../types/elements';
 import { CropPool, type CropSlotId } from './CropPool';
@@ -13,90 +15,137 @@ export interface CropActivation {
   massKg: number;
   friction: number;
   restitution: number;
-  radius: number;
-  color: string;
   position: Vec3;
   velocity: Vec3;
 }
 
+export interface CropHandle {
+  cropType: CropTypeId;
+  slot: CropSlotId;
+}
+
 const PARK_Y = -100;
+const CROP_TYPE_IDS = Object.keys(CROP_TYPES) as CropTypeId[];
+
+interface TypeBucket {
+  pool: CropPool;
+  bodies: (RapierRigidBody | null)[];
+  colliders: (RapierCollider | null)[];
+  /** Approximate half-extent used for floor-contact tests. */
+  contactRadii: number[];
+  floorContactAt: (number | null)[];
+  boundBodies: number;
+}
+
+function emptyBucket(capacity: number): TypeBucket {
+  return {
+    pool: new CropPool(capacity),
+    bodies: Array.from({ length: capacity }, () => null),
+    colliders: Array.from({ length: capacity }, () => null),
+    contactRadii: Array.from({ length: capacity }, () => 0.06),
+    floorContactAt: Array.from({ length: capacity }, () => null),
+    boundBodies: 0,
+  };
+}
+
+function contactExtent(preset: CropTypePreset): number {
+  if (preset.collider.shape === 'ball') return preset.collider.radius;
+  return preset.collider.halfHeight + preset.collider.radius;
+}
 
 class CropRuntime {
-  pool: CropPool = new CropPool(1);
-  private bodies: (RapierRigidBody | null)[] = [];
-  private colliders: (RapierCollider | null)[] = [];
-  private radii: number[] = [];
-  /** Simulation time of first floor contact per slot; null = not yet touched floor. */
-  private floorContactAt: (number | null)[] = [];
-  private boundBodies = 0;
+  private maxActive = 1;
+  private globalActive = 0;
+  private buckets: Record<CropTypeId, TypeBucket> = {
+    wheatClump: emptyBucket(1),
+    potato: emptyBucket(1),
+    sugarBeet: emptyBucket(1),
+  };
 
-  /** True once every pool slot has a rigid body ref (colliders may resolve lazily). */
-  get isBound(): boolean {
-    return this.boundBodies === this.pool.capacity && this.boundBodies > 0;
+  get pool(): { activeCount: number; isExhausted: boolean; capacity: number } {
+    return {
+      activeCount: this.globalActive,
+      isExhausted: this.globalActive >= this.maxActive,
+      capacity: this.maxActive,
+    };
   }
 
-  /**
-   * Rebuild the logical pool when `maxActiveCrops` changes.
-   * Physical refs are re-bound by CropBodies on the next layout effect.
-   */
+  /** True once every type pool has all rigid body refs bound. */
+  get isBound(): boolean {
+    return CROP_TYPE_IDS.every((type) => {
+      const bucket = this.buckets[type];
+      return bucket.boundBodies === bucket.pool.capacity && bucket.boundBodies > 0;
+    });
+  }
+
   configure(capacity: number): void {
-    if (this.pool.capacity === capacity && this.boundBodies === capacity) return;
-    this.pool = new CropPool(capacity);
-    this.bodies = Array.from({ length: capacity }, () => null);
-    this.colliders = Array.from({ length: capacity }, () => null);
-    this.radii = Array.from({ length: capacity }, () => 0.06);
-    this.floorContactAt = Array.from({ length: capacity }, () => null);
-    this.boundBodies = 0;
+    const already =
+      this.maxActive === capacity &&
+      CROP_TYPE_IDS.every((type) => this.buckets[type].boundBodies === capacity);
+    if (already) return;
+
+    this.maxActive = capacity;
+    this.globalActive = 0;
+    for (const type of CROP_TYPE_IDS) {
+      this.buckets[type] = emptyBucket(capacity);
+    }
   }
 
   bindSlot(
+    cropType: CropTypeId,
     id: CropSlotId,
     body: RapierRigidBody | null,
     collider: RapierCollider | null,
   ): void {
-    if (id < 0 || id >= this.pool.capacity) return;
-    this.bodies[id] = body;
-    this.colliders[id] = collider;
+    const bucket = this.buckets[cropType];
+    if (id < 0 || id >= bucket.pool.capacity) return;
+    bucket.bodies[id] = body;
+    bucket.colliders[id] = collider;
     if (body) {
       body.setEnabled(false);
       body.setTranslation({ x: 0, y: PARK_Y - id * 0.02, z: 0 }, false);
     }
     let bound = 0;
-    for (let i = 0; i < this.pool.capacity; i++) {
-      if (this.bodies[i]) bound += 1;
+    for (let i = 0; i < bucket.pool.capacity; i++) {
+      if (bucket.bodies[i]) bound += 1;
     }
-    this.boundBodies = bound;
+    bucket.boundBodies = bound;
   }
 
-  private resolveCollider(id: CropSlotId): RapierCollider | null {
-    const existing = this.colliders[id];
+  private resolveCollider(bucket: TypeBucket, id: CropSlotId): RapierCollider | null {
+    const existing = bucket.colliders[id];
     if (existing) return existing;
-    const body = this.bodies[id];
+    const body = bucket.bodies[id];
     if (!body || body.numColliders() <= 0) return null;
     const collider = body.collider(0);
-    this.colliders[id] = collider;
+    bucket.colliders[id] = collider;
     return collider;
   }
 
-  /**
-   * Acquire a pool slot and enable the corresponding Rapier body.
-   * Returns null when the pool is exhausted or bodies are not ready.
-   */
-  spawn(activation: CropActivation): CropSlotId | null {
+  spawn(activation: CropActivation): CropHandle | null {
     if (!this.isBound) return null;
-    const id = this.pool.acquire(activation.cropType, activation.massKg);
+    if (this.globalActive >= this.maxActive) return null;
+
+    const bucket = this.buckets[activation.cropType];
+    const id = bucket.pool.acquire(activation.cropType, activation.massKg);
     if (id === null) return null;
 
-    const body = this.bodies[id];
-    const collider = this.resolveCollider(id);
+    const body = bucket.bodies[id];
+    const collider = this.resolveCollider(bucket, id);
     if (!body || !collider) {
-      this.pool.release(id);
+      bucket.pool.release(id);
       return null;
     }
 
-    collider.setRadius(activation.radius);
+    const preset = CROP_TYPES[activation.cropType];
     collider.setFriction(activation.friction);
     collider.setRestitution(activation.restitution);
+    if (preset.collider.shape === 'ball') {
+      collider.setRadius(preset.collider.radius);
+    } else {
+      collider.setRadius(preset.collider.radius);
+      collider.setHalfHeight(preset.collider.halfHeight);
+    }
 
     body.setAdditionalMass(activation.massKg, true);
     body.setTranslation(activation.position, true);
@@ -105,60 +154,108 @@ class CropRuntime {
     body.setEnabled(true);
     body.wakeUp();
 
-    this.radii[id] = activation.radius;
-    this.floorContactAt[id] = null;
+    bucket.contactRadii[id] = contactExtent(preset);
+    bucket.floorContactAt[id] = null;
+    this.globalActive += 1;
 
-    return id;
+    return { cropType: activation.cropType, slot: id };
   }
 
-  release(id: CropSlotId): void {
-    const body = this.bodies[id];
+  release(handle: CropHandle): void {
+    const bucket = this.buckets[handle.cropType];
+    const slot = bucket.pool.getSlot(handle.slot);
+    if (!slot.active) return;
+
+    const body = bucket.bodies[handle.slot];
     if (body) {
       body.setLinvel({ x: 0, y: 0, z: 0 }, true);
       body.setAngvel({ x: 0, y: 0, z: 0 }, true);
-      body.setTranslation({ x: 0, y: PARK_Y - id * 0.02, z: 0 }, true);
+      body.setTranslation({ x: 0, y: PARK_Y - handle.slot * 0.02, z: 0 }, true);
       body.setEnabled(false);
     }
-    this.floorContactAt[id] = null;
-    this.pool.release(id);
+    bucket.floorContactAt[handle.slot] = null;
+    bucket.pool.release(handle.slot);
+    this.globalActive = Math.max(0, this.globalActive - 1);
   }
 
   reset(): void {
-    for (const id of this.pool.activeIds()) {
-      this.release(id);
+    for (const type of CROP_TYPE_IDS) {
+      const bucket = this.buckets[type];
+      for (const id of bucket.pool.activeIds()) {
+        this.release({ cropType: type, slot: id });
+      }
+      bucket.pool.releaseAll();
     }
-    this.pool.releaseAll();
+    this.globalActive = 0;
+  }
+
+  tickFloorDespawn(simulationTime: number, floorDespawnSeconds: number): number {
+    let spilledKg = 0;
+    for (const type of CROP_TYPE_IDS) {
+      const bucket = this.buckets[type];
+      for (const id of bucket.pool.activeIds()) {
+        const body = bucket.bodies[id];
+        if (!body || !body.isEnabled()) continue;
+
+        const y = body.translation().y;
+        const extent = bucket.contactRadii[id] ?? 0.06;
+        const onFloor = y <= extent + 0.05;
+
+        if (onFloor && bucket.floorContactAt[id] === null) {
+          bucket.floorContactAt[id] = simulationTime;
+        }
+
+        const contactAt = bucket.floorContactAt[id];
+        if (contactAt === null) continue;
+        if (simulationTime - contactAt < floorDespawnSeconds) continue;
+
+        spilledKg += bucket.pool.getSlot(id).massKg;
+        this.release({ cropType: type, slot: id });
+      }
+    }
+    return spilledKg;
   }
 
   /**
-   * Floor despawn (docs/PHYSICS_SPECIFICATION.md §Floor-Contact Detection).
-   * First time an active crop rests near the ground plane (y≈0), stamp contact
-   * time; after `floorDespawnSeconds` of simulation time, release and count spill.
-   * @returns total mass (kg) despawned this step
+   * Immediate despawn for crops whose centres enter collection/despawn volumes.
+   * @returns mass collected vs spilled this step
    */
-  tickFloorDespawn(simulationTime: number, floorDespawnSeconds: number): number {
+  tickZoneDespawn(
+    zones: ReadonlyArray<{
+      kind: 'collection' | 'despawn';
+      position: Vec3;
+      rotationYaw: number;
+      size: Vec3;
+    }>,
+    isInside: (
+      point: Vec3,
+      position: Vec3,
+      yaw: number,
+      size: Vec3,
+    ) => boolean,
+  ): { collectedKg: number; spilledKg: number } {
+    let collectedKg = 0;
     let spilledKg = 0;
-    for (const id of this.pool.activeIds()) {
-      const body = this.bodies[id];
-      if (!body || !body.isEnabled()) continue;
+    if (zones.length === 0) return { collectedKg, spilledKg };
 
-      const y = body.translation().y;
-      const radius = this.radii[id] ?? 0.06;
-      // Resting on ground plane at y=0: centre ≈ radius.
-      const onFloor = y <= radius + 0.05;
-
-      if (onFloor && this.floorContactAt[id] === null) {
-        this.floorContactAt[id] = simulationTime;
+    for (const type of CROP_TYPE_IDS) {
+      const bucket = this.buckets[type];
+      for (const id of [...bucket.pool.activeIds()]) {
+        const body = bucket.bodies[id];
+        if (!body || !body.isEnabled()) continue;
+        const t = body.translation();
+        const point = { x: t.x, y: t.y, z: t.z };
+        for (const zone of zones) {
+          if (!isInside(point, zone.position, zone.rotationYaw, zone.size)) continue;
+          const mass = bucket.pool.getSlot(id).massKg;
+          this.release({ cropType: type, slot: id });
+          if (zone.kind === 'collection') collectedKg += mass;
+          else spilledKg += mass;
+          break;
+        }
       }
-
-      const contactAt = this.floorContactAt[id];
-      if (contactAt === null) continue;
-      if (simulationTime - contactAt < floorDespawnSeconds) continue;
-
-      spilledKg += this.pool.getSlot(id).massKg;
-      this.release(id);
     }
-    return spilledKg;
+    return { collectedKg, spilledKg };
   }
 }
 
@@ -169,12 +266,14 @@ export const cropRuntime = new CropRuntime();
 export const cropSpawnStats = {
   massSpawnedKg: 0,
   spilledMassKg: 0,
+  collectedMassKg: 0,
   statsAge: 0,
   simulationTime: 0,
   clearAccumulators: null as null | (() => void),
   reset() {
     this.massSpawnedKg = 0;
     this.spilledMassKg = 0;
+    this.collectedMassKg = 0;
     this.statsAge = 0;
     this.simulationTime = 0;
     this.clearAccumulators?.();

@@ -8,7 +8,7 @@ The simulator lets equipment planners and enthusiasts sketch a crop-handling lin
 
 ## Current Development Status
 
-**Stages 1–8 and 12 complete** — through crop spawning and save/load. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
+**Stages 1–10 and 12 complete** — through crop physics, despawn zones, and save/load. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
 
 ## Main Features
 

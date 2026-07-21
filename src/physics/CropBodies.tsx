@@ -1,42 +1,64 @@
 import { useEffect, useMemo, useRef } from 'react';
 import {
   BallCollider,
+  CapsuleCollider,
   InstancedRigidBodies,
   type InstancedRigidBodyProps,
   type RapierRigidBody,
 } from '@react-three/rapier';
 import type { InstancedMesh } from 'three';
+import { CROP_TYPES } from '../elements/cropTypes';
 import { cropRuntime } from '../simulation/cropRuntime';
 import { useSimulationStore } from '../state/simulationStore';
+import type { CropTypeId } from '../types/elements';
 import { CROP_COLLISION_GROUPS } from './collisionGroups';
 
-const DEFAULT_RADIUS = 0.06;
 const PARK_Y = -100;
+const CROP_TYPE_IDS = Object.keys(CROP_TYPES) as CropTypeId[];
+
+/** Small damping to settle piles (docs/PHYSICS_SPECIFICATION.md). */
+const CROP_LINEAR_DAMPING = 0.05;
 
 /**
- * Pre-allocated crop rigid bodies via InstancedRigidBodies (ADR-005).
- * Stage 8: shared ball mesh; potato capsules approximated as balls.
- * Stage 9: per-type InstancedMesh + proper capsule colliders.
+ * Pre-allocated crop rigid bodies — one InstancedRigidBodies pool per crop type
+ * (docs/ROADMAP.md §Stage 9 / ADR-005). Global active count is capped at maxActiveCrops.
  */
 export function CropBodies() {
   const capacity = useSimulationStore((s) => s.settings.maxActiveCrops);
+
+  useEffect(() => {
+    cropRuntime.configure(capacity);
+  }, [capacity]);
+
+  return (
+    <>
+      {CROP_TYPE_IDS.map((cropType) => (
+        <CropTypePool key={cropType} cropType={cropType} capacity={capacity} />
+      ))}
+    </>
+  );
+}
+
+function CropTypePool({
+  cropType,
+  capacity,
+}: {
+  cropType: CropTypeId;
+  capacity: number;
+}) {
+  const preset = CROP_TYPES[cropType];
   const bodiesRef = useRef<(RapierRigidBody | null)[] | null>(null);
   const meshRef = useRef<InstancedMesh>(null);
 
   const instances: InstancedRigidBodyProps[] = useMemo(
     () =>
       Array.from({ length: capacity }, (_, id) => ({
-        key: id,
+        key: `${cropType}-${id}`,
         position: [0, PARK_Y - id * 0.02, 0] as [number, number, number],
       })),
-    [capacity],
+    [capacity, cropType],
   );
 
-  useEffect(() => {
-    cropRuntime.configure(capacity);
-  }, [capacity]);
-
-  // InstancedRigidBodies fills refs asynchronously — retry until every slot is bound.
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setInterval> | undefined;
@@ -49,19 +71,17 @@ export function CropBodies() {
       for (let id = 0; id < capacity; id++) {
         const body = bodies[id] ?? null;
         if (!body) {
-          cropRuntime.bindSlot(id, null, null);
+          cropRuntime.bindSlot(cropType, id, null, null);
           continue;
         }
         const collider = body.numColliders() > 0 ? body.collider(0) : null;
-        cropRuntime.bindSlot(id, body, collider);
+        cropRuntime.bindSlot(cropType, id, body, collider);
         if (collider) ready += 1;
       }
 
       const mesh = meshRef.current;
       if (mesh) {
         mesh.count = capacity;
-        // Instance matrices live far from the mesh origin; default frustum
-        // culling uses the base geometry bounds and hides all crops at some angles.
         mesh.frustumCulled = false;
       }
 
@@ -82,10 +102,29 @@ export function CropBodies() {
       cancelled = true;
       if (timer !== undefined) clearInterval(timer);
       for (let id = 0; id < capacity; id++) {
-        cropRuntime.bindSlot(id, null, null);
+        cropRuntime.bindSlot(cropType, id, null, null);
       }
     };
-  }, [capacity, instances]);
+  }, [capacity, cropType, instances]);
+
+  const colliderNode =
+    preset.collider.shape === 'ball' ? (
+      <BallCollider
+        key={`${cropType}-ball`}
+        args={[preset.collider.radius]}
+        collisionGroups={CROP_COLLISION_GROUPS}
+        friction={preset.friction}
+        restitution={preset.restitution}
+      />
+    ) : (
+      <CapsuleCollider
+        key={`${cropType}-capsule`}
+        args={[preset.collider.halfHeight, preset.collider.radius]}
+        collisionGroups={CROP_COLLISION_GROUPS}
+        friction={preset.friction}
+        restitution={preset.restitution}
+      />
+    );
 
   return (
     <InstancedRigidBodies
@@ -94,16 +133,9 @@ export function CropBodies() {
       type="dynamic"
       colliders={false}
       ccd
+      linearDamping={CROP_LINEAR_DAMPING}
       collisionGroups={CROP_COLLISION_GROUPS}
-      colliderNodes={[
-        <BallCollider
-          key="crop-ball"
-          args={[DEFAULT_RADIUS]}
-          collisionGroups={CROP_COLLISION_GROUPS}
-          friction={0.5}
-          restitution={0.15}
-        />,
-      ]}
+      colliderNodes={[colliderNode]}
     >
       <instancedMesh
         ref={meshRef}
@@ -111,8 +143,14 @@ export function CropBodies() {
         castShadow
         frustumCulled={false}
       >
-        <sphereGeometry args={[DEFAULT_RADIUS, 10, 10]} />
-        <meshStandardMaterial color="#d9b45b" />
+        {preset.collider.shape === 'ball' ? (
+          <sphereGeometry args={[preset.collider.radius, 10, 10]} />
+        ) : (
+          <capsuleGeometry
+            args={[preset.collider.radius, preset.collider.halfHeight * 2, 4, 8]}
+          />
+        )}
+        <meshStandardMaterial color={preset.color} />
       </instancedMesh>
     </InstancedRigidBodies>
   );
