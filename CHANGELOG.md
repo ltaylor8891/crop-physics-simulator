@@ -6,7 +6,11 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+
+- Element placement (roadmap Stage 4): place belt conveyors, bucket elevators, crop spawners, collection zones, and despawn zones from the library with a ghost preview, grid snapping (0.5 m / 15°), Shift for repeated placement, and Escape/right-click to cancel.
+- Selection with highlight, drag-move on the ground plane (clamped to the build area), rotation, duplication, and deletion — via mouse, properties-panel buttons, and keyboard shortcuts (`Escape`, `Delete`, `Ctrl+D`, `R`/`Shift+R`, `G`, `Space`).
+- Properties panel now shows a read-only summary (name, type, position, rotation) of the selected element.
 
 ## [0.1.0] — 2026-07-21
 

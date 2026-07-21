@@ -7,16 +7,16 @@ _Last updated: 2026-07-21_
 ## Current Project State
 
 - Repository, complete design documentation, CI, and a runnable application exist.
-- The app renders the full panel layout (toolbar, element library with disabled placeholder entries, properties panel empty state, status bar) around an interactive 3D viewport (ground plane, metric grid, orbit camera).
-- No physics, placement, or simulation features are implemented yet.
+- The app renders the full panel layout around an interactive 3D viewport, and **element placement is functional**: all five element types can be placed via the library (ghost preview, grid snapping, Shift for repeat, Escape/right-click cancel), selected, dragged on XZ, rotated (`R`/`Shift+R`), duplicated (`Ctrl+D`/button), and deleted (`Delete`/button). Elements render as placeholder boxes until Stage 5.
+- No physics or simulation features are implemented yet.
 
 ## Current Branch
 
-- `main` — early single-agent development is happening directly on `main` (permitted by the branching strategy while there is a single contributor; move to feature branches for larger changes, e.g. `feature/element-placement`).
+- `main` (Stage 4 was developed on `feature/element-placement` and merged). Continue using focused feature branches for stage-sized changes.
 
 ## Last Completed Stage
 
-- **Stage 3 — 3D scene and camera** (see `docs/ROADMAP.md`). Stages 1–3 complete.
+- **Stage 4 — Element placement** (see `docs/ROADMAP.md`). Stages 1–4 complete.
 
 ## Work Currently In Progress
 
@@ -24,7 +24,7 @@ _Last updated: 2026-07-21_
 
 ## Next Recommended Task
 
-- **Stage 4 — Element placement**: build the element descriptor registry in `src/elements/`, wire the library panel to placement mode with a ghost preview, implement selection + move/rotate/duplicate/delete with grid snapping, backed by `sceneStore`. Acceptance criteria in `docs/ROADMAP.md` §Stage 4; interaction detail in `docs/UI_UX_SPECIFICATION.md`.
+- **Stage 5 — Conveyor rendering**: replace the conveyor placeholder box with a parametric mesh (belt surface, frame, side skirts, direction chevrons) driven by its properties, including incline pivoting about the infeed end. Acceptance criteria in `docs/ROADMAP.md` §Stage 5. Note KI-004 in `docs/KNOWN_ISSUES.md`: hand-verify element drag-move while working in the viewport.
 
 ## Important Files
 
@@ -33,8 +33,10 @@ _Last updated: 2026-07-21_
 - `docs/DECISIONS.md` — ADRs; do not reverse silently
 - `src/types/` — domain types (elements, settings, crop presets)
 - `src/state/` — Zustand stores (`sceneStore`, `uiStore`, `simulationStore`)
-- `src/utilities/flow.ts` — throughput/spawn-rate conversions (unit-tested)
-- `src/rendering/SceneCanvas.tsx` — R3F canvas, camera, grid
+- `src/elements/registry.ts` — element descriptors, defaults, bounds, factory (drives library/placement/rendering)
+- `src/rendering/` — `SceneCanvas` (canvas/camera/grid), `PlacementLayer` (ghost + ground interaction), `PlacedElements` (selection/drag)
+- `src/app/useKeyboardShortcuts.ts` — global shortcuts
+- `src/utilities/` — `flow.ts` (throughput conversions), `snap.ts` (grid snap, build-area checks), `ids.ts` (all unit-tested)
 - `schemas/layout.schema.json` + `examples/sample-layout.json` — save format
 
 ## Commands
@@ -51,12 +53,12 @@ npm run format:check
 
 ## Test Status
 
-- **Passing**: all unit tests (`src/utilities/flow.test.ts`, `src/utilities/ids.test.ts`, `src/serialization/sampleLayout.test.ts` — sample layout vs schema).
+- **Passing**: all unit tests — `src/utilities/flow.test.ts`, `src/utilities/ids.test.ts`, `src/utilities/snap.test.ts`, `src/elements/registry.test.ts`, `src/serialization/sampleLayout.test.ts` (37 tests).
 - **Failing**: none.
 
 ## Known Errors
 
-- None. See `docs/KNOWN_ISSUES.md` for open non-error issues (KI-001…KI-003).
+- None. See `docs/KNOWN_ISSUES.md` for open non-error issues (KI-001…KI-004); KI-004 flags that element drag-move needs a quick manual check.
 
 ## Uncommitted Work
 
@@ -85,4 +87,4 @@ npm run format:check
 1. Read `AGENTS.md`, then `README.md`, `docs/PRODUCT_SCOPE.md`, `docs/TECHNICAL_DESIGN.md`, `docs/DECISIONS.md`, and this file.
 2. `git status` + `git log --oneline -15` to confirm the state described here.
 3. `npm ci && npm run test && npm run typecheck && npm run dev` to verify the baseline.
-4. Start Stage 4 (element placement) per `docs/ROADMAP.md`.
+4. Start Stage 5 (conveyor rendering) per `docs/ROADMAP.md`.
