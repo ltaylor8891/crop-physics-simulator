@@ -1,5 +1,9 @@
 import { create } from 'zustand';
 import type { ElementId, SceneElement } from '../types/elements';
+import { generateElementId } from '../utilities/ids';
+
+/** Offset applied to duplicated elements so the copy is visible beside the original. */
+const DUPLICATE_OFFSET_M = 1;
 
 /**
  * Design-time scene description — the single source of truth that rendering
@@ -12,11 +16,13 @@ interface SceneState {
   addElement: (element: SceneElement) => void;
   updateElement: (id: ElementId, patch: Partial<Omit<SceneElement, 'id' | 'type'>>) => void;
   removeElement: (id: ElementId) => void;
+  /** Copy an element with a fresh id, offset by 1 m; returns the new id or null. */
+  duplicateElement: (id: ElementId) => ElementId | null;
   setSceneName: (name: string) => void;
   clearScene: () => void;
 }
 
-export const useSceneStore = create<SceneState>((set) => ({
+export const useSceneStore = create<SceneState>((set, get) => ({
   sceneName: 'Untitled scene',
   elements: {},
 
@@ -39,6 +45,23 @@ export const useSceneStore = create<SceneState>((set) => ({
       delete elements[id];
       return { elements };
     }),
+
+  duplicateElement: (id) => {
+    const source = get().elements[id];
+    if (!source) return null;
+    const copy: SceneElement = {
+      ...structuredClone(source),
+      id: generateElementId(),
+      name: `${source.name} copy`,
+      position: {
+        ...source.position,
+        x: source.position.x + DUPLICATE_OFFSET_M,
+        z: source.position.z + DUPLICATE_OFFSET_M,
+      },
+    };
+    set((state) => ({ elements: { ...state.elements, [copy.id]: copy } }));
+    return copy.id;
+  },
 
   setSceneName: (name) => set({ sceneName: name }),
 
