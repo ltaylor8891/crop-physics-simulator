@@ -65,7 +65,7 @@
     },
     "elementBase": {
       "type": "object",
-      "required": ["id", "type", "name", "position", "rotationYaw", "properties"],
+      "required": ["id", "name", "position", "rotationYaw"],
       "properties": {
         "id": { "type": "string", "pattern": "^el_[a-z0-9]{12}$" },
         "name": { "type": "string", "minLength": 1, "maxLength": 64 },
@@ -74,11 +74,13 @@
       }
     },
     "element": {
+      "type": "object",
       "allOf": [{ "$ref": "#/$defs/elementBase" }],
       "unevaluatedProperties": false,
       "oneOf": [
         {
           "type": "object",
+          "required": ["type", "properties"],
           "properties": {
             "type": { "const": "conveyor" },
             "properties": {
@@ -98,6 +100,7 @@
         },
         {
           "type": "object",
+          "required": ["type", "properties"],
           "properties": {
             "type": { "const": "elevator" },
             "properties": {
@@ -130,6 +133,7 @@
         },
         {
           "type": "object",
+          "required": ["type", "properties"],
           "properties": {
             "type": { "const": "spawner" },
             "properties": {
@@ -155,6 +159,7 @@
         },
         {
           "type": "object",
+          "required": ["type", "properties"],
           "properties": {
             "type": { "const": "collectionZone" },
             "properties": { "$ref": "#/$defs/zoneProperties" }
@@ -162,6 +167,7 @@
         },
         {
           "type": "object",
+          "required": ["type", "properties"],
           "properties": {
             "type": { "const": "despawnZone" },
             "properties": { "$ref": "#/$defs/zoneProperties" }
