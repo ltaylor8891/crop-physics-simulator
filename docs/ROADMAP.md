@@ -7,7 +7,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 1   | Repository and design documentation | Complete    |
 | 2   | Application shell                   | Complete    |
 | 3   | 3D scene and camera                 | Complete    |
-| 4   | Element placement                   | Not started |
+| 4   | Element placement                   | Complete    |
 | 5   | Conveyor rendering                  | Not started |
 | 6   | Conveyor physics                    | Not started |
 | 7   | Properties editor                   | Not started |
@@ -50,7 +50,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: element registry/descriptors (`src/elements`), library panel wired to placement mode with ghost preview, grid snapping, selection + highlight, keyboard shortcuts (`Escape`, `Delete`, `Ctrl+D`, `R`), `sceneStore` actions.
 - **Acceptance criteria**: full placement workflow of `UI_UX_SPECIFICATION.md` works with placeholder box meshes for every element type; IDs conform to `DOMAIN_MODEL.md`.
 - **Dependencies**: Stage 3.
-- **Status**: Not started.
+- **Status**: Complete. Placement/selection/rotation/duplication/deletion verified in-browser; drag-move implemented but verified only by code review and unit-tested helpers — re-check by hand alongside Stage 5 (noted in `KNOWN_ISSUES.md` KI-004). The `F` (frame camera) and `?` (shortcut overlay) shortcuts are deferred.
 
 ## Stage 5 — Conveyor rendering
 

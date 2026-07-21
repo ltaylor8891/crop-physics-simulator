@@ -6,11 +6,11 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 
 ### KI-001 — Most product features not yet implemented
 
-- **Description**: Stages 4–15 of the roadmap (element placement, conveyor rendering/physics, spawning, crop physics, despawn, elevators, save/load, statistics) are designed but not built. The app currently shows the panel shell and an interactive empty 3D scene.
+- **Description**: Stages 5–15 of the roadmap (conveyor rendering/physics, spawning, crop physics, despawn, elevators, save/load, statistics) are designed but not built. The app currently provides the panel shell, an interactive 3D scene, and full element placement/editing with placeholder box meshes.
 - **Severity**: High (expected at this phase, not a defect)
-- **Reproduction**: Run the app; the element library entries are disabled placeholders.
+- **Reproduction**: Run the app; elements can be placed and arranged but nothing simulates yet.
 - **Suspected cause**: n/a — project phase.
-- **Proposed resolution**: Proceed through `docs/ROADMAP.md` Stage 4 onwards.
+- **Proposed resolution**: Proceed through `docs/ROADMAP.md` Stage 5 onwards.
 - **Status**: Open (by design)
 
 ### KI-002 — Contact surface velocity mechanism unverified in bound Rapier version
@@ -27,6 +27,14 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 - **Description**: Rendering and physics behaviour are only verifiable manually; CI covers pure logic, types, lint, and build.
 - **Severity**: Low (accepted trade-off, see TECHNICAL_DESIGN §Testing)
 - **Proposed resolution**: Consider Playwright smoke tests around Stage 15.
+- **Status**: Open
+
+### KI-004 — Drag-move and some shortcuts not yet hand-verified
+
+- **Description**: Element drag-move (pointer capture, ground-ray following, build-area clamping) is implemented and its pure helpers are unit-tested, but it has not been exercised by hand in a browser; automated pointer-drag on the canvas was not possible with the available tooling. The `F` (frame camera on selection) and `?` (shortcut overlay) shortcuts from `UI_UX_SPECIFICATION.md` are not implemented yet.
+- **Severity**: Low
+- **Reproduction**: n/a — verification gap, not an observed defect.
+- **Proposed resolution**: Manually drag elements when next running the app (expected: element follows pointer on XZ, snaps at 0.5 m, camera stays still); implement `F` and `?` with the Stage 7 UI work.
 - **Status**: Open
 
 ## Physics Inaccuracies (by design — see PHYSICS_SPECIFICATION)

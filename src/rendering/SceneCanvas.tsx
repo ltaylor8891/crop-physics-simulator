@@ -1,23 +1,31 @@
 import { Component, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Grid, OrbitControls } from '@react-three/drei';
+import { useUiStore } from '../state/uiStore';
+import { BUILD_AREA_SIZE_M } from '../utilities/snap';
+import { PlacedElements } from './PlacedElements';
+import { PlacementLayer } from './PlacementLayer';
 
 /** Initial camera pose (docs/UI_UX_SPECIFICATION.md §Camera Controls). */
 const INITIAL_CAMERA_POSITION: [number, number, number] = [18, 14, 18];
 
-/** Build area is 100 m × 100 m centred on the origin (docs/UI_UX_SPECIFICATION.md). */
-const BUILD_AREA_SIZE = 100;
-
 function Ground() {
+  // Visuals only — pointer interaction happens on PlacementLayer's plane,
+  // so both meshes opt out of raycasting.
   return (
     <>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
-        <planeGeometry args={[BUILD_AREA_SIZE, BUILD_AREA_SIZE]} />
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -0.01, 0]}
+        receiveShadow
+        raycast={() => null}
+      >
+        <planeGeometry args={[BUILD_AREA_SIZE_M, BUILD_AREA_SIZE_M]} />
         <meshStandardMaterial color="#2b2f33" />
       </mesh>
       {/* 1 world unit = 1 m: minor lines every 1 m, majors every 5 m (ADR-003). */}
       <Grid
-        args={[BUILD_AREA_SIZE, BUILD_AREA_SIZE]}
+        args={[BUILD_AREA_SIZE_M, BUILD_AREA_SIZE_M]}
         cellSize={1}
         cellColor="#3d4349"
         sectionSize={5}
@@ -25,6 +33,7 @@ function Ground() {
         fadeDistance={90}
         fadeStrength={1}
         followCamera={false}
+        raycast={() => null}
       />
     </>
   );
@@ -68,6 +77,9 @@ class CanvasErrorBoundary extends Component<{ children: ReactNode }, CanvasError
 }
 
 export function SceneCanvas() {
+  // Camera dragging is suspended while an element is being dragged.
+  const dragging = useUiStore((s) => s.draggingElementId !== null);
+
   return (
     <CanvasErrorBoundary>
       <Canvas
@@ -78,8 +90,11 @@ export function SceneCanvas() {
         <color attach="background" args={['#1a1d20']} />
         <Lighting />
         <Ground />
+        <PlacementLayer />
+        <PlacedElements />
         <OrbitControls
           makeDefault
+          enabled={!dragging}
           target={[0, 0, 0]}
           minDistance={2}
           maxDistance={150}

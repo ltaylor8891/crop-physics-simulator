@@ -113,6 +113,32 @@ body,
   text-align: left;
 }
 
+.element-library button.active {
+  border-color: var(--accent);
+  background: #2c3d52;
+}
+
+.hint {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin-top: 14px;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.panel-actions .danger {
+  border-color: #7a4040;
+}
+
+.panel-actions .danger:hover {
+  border-color: #c05555;
+}
+
 .properties-panel {
   grid-area: properties;
   border-left: 1px solid var(--panel-border);

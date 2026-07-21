@@ -3,10 +3,12 @@ import { ElementLibrary } from '../components/ElementLibrary';
 import { PropertiesPanel } from '../components/PropertiesPanel';
 import { StatusBar } from '../components/StatusBar';
 import { SceneCanvas } from '../rendering/SceneCanvas';
+import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 import './app.css';
 
 /** Application shell layout (docs/UI_UX_SPECIFICATION.md §Overall Screen Layout). */
 export function App() {
+  useKeyboardShortcuts();
   return (
     <div className="app-layout">
       <Toolbar />
