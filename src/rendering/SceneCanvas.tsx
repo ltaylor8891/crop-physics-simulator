@@ -1,6 +1,7 @@
 import { Component, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Grid, OrbitControls } from '@react-three/drei';
+import { PhysicsWorld } from '../physics/PhysicsWorld';
 import { useUiStore } from '../state/uiStore';
 import { BUILD_AREA_SIZE_M } from '../utilities/snap';
 import { PlacedElements } from './PlacedElements';
@@ -92,6 +93,7 @@ export function SceneCanvas() {
         <Ground />
         <PlacementLayer />
         <PlacedElements />
+        <PhysicsWorld />
         <OrbitControls
           makeDefault
           enabled={!dragging}

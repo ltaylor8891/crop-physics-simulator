@@ -8,7 +8,7 @@ The simulator lets equipment planners and enthusiasts sketch a crop-handling lin
 
 ## Current Development Status
 
-**Stage 5 of 15 complete** — repository/design documentation, application shell, the 3D scene with camera controls, element placement (place/select/move/rotate/duplicate/delete with grid snapping), and parametric conveyor rendering are in place. Conveyor physics is next. See [docs/ROADMAP.md](docs/ROADMAP.md) for the full stage list and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md) for the precise current state.
+**Stage 6 of 15 complete** — through conveyor physics (Rapier belts carry dynamic bodies). Properties editor is next. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
 
 ## Main Features
 
@@ -106,11 +106,12 @@ npm run format:check  # Prettier check only (used by CI)
 2. The main viewport shows a ground plane with a grid. Orbit with left-drag, pan with right-drag, zoom with the scroll wheel.
 3. Click an element type in the left-hand library, then click the ground to place it (ghost preview shows the drop position; Shift-click places repeatedly; Escape or right-click cancels).
 4. Click a placed element to select it: drag to move, `R`/`Shift+R` to rotate, `Ctrl+D` to duplicate, `Delete` to remove. The right-hand panel shows its details.
-5. (From Stage 8 onwards) press **Play** in the toolbar to start the simulation.
+5. Press **Play**, select a conveyor, and click **Drop ball** to drop a test sphere onto the belt — it should ride toward the discharge end. **Reset** clears test balls.
+6. (From Stage 8 onwards) crop spawners drive continuous material flow.
 
 ## Known Limitations
 
-- Conveyors render as proper machines; other element types are placeholder boxes. Nothing simulates yet: physics, spawning, and save/load are stages 6–15 of the roadmap.
+- Only conveyors have physics so far; elevators/spawners/zones are visuals or placeholders. Crop spawning, save/load, and statistics are stages 7–15 of the roadmap.
 - Physics is an approximation: crops are simple convex bodies, not deformable grains. See [docs/PHYSICS_SPECIFICATION.md](docs/PHYSICS_SPECIFICATION.md).
 - Current issues are tracked in [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
 

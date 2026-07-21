@@ -1,14 +1,16 @@
 import { createElement } from '../elements/registry';
 import { useSceneStore } from '../state/sceneStore';
+import { useSimulationStore } from '../state/simulationStore';
+import { useUiStore } from '../state/uiStore';
 
 /**
- * Dev-only demo seeding via URL query, e.g. `?seed=conveyors`.
+ * Dev-only demo seeding via URL query, e.g. `?seed=conveyors` or `?seed=physics`.
  * Lets headless-browser verification and quick manual testing populate a scene
  * without clicking. Only wired up in dev builds (see main.tsx).
  */
 export function applyDevSeed(search: string): void {
   const seed = new URLSearchParams(search).get('seed');
-  if (seed !== 'conveyors') return;
+  if (seed !== 'conveyors' && seed !== 'physics') return;
 
   const store = useSceneStore.getState();
 
@@ -30,5 +32,10 @@ export function applyDevSeed(search: string): void {
     store.updateElement(inclined.id, {
       properties: { ...inclined.properties, inclineDeg: 15, length: 8 },
     });
+  }
+
+  if (seed === 'physics') {
+    useUiStore.getState().select(flat.id);
+    useSimulationStore.getState().setRunning(true);
   }
 }

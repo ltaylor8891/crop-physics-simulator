@@ -7,18 +7,17 @@ _Last updated: 2026-07-21_
 ## Current Project State
 
 - Repository, complete design documentation, CI, and a runnable application exist.
-- The app renders the full panel layout around an interactive 3D viewport, and **element placement is functional**: all five element types can be placed via the library (ghost preview, grid snapping, Shift for repeat, Escape/right-click cancel), selected, dragged on XZ, rotated (`R`/`Shift+R`), duplicated (`Ctrl+D`/button), and deleted (`Delete`/button).
-- **Conveyors render as parametric machines** (belt, frame rails, vertical legs, optional side skirts, amber direction chevrons pointing to the discharge/+X end); incline pivots about the infeed end. Other element types remain placeholder boxes until their stages.
-- Dev builds expose `window.__cropSim` (the three stores) and support `?seed=conveyors` for scripted/browser-automation verification (`src/app/devSeed.ts`); neither exists in production builds.
-- No physics or simulation features are implemented yet.
+- Element placement works for all five types; conveyors render as parametric machines.
+- **Conveyor physics is live**: Rapier world (fixed 1/60 s), ground + belt/skirt colliders, belt conveyance via `kinematicVelocity` + per-step translation pin (ADR-006). Toolbar **Drop ball** / **Reset** for Stage 6 testing. Other element types still have placeholder visuals and no physics yet.
+- Dev hooks: `window.__cropSim` (stores including `useDebugStore`), `?seed=conveyors` / `?seed=physics`.
 
 ## Current Branch
 
-- `main` (stages 4 and 5 were developed on `feature/element-placement` and `feature/conveyor-rendering` and merged). Continue using focused feature branches for stage-sized changes.
+- `main` after merging `feature/conveyor-physics`. Use focused feature branches for stage-sized changes.
 
 ## Last Completed Stage
 
-- **Stage 5 — Conveyor rendering** (see `docs/ROADMAP.md`). Stages 1–5 complete.
+- **Stage 6 — Conveyor physics** (see `docs/ROADMAP.md`). Stages 1–6 complete.
 
 ## Work Currently In Progress
 
@@ -26,41 +25,40 @@ _Last updated: 2026-07-21_
 
 ## Next Recommended Task
 
-- **Stage 6 — Conveyor physics**: wire up the Rapier world (`@react-three/rapier` is already installed), add machine colliders with the collision groups from `docs/PHYSICS_SPECIFICATION.md`, implement belt contact surface velocity (flat + inclined), and add a temporary debug "drop test ball" button. **Start with the KI-002 spike**: check what the bound Rapier version exposes for contact surface velocity and record the outcome in ADR-006. Acceptance criteria in `docs/ROADMAP.md` §Stage 6. Also hand-verify element drag-move (KI-004) while in the viewport.
+- **Stage 7 — Properties editor**: type-driven property forms from element descriptors, clamped numeric inputs with inline constraints, name editing, duplicate/delete (buttons already exist). While in the viewport, hand-verify KI-004 (drag-move) and KI-005 (ball rides belt / stopped belt holds). Acceptance criteria in `docs/ROADMAP.md` §Stage 7.
 
 ## Important Files
 
 - `docs/PRODUCT_SCOPE.md` — authoritative scope
 - `docs/TECHNICAL_DESIGN.md` — architecture; read before writing code
-- `docs/DECISIONS.md` — ADRs; do not reverse silently
-- `src/types/` — domain types (elements, settings, crop presets)
-- `src/state/` — Zustand stores (`sceneStore`, `uiStore`, `simulationStore`)
-- `src/elements/registry.ts` — element descriptors, defaults, bounds, factory (drives library/placement/rendering)
-- `src/rendering/` — `SceneCanvas` (canvas/camera/grid), `PlacementLayer` (ghost + ground interaction), `PlacedElements` (selection/drag), `elements/ConveyorMesh` + `elements/conveyorGeometry` (parametric conveyor)
-- `src/app/useKeyboardShortcuts.ts` — global shortcuts
-- `src/utilities/` — `flow.ts` (throughput conversions), `snap.ts` (grid snap, build-area checks), `ids.ts` (all unit-tested)
-- `schemas/layout.schema.json` + `examples/sample-layout.json` — save format
+- `docs/DECISIONS.md` — ADRs; do not reverse silently (ADR-006 mechanism now recorded)
+- `docs/PHYSICS_SPECIFICATION.md` — physics contract
+- `src/physics/` — `PhysicsWorld`, `ConveyorColliders`, `GroundCollider`, `DebugBalls`, `beltVelocity`, collision groups, materials
+- `src/elements/registry.ts` — element descriptors
+- `src/rendering/` — visuals (`ConveyorMesh`, placement, selection)
+- `src/state/` — `sceneStore`, `uiStore`, `simulationStore`, `debugStore`
+- `src/utilities/` — flow, snap, ids (unit-tested)
 
 ## Commands
 
 ```bash
-npm ci             # install from lock file
-npm run dev        # dev server
-npm run typecheck  # tsc --noEmit
-npm run lint       # eslint
-npm run test       # vitest run
-npm run build      # typecheck + production build
+npm ci
+npm run dev
+npm run typecheck
+npm run lint
+npm run test
+npm run build
 npm run format:check
 ```
 
 ## Test Status
 
-- **Passing**: all unit tests — `src/utilities/flow.test.ts`, `src/utilities/ids.test.ts`, `src/utilities/snap.test.ts`, `src/elements/registry.test.ts`, `src/rendering/elements/conveyorGeometry.test.ts`, `src/serialization/sampleLayout.test.ts` (45 tests).
+- **Passing**: 52 unit tests across utilities, registry, conveyor geometry, belt velocity/orientation, layout schema.
 - **Failing**: none.
 
 ## Known Errors
 
-- None. See `docs/KNOWN_ISSUES.md` for open non-error issues (KI-001…KI-004); KI-004 flags that element drag-move needs a quick manual check.
+- None. Open verification gaps: KI-004, KI-005. KI-002 closed.
 
 ## Uncommitted Work
 
@@ -68,25 +66,24 @@ npm run format:check
 
 ## Architectural Constraints (do not violate)
 
-- 1 world unit = 1 metre; Y-up right-handed; element flow along local +X; yaw in radians CCW about +Y (ADR-003, `docs/DOMAIN_MODEL.md`).
-- Fixed physics timestep 1/60 s; simulation logic on fixed steps only, never render delta (ADR-004).
-- Conveyors via contact surface velocity, not moving geometry (ADR-006).
-- Crops from a fixed-size pool with hard cap + spawner throttling (ADR-005).
+- 1 world unit = 1 metre; Y-up right-handed; element flow along local +X; yaw in radians CCW about +Y (ADR-003).
+- Fixed physics timestep 1/60 s; simulation logic on fixed steps only (ADR-004).
+- Conveyors via kinematic-velocity surface motion with pinned translation — not moving geometry (ADR-006).
+- Crops from a fixed-size pool with hard cap + spawner throttling (ADR-005) — Stage 8/9.
 - Stores hold serialisable plain data only; per-frame transforms bypass React state.
-- Save format changes require version bump + migration + doc/schema/sample updates (see `docs/SAVE_FILE_FORMAT.md`).
+- Save format changes require version bump + migration + doc/schema/sample updates.
 
 ## Decisions Requiring Review Before Reversal
 
-- All Accepted ADRs in `docs/DECISIONS.md` (ADR-001…ADR-008). Supersede with a new ADR; never edit history silently.
+- All Accepted ADRs in `docs/DECISIONS.md` (ADR-001…ADR-008).
 
 ## Areas Requiring User Confirmation
 
-- Crop type presets (sizes/masses in `docs/PHYSICS_SPECIFICATION.md`) are plausible defaults — confirm with the user if realism matters to them.
-- Build-area size (100 m × 100 m) and default grid snap (0.5 m) are assumptions from the UI spec, not user-confirmed.
+- Crop type presets and build-area / grid-snap assumptions (unchanged).
 
 ## Suggested Starting Point for the Next Agent
 
 1. Read `AGENTS.md`, then `README.md`, `docs/PRODUCT_SCOPE.md`, `docs/TECHNICAL_DESIGN.md`, `docs/DECISIONS.md`, and this file.
-2. `git status` + `git log --oneline -15` to confirm the state described here.
-3. `npm ci && npm run test && npm run typecheck && npm run dev` to verify the baseline.
-4. Start Stage 6 (conveyor physics) per `docs/ROADMAP.md`, beginning with the KI-002 surface-velocity spike.
+2. `git status` + `git log --oneline -15`.
+3. `npm ci && npm run test && npm run typecheck && npm run dev`.
+4. Hand-check KI-005 (Drop ball on a running conveyor), then start Stage 7.
