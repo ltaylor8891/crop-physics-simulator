@@ -2,35 +2,36 @@
 
 The continuity document for any agent (or human) picking this project up. **Update this file before ending any substantial development session.** Keep it short and current — history belongs in git, design in the other docs.
 
-_Last updated: 2026-07-21_
+_Last updated: 2026-07-22_
 
 ## Current Project State
 
-- Stages 1–10 and 12 complete on `feature/crop-physics` (merge to `main` when ready).
-- Per-type crop pools (wheat / potato capsule / sugar beet), floor + zone despawn, save/load on `main`.
-- Next major feature: **Stage 11 elevators**.
+- Stages 1–12 complete on `feature/elevators` (merge to `main` when ready).
+- Elevators: intake → transit queue → rate-capped discharge; parametric mesh; **In elevator** in the status bar.
+- Next major feature: **Stage 13 statistics** (rolling windows).
 
 ## Current Branch
 
-- `feature/crop-physics` (ahead of `main` which already has Stages 8+12).
+- `feature/elevators` (based on `main` after Stage 9/10 merge).
 
 ## Last Completed Stage
 
-- **Stage 9 — Crop physics** and **Stage 10 — Floor/zone despawning**.
+- **Stage 11 — Elevators**.
 
 ## Work Currently In Progress
 
-- Nothing after Stage 9/10 commit.
+- Nothing after Stage 11 implementation (verify + commit pending if not done).
 
 ## Next Recommended Task
 
-- Merge/push `feature/crop-physics`, then **Stage 11 — Elevators**.
+- Merge/push `feature/elevators`, then **Stage 13 — Statistics**.
 
 ## Important Files
 
-- `src/physics/CropBodies.tsx` — per-type InstancedRigidBodies
-- `src/simulation/cropRuntime.ts`, `zoneVolume.ts`
-- `src/physics/SpawningSystem.tsx`
+- `src/simulation/elevator.ts` — transit, intake/discharge poses, rate cap
+- `src/physics/SpawningSystem.tsx` — fixed-step elevator + spawn + despawn
+- `src/rendering/elements/ElevatorMesh.tsx`
+- `src/simulation/cropRuntime.ts` — `tickElevatorIntake`
 
 ## Commands
 
@@ -40,7 +41,7 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Test Status
 
-- **Passing**: 98 unit tests.
+- **Passing**: 110 unit tests (typecheck, lint, build clean).
 - **Failing**: none known.
 
 ## Known Errors
@@ -49,7 +50,7 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Uncommitted Work
 
-- None after Stage 9/10 commit.
+- Stage 11 elevator implementation on `feature/elevators` (check `git status`).
 
 ## Architectural Constraints (do not violate)
 
@@ -60,5 +61,5 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Suggested Starting Point for the Next Agent
 
-1. Merge `feature/crop-physics` → `main` and push.
-2. Start Stage 11 elevators per `docs/ROADMAP.md` / `PHYSICS_SPECIFICATION.md`.
+1. Merge `feature/elevators` → `main` and push if not already.
+2. Start Stage 13 statistics per `docs/ROADMAP.md`.

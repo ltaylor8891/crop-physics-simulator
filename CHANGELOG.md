@@ -15,6 +15,7 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Added
 
+- Elevators (roadmap Stage 11): parametric casing/head/spout mesh; base intake AABB; transit delay `height/transportSpeed`; FIFO queue with `dischargeRateCap` fractional accumulator; discharge along local +X with spawn-style jitter; status bar **In elevator** count.
 - Crop physics (roadmap Stage 9): one instanced pool per crop type (ball / capsule / ball) with preset friction, restitution, mass, CCD, and light linear damping; global active cap still `maxActiveCrops`.
 - Floor and zone despawn (roadmap Stage 10): ground contact despawn after `floorDespawnSeconds`; immediate collection/despawn zone volumes with collected vs spilled mass accounting.
 - Save / load layouts (roadmap Stage 12): **New**, **Load**, **Save** in the toolbar; Ctrl+S / Ctrl+O; drag-drop JSON onto the window; schema-validated parse with migration scaffold; load errors leave the scene untouched; camera pose round-trips.

@@ -6,11 +6,11 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 
 ### KI-001 — Most product features not yet implemented
 
-- **Description**: Stages 11 and 13–15 of the roadmap (elevators, statistics, performance, release) are designed but not fully built. Stages 1–10 and 12 are in place.
+- **Description**: Stages 13–15 of the roadmap (statistics, performance, release) are designed but not fully built. Stages 1–12 are in place.
 - **Severity**: High (expected at this phase, not a defect)
-- **Reproduction**: Run the app; elements can be placed and arranged but nothing simulates yet.
+- **Reproduction**: Run the app; session-average t/h and FPS targets are still Stage 13–14 work.
 - **Suspected cause**: n/a — project phase.
-- **Proposed resolution**: Proceed through `docs/ROADMAP.md` Stage 5 onwards.
+- **Proposed resolution**: Proceed through `docs/ROADMAP.md` Stage 13 onwards.
 - **Status**: Open (by design)
 
 ### KI-002 — Contact surface velocity mechanism unverified in bound Rapier version

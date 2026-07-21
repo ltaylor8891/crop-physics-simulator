@@ -3,6 +3,15 @@ import { useAfterPhysicsStep } from '@react-three/rapier';
 import { CROP_TYPES } from '../elements/cropTypes';
 import { cropRuntime, cropSpawnStats } from '../simulation/cropRuntime';
 import {
+  countInElevator,
+  createElevatorRuntimeState,
+  elevatorIntakeSize,
+  elevatorTransitSeconds,
+  enqueueElevatorTransit,
+  tickElevatorDischarge,
+  type ElevatorRuntimeState,
+} from '../simulation/elevator';
+import {
   applyThrottleCap,
   createSpawnerRuntimeState,
   tickSpawner,
@@ -11,24 +20,27 @@ import {
 import { isPointInsideZone } from '../simulation/zoneVolume';
 import { useSceneStore } from '../state/sceneStore';
 import { useSimulationStore } from '../state/simulationStore';
-import type { ElementId, SpawnerElement } from '../types/elements';
+import type { ElementId, ElevatorElement, SpawnerElement } from '../types/elements';
 import { kgPerSecondToTonnesPerHour } from '../utilities/flow';
 
 const PHYSICS_DT = 1 / 60;
 const STATS_HZ = 4;
 
 const spawnerAccumulators = new Map<ElementId, SpawnerRuntimeState>();
+const elevatorRuntimes = new Map<ElementId, ElevatorRuntimeState>();
 
 /**
- * Fixed-step crop emission + floor/zone despawn (docs/ROADMAP.md §Stage 8–10).
- * Does not run while `<Physics paused>` — play/pause gates spawning automatically.
+ * Fixed-step crop emission, elevators, and floor/zone despawn
+ * (docs/ROADMAP.md §Stage 8–11). Does not run while `<Physics paused>`.
  */
 export function SpawningSystem() {
   const accumulatorsRef = useRef(spawnerAccumulators);
+  const elevatorsRef = useRef(elevatorRuntimes);
 
   useEffect(() => {
     cropSpawnStats.clearAccumulators = () => {
       spawnerAccumulators.clear();
+      elevatorRuntimes.clear();
     };
     return () => {
       cropSpawnStats.clearAccumulators = null;
@@ -37,13 +49,22 @@ export function SpawningSystem() {
 
   useEffect(() => {
     return useSceneStore.subscribe((state) => {
-      const live = new Set(
+      const liveSpawners = new Set(
         Object.values(state.elements)
           .filter((el): el is SpawnerElement => el.type === 'spawner')
           .map((el) => el.id),
       );
       for (const id of accumulatorsRef.current.keys()) {
-        if (!live.has(id)) accumulatorsRef.current.delete(id);
+        if (!liveSpawners.has(id)) accumulatorsRef.current.delete(id);
+      }
+
+      const liveElevators = new Set(
+        Object.values(state.elements)
+          .filter((el): el is ElevatorElement => el.type === 'elevator')
+          .map((el) => el.id),
+      );
+      for (const id of elevatorsRef.current.keys()) {
+        if (!liveElevators.has(id)) elevatorsRef.current.delete(id);
       }
     });
   }, []);
@@ -90,11 +111,96 @@ export function SpawningSystem() {
     cropSpawnStats.collectedMassKg += zoneResult.collectedKg;
     cropSpawnStats.spilledMassKg += zoneResult.spilledKg;
 
+    const elevators = Object.values(elements).filter(
+      (el): el is ElevatorElement => el.type === 'elevator',
+    );
+
+    const intakes = elevators.map((el) => ({
+      elevatorId: el.id,
+      position: el.position,
+      rotationYaw: el.rotationYaw,
+      size: elevatorIntakeSize(el),
+    }));
+    const accepted = cropRuntime.tickElevatorIntake(intakes, isPointInsideZone);
+    for (const item of accepted) {
+      const elev = elements[item.elevatorId];
+      if (!elev || elev.type !== 'elevator') continue;
+      let runtime = elevatorsRef.current.get(elev.id);
+      if (!runtime) {
+        runtime = createElevatorRuntimeState();
+        elevatorsRef.current.set(elev.id, runtime);
+      }
+      const next = enqueueElevatorTransit(
+        runtime,
+        item.cropType,
+        cropSpawnStats.simulationTime,
+        elevatorTransitSeconds(elev),
+      );
+      elevatorsRef.current.set(elev.id, next);
+    }
+
+    let stepThrottled = false;
+
+    for (const elev of elevators) {
+      let runtime = elevatorsRef.current.get(elev.id);
+      if (!runtime) {
+        runtime = createElevatorRuntimeState();
+        elevatorsRef.current.set(elev.id, runtime);
+      }
+
+      const tick = tickElevatorDischarge(
+        runtime,
+        elev,
+        cropSpawnStats.simulationTime,
+        PHYSICS_DT,
+      );
+      let discharged = 0;
+
+      for (const pose of tick.discharges) {
+        const preset = CROP_TYPES[pose.cropType];
+        const handle = cropRuntime.spawn({
+          cropType: pose.cropType,
+          massKg: preset.mass,
+          friction: preset.friction,
+          restitution: preset.restitution,
+          position: pose.position,
+          velocity: pose.velocity,
+        });
+        if (handle === null) {
+          stepThrottled = true;
+          break;
+        }
+        discharged += 1;
+      }
+
+      if (discharged < tick.requested) {
+        // Put unemitted crops back at the front of the queue and throttle credit.
+        const unmet = tick.discharges.slice(discharged);
+        elevatorsRef.current.set(elev.id, {
+          accumulator: applyThrottleCap(
+            tick.accumulator,
+            tick.requested - discharged,
+          ),
+          queue: [
+            ...unmet.map((d) => ({
+              cropType: d.cropType,
+              readyAt: cropSpawnStats.simulationTime,
+            })),
+            ...tick.queue,
+          ],
+        });
+        stepThrottled = true;
+      } else {
+        elevatorsRef.current.set(elev.id, {
+          accumulator: tick.accumulator,
+          queue: tick.queue,
+        });
+      }
+    }
+
     const spawners = Object.values(elements).filter(
       (el): el is SpawnerElement => el.type === 'spawner',
     );
-
-    let stepThrottled = false;
 
     for (const spawner of spawners) {
       let state = accumulatorsRef.current.get(spawner.id);
@@ -137,6 +243,7 @@ export function SpawningSystem() {
     }
 
     const throttled = stepThrottled || cropRuntime.pool.isExhausted;
+    const inElevator = countInElevator(elevatorsRef.current.values());
 
     cropSpawnStats.statsAge += PHYSICS_DT;
     if (cropSpawnStats.statsAge >= 1 / STATS_HZ) {
@@ -146,6 +253,7 @@ export function SpawningSystem() {
       useSimulationStore.getState().setStatistics({
         ...prev,
         activeCrops: cropRuntime.pool.activeCount,
+        inElevator,
         totalMassSpawnedKg: cropSpawnStats.massSpawnedKg,
         spilledMassKg: cropSpawnStats.spilledMassKg,
         throughputInTph:

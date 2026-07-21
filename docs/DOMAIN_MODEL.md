@@ -30,7 +30,7 @@ A bucket elevator abstracted as a vertical transport column (buckets are not sim
 
 - **Origin**: centre of footprint at ground level.
 - Properties: `height` (m, discharge height), `footprint` `{x, z}` (m), `transportSpeed` (m/s, default 2), `dischargeRateCap` (t/h), `dischargeVelocity` (m/s, horizontal, along local +X at the top).
-- **Intake**: sensor volume at the base. **Discharge point**: top of the column, offset to local +X.
+- **Intake**: sensor volume at the base (footprint × 0.8 m height). **Discharge point**: top of the column, offset local +X past the face by `footprint.x/2 + 0.2 m`.
 
 ### Crop Spawner
 

@@ -8,7 +8,7 @@ The simulator lets equipment planners and enthusiasts sketch a crop-handling lin
 
 ## Current Development Status
 
-**Stages 1–10 and 12 complete** — through crop physics, despawn zones, and save/load. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
+**Stages 1–12 complete** — through elevators, crop physics, despawn zones, and save/load. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
 
 ## Main Features
 
@@ -19,7 +19,8 @@ Planned feature set (see [docs/PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md) for the 
 - Conveyor motion via contact surface velocity (belts stay static; contacts are driven)
 - Crop spawning driven by throughput settings (t/h → kg/s → crops/s)
 - Floor despawn: crops touching the floor are removed after 3 seconds
-- Scene statistics: active crops, throughput in/out, spilled mass
+- Elevators: intake → timed transit → rate-capped discharge (buckets not simulated)
+- Scene statistics: active crops, in-elevator count, throughput in/out, spilled mass
 - Versioned JSON save/load of layouts ([docs/SAVE_FILE_FORMAT.md](docs/SAVE_FILE_FORMAT.md))
 
 ## Technology Stack

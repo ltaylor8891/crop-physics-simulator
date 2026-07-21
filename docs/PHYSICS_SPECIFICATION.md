@@ -64,10 +64,11 @@ High belt friction + zero belt restitution is what makes surface-velocity convey
 
 Buckets are not simulated. The elevator is a state machine per crop:
 
-1. Crop intersects the **intake sensor** at the base → body is released to the pool (visually disappears), a record `{cropType, arrivalTime}` is queued as "in transit".
-2. Transit time = `height / transportSpeed` (default 2 m/s).
-3. On expiry, a crop of the same type is re-spawned at the **discharge point** (top, offset local +X) with `dischargeVelocity` horizontally along local +X plus a small downward component and jitter.
-4. Discharge is rate-capped at `dischargeRateCap` (t/h) using the same fractional accumulator as spawners; excess queued crops wait (the queue is unbounded and represents material inside the elevator).
+1. Crop centre intersects the **intake sensor** at the base → body is released to the pool (visually disappears), a record `{cropType, readyAt}` is queued as "in transit". Intake AABB = element footprint × **0.8 m** height (software volume, same pattern as collection zones).
+2. Transit time = `height / transportSpeed` (default 2 m/s). `readyAt = intakeTime + transitTime`.
+3. When the FIFO head is ready, a crop of the same type is re-spawned at the **discharge point**: world position at `y = height`, local +X = `footprint.x/2 + 0.2 m` (clears the head face), yawed into world. Velocity = `dischargeVelocity` along local +X, plus the same small downward component and jitter magnitudes as spawners (`SPAWN_*` constants).
+4. Discharge is rate-capped at `dischargeRateCap` (t/h) using the same fractional accumulator as spawners (rate from the head crop’s mass); excess queued crops wait (the queue is unbounded and represents material inside the elevator). On pool exhaustion, discharges throttle like spawners (`applyThrottleCap`) and unmet heads are re-queued as immediately ready.
+5. Status bar **In elevator** = sum of transit-queue lengths (crops hidden from the scene).
 
 Consequence: elevators never jam or spill internally. This is a deliberate simplification; note it in any statistics interpretation.
 

@@ -258,6 +258,47 @@ class CropRuntime {
     }
     return { collectedKg, spilledKg };
   }
+
+  /**
+   * Release crops whose centres enter elevator intake volumes.
+   * First matching elevator wins; returns intakes for transit enqueue.
+   */
+  tickElevatorIntake(
+    intakes: ReadonlyArray<{
+      elevatorId: string;
+      position: Vec3;
+      rotationYaw: number;
+      size: Vec3;
+    }>,
+    isInside: (
+      point: Vec3,
+      position: Vec3,
+      yaw: number,
+      size: Vec3,
+    ) => boolean,
+  ): Array<{ elevatorId: string; cropType: CropTypeId }> {
+    const accepted: Array<{ elevatorId: string; cropType: CropTypeId }> = [];
+    if (intakes.length === 0) return accepted;
+
+    for (const type of CROP_TYPE_IDS) {
+      const bucket = this.buckets[type];
+      for (const id of [...bucket.pool.activeIds()]) {
+        const body = bucket.bodies[id];
+        if (!body || !body.isEnabled()) continue;
+        const t = body.translation();
+        const point = { x: t.x, y: t.y, z: t.z };
+        for (const intake of intakes) {
+          if (!isInside(point, intake.position, intake.rotationYaw, intake.size)) {
+            continue;
+          }
+          this.release({ cropType: type, slot: id });
+          accepted.push({ elevatorId: intake.elevatorId, cropType: type });
+          break;
+        }
+      }
+    }
+    return accepted;
+  }
 }
 
 /** Process-wide runtime used by the physics step and UI reset. */

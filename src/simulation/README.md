@@ -6,8 +6,9 @@ physics steps (or is pure and unit-tested), never on render frames.
 | Module | Role |
 | --- | --- |
 | `CropPool.ts` | Logical slot acquire/release with hard cap (ADR-005) |
-| `cropRuntime.ts` | Per-type Rapier pools, floor + zone despawn |
+| `cropRuntime.ts` | Per-type Rapier pools, floor + zone + elevator-intake |
 | `spawning.ts` | Per-spawner fractional accumulator, emit pose jitter |
-| `zoneVolume.ts` | Collection/despawn AABB tests |
+| `elevator.ts` | Transit queue, intake/discharge poses, rate-capped emit |
+| `zoneVolume.ts` | Collection/despawn/intake AABB tests |
 
 Wired from `src/physics/SpawningSystem.tsx` via `useAfterPhysicsStep`.

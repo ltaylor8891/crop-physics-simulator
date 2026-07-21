@@ -5,6 +5,8 @@ import { DEFAULT_SIMULATION_SETTINGS } from '../types/settings';
 /** Live statistics, updated at ~4 Hz by the simulation loop — never per frame. */
 export interface SceneStatistics {
   activeCrops: number;
+  /** Crops currently in elevator transit queues (hidden from the scene). */
+  inElevator: number;
   totalMassSpawnedKg: number;
   throughputInTph: number;
   throughputCollectedTph: number;
@@ -14,6 +16,7 @@ export interface SceneStatistics {
 
 const ZERO_STATISTICS: SceneStatistics = {
   activeCrops: 0,
+  inElevator: 0,
   totalMassSpawnedKg: 0,
   throughputInTph: 0,
   throughputCollectedTph: 0,
