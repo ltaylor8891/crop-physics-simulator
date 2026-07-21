@@ -1,4 +1,4 @@
-import { Component, type ReactNode } from 'react';
+import { Component, Suspense, type ErrorInfo, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Grid, OrbitControls } from '@react-three/drei';
 import { PhysicsWorld } from '../physics/PhysicsWorld';
@@ -50,26 +50,37 @@ function Lighting() {
 }
 
 interface CanvasErrorBoundaryState {
-  failed: boolean;
+  error: Error | null;
 }
 
-/** WebGL-failure fallback (docs/UI_UX_SPECIFICATION.md §Error Messages). */
+/**
+ * Catches render failures inside the canvas (WebGL, Rapier, React loops, etc.).
+ * Shows the real error message so a coding bug is not mistaken for missing WebGL.
+ */
 class CanvasErrorBoundary extends Component<{ children: ReactNode }, CanvasErrorBoundaryState> {
-  state: CanvasErrorBoundaryState = { failed: false };
+  state: CanvasErrorBoundaryState = { error: null };
 
-  static getDerivedStateFromError(): CanvasErrorBoundaryState {
-    return { failed: true };
+  static getDerivedStateFromError(error: Error): CanvasErrorBoundaryState {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo): void {
+    console.error('3D viewport crashed:', error, info.componentStack);
   }
 
   render() {
-    if (this.state.failed) {
+    if (this.state.error) {
       return (
         <div className="canvas-fallback" role="alert">
           <h2>3D view unavailable</h2>
           <p>
-            The Crop Physics Simulator needs WebGL 2 and WebAssembly. Please use a modern desktop
-            browser (Chrome, Edge, Firefox, or Safari 16+) with hardware acceleration enabled.
+            The viewport hit an error. If this persists on a modern desktop browser with hardware
+            acceleration, report the message below.
           </p>
+          <pre className="canvas-fallback-error">{this.state.error.message}</pre>
+          <button type="button" onClick={() => this.setState({ error: null })}>
+            Try again
+          </button>
         </div>
       );
     }
@@ -93,7 +104,10 @@ export function SceneCanvas() {
         <Ground />
         <PlacementLayer />
         <PlacedElements />
-        <PhysicsWorld />
+        {/* Rapier WASM loads via suspend-react; Suspense keeps the canvas up while it inits. */}
+        <Suspense fallback={null}>
+          <PhysicsWorld />
+        </Suspense>
         <OrbitControls
           makeDefault
           enabled={!dragging}

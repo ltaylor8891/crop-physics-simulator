@@ -186,6 +186,20 @@ body,
   color: var(--text-dim);
 }
 
+.canvas-fallback-error {
+  max-width: 40rem;
+  margin: 12px 0;
+  padding: 10px 12px;
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.8rem;
+  color: #e8a0a0;
+  background: #2a1f1f;
+  border: 1px solid #5a3030;
+  border-radius: 4px;
+}
+
 /* Status bar */
 .status-bar {
   grid-area: status;
