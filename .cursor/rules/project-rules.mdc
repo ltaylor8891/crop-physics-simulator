@@ -1,0 +1,10 @@
+---
+description: Project rules for the Crop Physics Simulator
+alwaysApply: true
+---
+
+All agent instructions for this repository live in `AGENTS.md` at the repo root — read and follow it; the design scope is not duplicated here.
+
+- Authoritative docs: `docs/PRODUCT_SCOPE.md` (scope), `docs/TECHNICAL_DESIGN.md` (architecture), `docs/DECISIONS.md` (ADRs), `docs/AGENT_HANDOFF.md` (current state/next task).
+- Preserve conventions: 1 unit = 1 m, Y-up, flow along local +X, yaw radians CCW about +Y, fixed 1/60 s physics timestep, conveyor motion via contact surface velocity, pooled crops.
+- Before finishing: `npm run typecheck && npm run lint && npm run test && npm run build`, update affected docs and `docs/AGENT_HANDOFF.md`, commit in small focused commits (`feat:`/`fix:`/`docs:`/…).

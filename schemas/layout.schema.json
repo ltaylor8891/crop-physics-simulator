@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/crop-physics-simulator/layout.schema.json",
+  "title": "Crop Physics Simulator Layout (fileVersion 1)",
+  "description": "Versioned save-file format for simulator layouts. Human-readable specification: docs/SAVE_FILE_FORMAT.md",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fileVersion", "meta", "settings", "elements", "camera"],
+  "properties": {
+    "fileVersion": { "const": 1 },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "createdAt", "modifiedAt", "appVersion"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "modifiedAt": { "type": "string", "format": "date-time" },
+        "appVersion": { "type": "string", "minLength": 1 }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gravity", "maxActiveCrops", "floorDespawnSeconds"],
+      "properties": {
+        "gravity": { "type": "number", "minimum": 0, "maximum": 20 },
+        "maxActiveCrops": { "type": "integer", "minimum": 100, "maximum": 5000 },
+        "floorDespawnSeconds": { "type": "number", "minimum": 0.5, "maximum": 30 }
+      }
+    },
+    "elements": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/element" }
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "target"],
+      "properties": {
+        "position": { "$ref": "#/$defs/vec3" },
+        "target": { "$ref": "#/$defs/vec3" }
+      }
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+    "axisXZ": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "z"],
+      "properties": {
+        "x": { "type": "number", "exclusiveMinimum": 0 },
+        "z": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "elementBase": {
+      "type": "object",
+      "required": ["id", "type", "name", "position", "rotationYaw", "properties"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^el_[a-z0-9]{12}$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "position": { "$ref": "#/$defs/vec3" },
+        "rotationYaw": { "type": "number" }
+      }
+    },
+    "element": {
+      "allOf": [{ "$ref": "#/$defs/elementBase" }],
+      "unevaluatedProperties": false,
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "conveyor" },
+            "properties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["length", "width", "beltHeight", "inclineDeg", "beltSpeed", "skirts"],
+              "properties": {
+                "length": { "type": "number", "minimum": 1, "maximum": 50 },
+                "width": { "type": "number", "minimum": 0.3, "maximum": 3 },
+                "beltHeight": { "type": "number", "minimum": 0.2, "maximum": 5 },
+                "inclineDeg": { "type": "number", "minimum": -30, "maximum": 30 },
+                "beltSpeed": { "type": "number", "minimum": 0, "maximum": 300 },
+                "skirts": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "elevator" },
+            "properties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "height",
+                "footprint",
+                "transportSpeed",
+                "dischargeRateCap",
+                "dischargeVelocity"
+              ],
+              "properties": {
+                "height": { "type": "number", "minimum": 1, "maximum": 30 },
+                "footprint": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["x", "z"],
+                  "properties": {
+                    "x": { "type": "number", "minimum": 0.5, "maximum": 4 },
+                    "z": { "type": "number", "minimum": 0.5, "maximum": 4 }
+                  }
+                },
+                "transportSpeed": { "type": "number", "minimum": 0.5, "maximum": 5 },
+                "dischargeRateCap": { "type": "number", "minimum": 0.1, "maximum": 500 },
+                "dischargeVelocity": { "type": "number", "minimum": 0, "maximum": 5 }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "spawner" },
+            "properties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cropType", "throughput", "emitArea", "enabled"],
+              "properties": {
+                "cropType": { "enum": ["wheatClump", "potato", "sugarBeet"] },
+                "throughput": { "type": "number", "minimum": 0.1, "maximum": 500 },
+                "emitArea": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["x", "z"],
+                  "properties": {
+                    "x": { "type": "number", "minimum": 0.1, "maximum": 3 },
+                    "z": { "type": "number", "minimum": 0.1, "maximum": 3 }
+                  }
+                },
+                "enabled": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "collectionZone" },
+            "properties": { "$ref": "#/$defs/zoneProperties" }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "despawnZone" },
+            "properties": { "$ref": "#/$defs/zoneProperties" }
+          }
+        }
+      ]
+    },
+    "zoneProperties": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["size"],
+      "properties": {
+        "size": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y", "z"],
+          "properties": {
+            "x": { "type": "number", "minimum": 0.5, "maximum": 20 },
+            "y": { "type": "number", "minimum": 0.5, "maximum": 20 },
+            "z": { "type": "number", "minimum": 0.5, "maximum": 20 }
+          }
+        }
+      }
+    }
+  }
+}

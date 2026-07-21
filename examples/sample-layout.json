@@ -1,0 +1,87 @@
+{
+  "fileVersion": 1,
+  "meta": {
+    "name": "Sample intake line",
+    "createdAt": "2026-07-21T19:00:00Z",
+    "modifiedAt": "2026-07-21T19:00:00Z",
+    "appVersion": "0.1.0"
+  },
+  "settings": {
+    "gravity": 9.81,
+    "maxActiveCrops": 2000,
+    "floorDespawnSeconds": 3
+  },
+  "elements": [
+    {
+      "id": "el_spawner00001",
+      "type": "spawner",
+      "name": "Potato intake",
+      "position": { "x": -8, "y": 1.6, "z": 0 },
+      "rotationYaw": 0,
+      "properties": {
+        "cropType": "potato",
+        "throughput": 40,
+        "emitArea": { "x": 0.6, "z": 0.6 },
+        "enabled": true
+      }
+    },
+    {
+      "id": "el_conveyor0001",
+      "type": "conveyor",
+      "name": "Intake belt",
+      "position": { "x": -5, "y": 0, "z": 0 },
+      "rotationYaw": 0,
+      "properties": {
+        "length": 6,
+        "width": 0.8,
+        "beltHeight": 0.75,
+        "inclineDeg": 0,
+        "beltSpeed": 90,
+        "skirts": true
+      }
+    },
+    {
+      "id": "el_conveyor0002",
+      "type": "conveyor",
+      "name": "Incline belt",
+      "position": { "x": 1, "y": 0, "z": 0 },
+      "rotationYaw": 0,
+      "properties": {
+        "length": 6,
+        "width": 0.8,
+        "beltHeight": 0.75,
+        "inclineDeg": 15,
+        "beltSpeed": 110,
+        "skirts": true
+      }
+    },
+    {
+      "id": "el_elevator0001",
+      "type": "elevator",
+      "name": "Main elevator",
+      "position": { "x": 7.5, "y": 0, "z": 0 },
+      "rotationYaw": 0,
+      "properties": {
+        "height": 8,
+        "footprint": { "x": 1.2, "z": 1.2 },
+        "transportSpeed": 2,
+        "dischargeRateCap": 60,
+        "dischargeVelocity": 1.5
+      }
+    },
+    {
+      "id": "el_collect00001",
+      "type": "collectionZone",
+      "name": "Store bin",
+      "position": { "x": 10.5, "y": 0, "z": 0 },
+      "rotationYaw": 0,
+      "properties": {
+        "size": { "x": 3, "y": 3, "z": 3 }
+      }
+    }
+  ],
+  "camera": {
+    "position": { "x": 18, "y": 14, "z": 18 },
+    "target": { "x": 0, "y": 1, "z": 0 }
+  }
+}
