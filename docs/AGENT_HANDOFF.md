@@ -7,16 +7,18 @@ _Last updated: 2026-07-21_
 ## Current Project State
 
 - Repository, complete design documentation, CI, and a runnable application exist.
-- The app renders the full panel layout around an interactive 3D viewport, and **element placement is functional**: all five element types can be placed via the library (ghost preview, grid snapping, Shift for repeat, Escape/right-click cancel), selected, dragged on XZ, rotated (`R`/`Shift+R`), duplicated (`Ctrl+D`/button), and deleted (`Delete`/button). Elements render as placeholder boxes until Stage 5.
+- The app renders the full panel layout around an interactive 3D viewport, and **element placement is functional**: all five element types can be placed via the library (ghost preview, grid snapping, Shift for repeat, Escape/right-click cancel), selected, dragged on XZ, rotated (`R`/`Shift+R`), duplicated (`Ctrl+D`/button), and deleted (`Delete`/button).
+- **Conveyors render as parametric machines** (belt, frame rails, vertical legs, optional side skirts, amber direction chevrons pointing to the discharge/+X end); incline pivots about the infeed end. Other element types remain placeholder boxes until their stages.
+- Dev builds expose `window.__cropSim` (the three stores) and support `?seed=conveyors` for scripted/browser-automation verification (`src/app/devSeed.ts`); neither exists in production builds.
 - No physics or simulation features are implemented yet.
 
 ## Current Branch
 
-- `main` (Stage 4 was developed on `feature/element-placement` and merged). Continue using focused feature branches for stage-sized changes.
+- `main` (stages 4 and 5 were developed on `feature/element-placement` and `feature/conveyor-rendering` and merged). Continue using focused feature branches for stage-sized changes.
 
 ## Last Completed Stage
 
-- **Stage 4 — Element placement** (see `docs/ROADMAP.md`). Stages 1–4 complete.
+- **Stage 5 — Conveyor rendering** (see `docs/ROADMAP.md`). Stages 1–5 complete.
 
 ## Work Currently In Progress
 
@@ -24,7 +26,7 @@ _Last updated: 2026-07-21_
 
 ## Next Recommended Task
 
-- **Stage 5 — Conveyor rendering**: replace the conveyor placeholder box with a parametric mesh (belt surface, frame, side skirts, direction chevrons) driven by its properties, including incline pivoting about the infeed end. Acceptance criteria in `docs/ROADMAP.md` §Stage 5. Note KI-004 in `docs/KNOWN_ISSUES.md`: hand-verify element drag-move while working in the viewport.
+- **Stage 6 — Conveyor physics**: wire up the Rapier world (`@react-three/rapier` is already installed), add machine colliders with the collision groups from `docs/PHYSICS_SPECIFICATION.md`, implement belt contact surface velocity (flat + inclined), and add a temporary debug "drop test ball" button. **Start with the KI-002 spike**: check what the bound Rapier version exposes for contact surface velocity and record the outcome in ADR-006. Acceptance criteria in `docs/ROADMAP.md` §Stage 6. Also hand-verify element drag-move (KI-004) while in the viewport.
 
 ## Important Files
 
@@ -34,7 +36,7 @@ _Last updated: 2026-07-21_
 - `src/types/` — domain types (elements, settings, crop presets)
 - `src/state/` — Zustand stores (`sceneStore`, `uiStore`, `simulationStore`)
 - `src/elements/registry.ts` — element descriptors, defaults, bounds, factory (drives library/placement/rendering)
-- `src/rendering/` — `SceneCanvas` (canvas/camera/grid), `PlacementLayer` (ghost + ground interaction), `PlacedElements` (selection/drag)
+- `src/rendering/` — `SceneCanvas` (canvas/camera/grid), `PlacementLayer` (ghost + ground interaction), `PlacedElements` (selection/drag), `elements/ConveyorMesh` + `elements/conveyorGeometry` (parametric conveyor)
 - `src/app/useKeyboardShortcuts.ts` — global shortcuts
 - `src/utilities/` — `flow.ts` (throughput conversions), `snap.ts` (grid snap, build-area checks), `ids.ts` (all unit-tested)
 - `schemas/layout.schema.json` + `examples/sample-layout.json` — save format
@@ -53,7 +55,7 @@ npm run format:check
 
 ## Test Status
 
-- **Passing**: all unit tests — `src/utilities/flow.test.ts`, `src/utilities/ids.test.ts`, `src/utilities/snap.test.ts`, `src/elements/registry.test.ts`, `src/serialization/sampleLayout.test.ts` (37 tests).
+- **Passing**: all unit tests — `src/utilities/flow.test.ts`, `src/utilities/ids.test.ts`, `src/utilities/snap.test.ts`, `src/elements/registry.test.ts`, `src/rendering/elements/conveyorGeometry.test.ts`, `src/serialization/sampleLayout.test.ts` (45 tests).
 - **Failing**: none.
 
 ## Known Errors
@@ -87,4 +89,4 @@ npm run format:check
 1. Read `AGENTS.md`, then `README.md`, `docs/PRODUCT_SCOPE.md`, `docs/TECHNICAL_DESIGN.md`, `docs/DECISIONS.md`, and this file.
 2. `git status` + `git log --oneline -15` to confirm the state described here.
 3. `npm ci && npm run test && npm run typecheck && npm run dev` to verify the baseline.
-4. Start Stage 5 (conveyor rendering) per `docs/ROADMAP.md`.
+4. Start Stage 6 (conveyor physics) per `docs/ROADMAP.md`, beginning with the KI-002 surface-velocity spike.
