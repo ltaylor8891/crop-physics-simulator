@@ -6,34 +6,32 @@ _Last updated: 2026-07-21_
 
 ## Current Project State
 
-- Stages 1–7 complete: docs, shell, 3D scene, placement, conveyor rendering, conveyor physics, and a full properties editor.
-- **Belt speed accuracy fix**: belts are `fixed`; after each physics step, contacting dynamics get tangential velocity = `beltSpeed_mPerMin / 60` (ADR-016). Debug balls no longer use linear damping that undershot speed.
-- Properties panel edits name, position X/Z (and Y for spawners), rotation (degrees), and type-specific fields from `PROPERTY_FIELDS`.
-- Toolbar **Drop ball** / **Reset** for Stage 6 testing.
-- Dev hooks: `window.__cropSim`, `?seed=conveyors` / `?seed=physics`.
+- Stages 1–8 complete: through crop spawning.
+- Spawners emit on the fixed step at configured t/h (`CropPool` + `cropRuntime` + `SpawningSystem`). Play/pause gates spawning. **Reset** clears crops + stats.
+- Belt speed uses ADR-016 contact velocity injection.
+- Dev seeds: `?seed=conveyors` / `?seed=physics` / `?seed=spawn`.
 
 ## Current Branch
 
-- `main`. Use focused feature branches for stage-sized changes.
+- `feature/crop-spawning` (Stage 8). Merge to `main` when ready.
 
 ## Last Completed Stage
 
-- **Stage 7 — Properties editor**. Stages 1–7 complete.
+- **Stage 8 — Crop spawning**.
 
 ## Work Currently In Progress
 
-- Nothing in progress; tree clean after belt-speed fix commit.
+- Nothing; Stage 8 ready to merge after a quick interactive check.
 
 ## Next Recommended Task
 
-- Hand-check KI-005 with the new mechanism, then **Stage 8 — Crop spawning** per `docs/ROADMAP.md`.
+- **Stage 9 — Crop physics**: per-type InstancedMesh, proper capsule colliders, CCD/sleeping polish, performance at 1–2k bodies. Also hand-verify KI-004 / KI-005 and Stage 8 spawn visually (`?seed=spawn`).
 
 ## Important Files
 
-- `src/physics/ConveyorColliders.tsx` — fixed belt + contact velocity injection
-- `src/physics/beltVelocity.ts` — m/min → m/s, normal, `velocityWithBeltSurface`
-- `docs/DECISIONS.md` — ADR-006 / ADR-016
-- `src/elements/propertySchema.ts`, `src/components/PropertiesPanel.tsx`
+- `src/simulation/CropPool.ts`, `spawning.ts`, `cropRuntime.ts`
+- `src/physics/CropBodies.tsx`, `SpawningSystem.tsx`
+- `src/elements/cropTypes.ts`
 
 ## Commands
 
@@ -43,26 +41,27 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Test Status
 
-- **Passing**: 66 unit tests.
+- **Passing**: 79 unit tests.
 - **Failing**: none known.
 
 ## Known Errors
 
-- None. Open verification gaps: KI-004, KI-005.
+- None. Open verification gaps: KI-004, KI-005. Stage 8: potato capsules approximated as balls; pool mount of `maxActiveCrops` (2000) InstancedRigidBodies may be slow on first load.
 
 ## Uncommitted Work
 
-- None — working tree clean.
+- None after Stage 8 commit.
 
 ## Architectural Constraints (do not violate)
 
 - 1 world unit = 1 metre; Y-up; flow along local +X; yaw radians CCW about +Y.
 - Fixed physics timestep 1/60 s; simulation on fixed steps only.
 - Conveyors: fixed deck + per-step tangential velocity injection (ADR-016).
-- Zustand selectors must return stable references (no new arrays/objects from the selector itself).
+- Crops: pooled bodies; `acquire() === null` → throttle (ADR-005).
+- Zustand selectors must return stable references.
 - Stores hold serialisable plain data only.
 
 ## Suggested Starting Point for the Next Agent
 
 1. Read `AGENTS.md` and this file; confirm `git status` / recent log.
-2. Hand-verify belt travel time at a known m/min, then Stage 8.
+2. Interactive check `?seed=spawn`, then Stage 9 or merge Stage 8 to `main`.

@@ -10,7 +10,7 @@ import { useUiStore } from '../state/uiStore';
  */
 export function applyDevSeed(search: string): void {
   const seed = new URLSearchParams(search).get('seed');
-  if (seed !== 'conveyors' && seed !== 'physics') return;
+  if (seed !== 'conveyors' && seed !== 'physics' && seed !== 'spawn') return;
 
   const store = useSceneStore.getState();
 
@@ -36,6 +36,25 @@ export function applyDevSeed(search: string): void {
 
   if (seed === 'physics') {
     useUiStore.getState().select(flat.id);
+    useSimulationStore.getState().setRunning(true);
+  }
+
+  if (seed === 'spawn') {
+    const spawner = createElement('spawner', { x: -5, z: 3 }, useSceneStore.getState().elements);
+    store.addElement(spawner);
+    if (spawner.type === 'spawner') {
+      store.updateElement(spawner.id, {
+        position: { x: -5, y: flat.type === 'conveyor' ? flat.properties.beltHeight + 0.5 : 1.5, z: 3 },
+        properties: {
+          ...spawner.properties,
+          cropType: 'potato',
+          throughput: 20,
+          emitArea: { x: 0.4, z: 0.4 },
+          enabled: true,
+        },
+      });
+    }
+    useUiStore.getState().select(spawner.id);
     useSimulationStore.getState().setRunning(true);
   }
 }

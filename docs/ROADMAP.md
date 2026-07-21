@@ -11,7 +11,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 5   | Conveyor rendering                  | Complete    |
 | 6   | Conveyor physics                    | Complete    |
 | 7   | Properties editor                   | Complete    |
-| 8   | Crop spawning                       | Not started |
+| 8   | Crop spawning                       | Complete    |
 | 9   | Crop physics                        | Not started |
 | 10  | Floor despawning                    | Not started |
 | 11  | Elevators                           | Not started |
@@ -82,7 +82,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: crop type presets, `CropPool` skeleton, spawn accumulator on the fixed step (`src/simulation/spawning.ts`) using `src/utilities/flow.ts`, position/velocity jitter, enable toggle.
 - **Acceptance criteria**: measured long-run spawn rate within 1 % of configured t/h; spawning pauses/resumes with the play state.
 - **Dependencies**: Stage 6.
-- **Status**: Not started.
+- **Status**: Complete. Presets in `cropTypes.ts`; pool + `cropRuntime` + fixed-step `SpawningSystem`; unit tests cover long-run mass rate within 1%. Play/pause gates via `<Physics paused>`. Potato capsules approximated as balls until Stage 9.
 
 ## Stage 9 — Crop physics
 

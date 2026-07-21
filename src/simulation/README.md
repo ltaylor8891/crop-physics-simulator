@@ -1,3 +1,12 @@
 # src/simulation
 
-Fixed-timestep simulation loops (crop spawning, despawn timers, elevator transit, statistics) land here from Stage 8 (`docs/ROADMAP.md`). All logic in this folder runs on physics steps, never render frames (ADR-004).
+Fixed-timestep simulation loops (docs/ROADMAP.md, ADR-004). All logic here runs on
+physics steps (or is pure and unit-tested), never on render frames.
+
+| Module | Role |
+| --- | --- |
+| `CropPool.ts` | Logical slot acquire/release with hard cap (ADR-005) |
+| `cropRuntime.ts` | Binds pool slots to Rapier bodies created by `CropBodies` |
+| `spawning.ts` | Per-spawner fractional accumulator, emit pose jitter |
+
+Wired from `src/physics/SpawningSystem.tsx` via `useAfterPhysicsStep`.

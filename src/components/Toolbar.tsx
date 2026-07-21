@@ -1,3 +1,4 @@
+import { resetCropSimulation } from '../simulation/cropRuntime';
 import { useDebugStore } from '../state/debugStore';
 import { useSceneStore } from '../state/sceneStore';
 import { useSimulationStore } from '../state/simulationStore';
@@ -27,7 +28,7 @@ export function Toolbar() {
 
   const handleReset = () => {
     clearBalls();
-    useSimulationStore.getState().resetStatistics();
+    resetCropSimulation();
   };
 
   return (
@@ -64,7 +65,7 @@ export function Toolbar() {
         >
           Drop ball
         </button>
-        <button type="button" onClick={handleReset} title="Remove debug balls and clear statistics">
+        <button type="button" onClick={handleReset} title="Remove crops, debug balls, and clear statistics">
           Reset
         </button>
       </div>

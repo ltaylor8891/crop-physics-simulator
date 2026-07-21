@@ -1,8 +1,10 @@
 import { Physics } from '@react-three/rapier';
 import { useSimulationStore } from '../state/simulationStore';
 import { ConveyorColliders } from './ConveyorColliders';
+import { CropBodies } from './CropBodies';
 import { DebugBalls } from './DebugBalls';
 import { GroundCollider } from './GroundCollider';
+import { SpawningSystem } from './SpawningSystem';
 
 /**
  * Rapier world for the scene (docs/TECHNICAL_DESIGN.md §Physics Architecture).
@@ -22,6 +24,8 @@ export function PhysicsWorld() {
     >
       <GroundCollider />
       <ConveyorColliders />
+      <CropBodies />
+      <SpawningSystem />
       <DebugBalls />
     </Physics>
   );

@@ -6,7 +6,7 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 
 ### KI-001 — Most product features not yet implemented
 
-- **Description**: Stages 8–15 of the roadmap (spawning, crop physics, despawn, elevators, save/load, statistics) are designed but not fully built. Placement, conveyor rendering/physics, and the properties editor are in place.
+- **Description**: Stages 9–15 of the roadmap (crop physics polish, despawn, elevators, save/load, statistics) are designed but not fully built. Placement through crop spawning (Stages 1–8) are in place.
 - **Severity**: High (expected at this phase, not a defect)
 - **Reproduction**: Run the app; elements can be placed and arranged but nothing simulates yet.
 - **Suspected cause**: n/a — project phase.
