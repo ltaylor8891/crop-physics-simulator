@@ -6,7 +6,7 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 
 ### KI-001 — Most product features not yet implemented
 
-- **Description**: Stages 5–15 of the roadmap (conveyor rendering/physics, spawning, crop physics, despawn, elevators, save/load, statistics) are designed but not built. The app currently provides the panel shell, an interactive 3D scene, and full element placement/editing with placeholder box meshes.
+- **Description**: Stages 7–15 of the roadmap (properties editor, spawning, crop physics, despawn, elevators, save/load, statistics) are designed but not fully built. Conveyor placement, rendering, and belt physics with a debug drop-ball are in place.
 - **Severity**: High (expected at this phase, not a defect)
 - **Reproduction**: Run the app; elements can be placed and arranged but nothing simulates yet.
 - **Suspected cause**: n/a — project phase.
@@ -20,7 +20,7 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 - **Reproduction**: n/a (research task)
 - **Suspected cause**: Binding library lags the raw Rapier API.
 - **Proposed resolution**: At Stage 6 start, spike both approaches; record the outcome in ADR-006's consequences and `PHYSICS_SPECIFICATION.md`.
-- **Status**: Open
+- **Status**: Closed — no contact-surface-velocity API; implemented via `kinematicVelocity` + pinned translation (see ADR-006).
 
 ### KI-003 — No browser-based automated tests
 
@@ -35,6 +35,15 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 - **Severity**: Low
 - **Reproduction**: n/a — verification gap, not an observed defect.
 - **Proposed resolution**: Manually drag elements when next running the app (expected: element follows pointer on XZ, snaps at 0.5 m, camera stays still); implement `F` and `?` with the Stage 7 UI work.
+- **Status**: Open
+
+### KI-005 — Stage 6 belt conveyance needs interactive hand-check
+
+- **Description**: Conveyor physics is implemented and unit-tested for velocity/orientation maths, but carrying a dropped ball to discharge on flat and ±20° belts has not been confirmed live in this session (browser automation unavailable).
+- **Severity**: Medium
+- **Reproduction**: `npm run dev` → place/select a conveyor → Play → Drop ball; confirm the ball rides to the discharge end. Repeat with incline ±20° and with belt speed 0 (ball should stay).
+- **Suspected cause**: n/a — verification gap.
+- **Proposed resolution**: Hand-check while starting Stage 7; note any defects here.
 - **Status**: Open
 
 ## Physics Inaccuracies (by design — see PHYSICS_SPECIFICATION)

@@ -66,8 +66,13 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
   1. Contact surface velocity on a static belt collider (contacts solved as if the surface moved)
   2. Kinematic belt segments translating with wrap-around teleport
   3. Per-step impulse/force applied to bodies overlapping a belt volume
-- **Decision**: Contact surface velocity (option 1). It is how belts are conventionally modelled in rigid-body engines: static geometry, friction-coupled tangential target velocity, correct behaviour for stacked crops (only the contact layer is driven directly; upper layers follow through inter-crop friction).
-- **Consequences**: Belt speed changes from zero must explicitly wake sleeping bodies (no contact event fires). Exact mechanism depends on what `@react-three/rapier`'s bound Rapier version exposes; if contact-surface velocity is not directly available, implement via the contact-pair iterator applying tangential velocity targets per step, and record the final mechanism here when Stage 6 lands.
+  4. `kinematicVelocity` rigid body with belt linvel, translation pinned each step (Rapier-compatible surface-velocity equivalent)
+- **Decision**: Option 4 as the Stage 6 implementation of the surface-velocity intent. Spike (KI-002) confirmed that `@dimforge/rapier3d-compat` / `@react-three/rapier` expose **no** contact-modification / contact-surface-velocity API — `PhysicsHooks` only filter contact/intersection pairs. Setting `linearVelocity` on a `kinematicVelocity` body makes the solver treat contacts as if the surface moved; pinning translation after each step keeps the belt visually and spatially fixed.
+- **Consequences**:
+  - Belt speed changes from zero must explicitly wake sleeping bodies (implemented in `ConveyorColliders`).
+  - Implementation lives in `src/physics/ConveyorColliders.tsx` + `src/physics/beltVelocity.ts`.
+  - Side skirts remain `fixed` (no surface velocity).
+  - If a future Rapier release adds true contact surface velocity, prefer migrating to it and superseding this ADR's mechanism note — the product decision (surface velocity, not moving geometry) stands.
 
 ## ADR-007 — Zustand for state management
 

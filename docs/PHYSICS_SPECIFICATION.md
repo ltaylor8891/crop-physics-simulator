@@ -28,7 +28,7 @@ Rapier interaction groups (16-bit membership/filter):
 
 ## Crop-to-Machine Collision
 
-- Machines are `fixed` rigid bodies with cuboid or compound-cuboid colliders (belt surface, side skirts, elevator casing).
+- Machines use cuboid colliders. **Belt surfaces** are `kinematicVelocity` bodies (pinned each step — see §Conveyor Surface Velocity); **skirts, casings, and the ground** are `fixed`.
 - Contact is solved with Rapier's default solver; machine colliders use the friction/restitution in the materials table below combined with the crop's values (Rapier default combine rule: average).
 - Colliders must be thick enough (≥ 0.05 m) that crops at maximum supported speed (300 m/min = 5 m/s) cannot tunnel through at the fixed timestep. Continuous collision detection (CCD) is enabled on crop bodies as a backstop.
 
@@ -49,10 +49,11 @@ High belt friction + zero belt restitution is what makes surface-velocity convey
 
 ## Conveyor Surface Velocity
 
-- The belt's top collider is static geometry with a **contact surface velocity**: in contact resolution, the contact's tangential target velocity is the belt vector instead of zero, so resting bodies are accelerated to belt speed by friction.
-- Belt vector = local `+X * (beltSpeed_mPerMin / 60)`, rotated by element yaw (and pitch for inclines) into world space.
-- Implementation note: `@react-three/rapier` does not expose contact surface velocity as a prop; set it on the raw collider (`collider.setContactSkin` is unrelated — use Rapier's `RigidBody`/collider contact modification or, if unavailable in the bound version, apply per-step tangential velocity correction to contacting crops via the contact-pair iterator). The chosen mechanism must be recorded in ADR-006's consequences when implemented.
-- Expected behaviour: a crop dropped on a running belt reaches belt speed within a few timesteps and travels without sliding once matched; when the belt is stopped, crops decelerate by friction rather than instantly freezing.
+- The belt collider is a **`kinematicVelocity` rigid body** whose linear velocity equals the belt vector; after every fixed physics step its translation is reset to the home pose so the belt never drifts. Contacts therefore see a moving surface while the geometry stays put. This is the Rapier-compatible implementation of contact surface velocity (ADR-006 / KI-002): the bound engine has no dedicated contact-surface-velocity or contact-modification API.
+- Belt vector = local `+X * (beltSpeed_mPerMin / 60)`, pitched by incline and yawed into world space (`src/physics/beltVelocity.ts`).
+- Side skirts are separate **`fixed`** colliders (no surface velocity).
+- Expected behaviour: a crop dropped on a running belt reaches belt speed within a few timesteps and travels without sliding once matched; when the belt is stopped (`linvel = 0`), crops decelerate by friction rather than instantly freezing.
+- Starting a stopped belt wakes sleeping dynamic bodies in the world so settled piles resume.
 
 ## Inclined Conveyor Behaviour
 
