@@ -144,17 +144,86 @@ body,
   border-left: 1px solid var(--panel-border);
 }
 
-.properties-panel dl {
-  margin: 0;
+.property-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.properties-panel dt {
+.property-section {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--text-dim);
-  font-size: 0.8rem;
 }
 
-.properties-panel dd {
-  margin: 0 0 10px;
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.field-unit {
+  margin-left: auto;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.field input[type='number'],
+.field input[type='text'],
+.field select {
+  width: 100%;
+  background: #16181b;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+}
+
+.field-invalid input {
+  border-color: #c05555;
+  background: #2a1f1f;
+}
+
+.field-error {
+  font-size: 0.75rem;
+  color: #e8a0a0;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.field-checkbox label {
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.field-checkbox input {
+  width: auto;
+}
+
+.field-readonly {
+  gap: 2px;
+}
+
+.field-readonly-label {
+  font-size: 0.8rem;
+  color: var(--text-dim);
 }
 
 .empty-state {
@@ -234,7 +303,8 @@ button:hover:not(:disabled) {
 }
 
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
