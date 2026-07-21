@@ -5,6 +5,10 @@ import { generateElementId } from '../utilities/ids';
 /** Offset applied to duplicated elements so the copy is visible beside the original. */
 const DUPLICATE_OFFSET_M = 1;
 
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
 /**
  * Design-time scene description — the single source of truth that rendering
  * and physics are derived from (docs/TECHNICAL_DESIGN.md §State Management).
@@ -12,6 +16,8 @@ const DUPLICATE_OFFSET_M = 1;
  */
 interface SceneState {
   sceneName: string;
+  /** ISO 8601 UTC; preserved across saves, reset on New. */
+  createdAt: string;
   elements: Record<ElementId, SceneElement>;
   addElement: (element: SceneElement) => void;
   updateElement: (id: ElementId, patch: Partial<Omit<SceneElement, 'id' | 'type'>>) => void;
@@ -20,10 +26,16 @@ interface SceneState {
   duplicateElement: (id: ElementId) => ElementId | null;
   setSceneName: (name: string) => void;
   clearScene: () => void;
+  replaceScene: (next: {
+    sceneName: string;
+    createdAt: string;
+    elements: Record<ElementId, SceneElement>;
+  }) => void;
 }
 
 export const useSceneStore = create<SceneState>((set, get) => ({
   sceneName: 'Untitled scene',
+  createdAt: nowIso(),
   elements: {},
 
   addElement: (element) =>
@@ -65,5 +77,13 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
   setSceneName: (name) => set({ sceneName: name }),
 
-  clearScene: () => set({ elements: {}, sceneName: 'Untitled scene' }),
+  clearScene: () =>
+    set({ elements: {}, sceneName: 'Untitled scene', createdAt: nowIso() }),
+
+  replaceScene: (next) =>
+    set({
+      sceneName: next.sceneName,
+      createdAt: next.createdAt,
+      elements: next.elements,
+    }),
 }));

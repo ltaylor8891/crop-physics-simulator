@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useSceneStore } from '../state/sceneStore';
 import { useSimulationStore } from '../state/simulationStore';
 import { useUiStore } from '../state/uiStore';
+import { downloadCurrentLayout } from '../serialization/layoutActions';
 import { stepYaw } from '../utilities/snap';
 
 /** True for elements where typing must not trigger shortcuts (text/number inputs). */
@@ -76,6 +77,22 @@ export function useKeyboardShortcuts() {
           simulation.setRunning(!simulation.running);
           break;
         }
+
+        case 's':
+        case 'S':
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            downloadCurrentLayout();
+          }
+          break;
+
+        case 'o':
+        case 'O':
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            document.getElementById('layout-file-input')?.click();
+          }
+          break;
       }
     };
 

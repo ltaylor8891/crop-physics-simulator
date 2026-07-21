@@ -15,7 +15,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 9   | Crop physics                        | Not started |
 | 10  | Floor despawning                    | In progress |
 | 11  | Elevators                           | Not started |
-| 12  | Saving and loading                  | Not started |
+| 12  | Saving and loading                  | Complete    |
 | 13  | Statistics                          | Not started |
 | 14  | Performance optimisation            | Not started |
 | 15  | Testing and release preparation     | Not started |
@@ -114,7 +114,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: `serializeLayout`/`parseLayout` with strict validation, migration scaffold, save-download and load-picker + drag-drop, error dialog, camera state round-trip; sample layout loads.
 - **Acceptance criteria**: save→load round-trip is lossless for all element types; corrupt files produce readable errors and leave the scene untouched; unit tests cover round-trip + rejection cases + `examples/sample-layout.json` against the schema.
 - **Dependencies**: Stage 7 (all properties exist); ideally after 11 so all types serialise.
-- **Status**: Not started.
+- **Status**: Complete. Toolbar **New** / **Load** / **Save**, Ctrl+S/O, window drag-drop, load-error dialog, camera restore. `ajv` is a runtime dependency for schema validation.
 
 ## Stage 13 — Statistics
 

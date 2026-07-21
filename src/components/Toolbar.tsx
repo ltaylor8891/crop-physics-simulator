@@ -1,3 +1,10 @@
+import { useRef, useState } from 'react';
+import {
+  createNewLayout,
+  downloadCurrentLayout,
+  loadLayoutFile,
+} from '../serialization/layoutActions';
+import type { ParseError } from '../serialization/types';
 import { resetCropSimulation } from '../simulation/cropRuntime';
 import { useDebugStore } from '../state/debugStore';
 import { useSceneStore } from '../state/sceneStore';
@@ -5,6 +12,8 @@ import { useSimulationStore } from '../state/simulationStore';
 import { useUiStore } from '../state/uiStore';
 import type { ConveyorElement } from '../types/elements';
 import { degreesToRadians } from '../utilities/units';
+import { ConfirmNewDialog } from './ConfirmNewDialog';
+import { LoadErrorDialog } from './LoadErrorDialog';
 
 /**
  * Top toolbar (docs/UI_UX_SPECIFICATION.md §Top Toolbar).
@@ -18,6 +27,9 @@ export function Toolbar() {
   const toggleGridSnap = useUiStore((s) => s.toggleGridSnap);
   const dropBall = useDebugStore((s) => s.dropBall);
   const clearBalls = useDebugStore((s) => s.clearBalls);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loadErrors, setLoadErrors] = useState<ParseError[] | null>(null);
+  const [confirmNew, setConfirmNew] = useState(false);
 
   const handleDropBall = () => {
     dropBall(dropPositionAboveSelection());
@@ -31,6 +43,24 @@ export function Toolbar() {
     resetCropSimulation();
   };
 
+  const requestNew = () => {
+    const hasElements = Object.keys(useSceneStore.getState().elements).length > 0;
+    if (hasElements) setConfirmNew(true);
+    else createNewLayout();
+  };
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const onFileChosen = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    const errors = await loadLayoutFile(file);
+    if (errors) setLoadErrors(errors);
+  };
+
   return (
     <header className="toolbar">
       <span className="toolbar-title">Crop Physics Simulator</span>
@@ -39,15 +69,29 @@ export function Toolbar() {
       </span>
 
       <div className="toolbar-group" aria-label="File">
-        <button type="button" disabled title="Coming in Stage 12 (save/load)">
+        <button type="button" onClick={requestNew} title="Clear the scene (New)">
           New
         </button>
-        <button type="button" disabled title="Coming in Stage 12 (save/load)">
+        <button type="button" onClick={openFilePicker} title="Load a layout JSON file (Ctrl+O)">
           Load
         </button>
-        <button type="button" disabled title="Coming in Stage 12 (save/load)">
+        <button
+          type="button"
+          onClick={() => downloadCurrentLayout()}
+          title="Download layout JSON (Ctrl+S)"
+        >
           Save
         </button>
+        <input
+          id="layout-file-input"
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={(event) => {
+            void onFileChosen(event);
+          }}
+        />
       </div>
 
       <div className="toolbar-group" aria-label="Simulation">
@@ -65,7 +109,11 @@ export function Toolbar() {
         >
           Drop ball
         </button>
-        <button type="button" onClick={handleReset} title="Remove crops, debug balls, and clear statistics">
+        <button
+          type="button"
+          onClick={handleReset}
+          title="Remove crops, debug balls, and clear statistics"
+        >
           Reset
         </button>
       </div>
@@ -76,6 +124,19 @@ export function Toolbar() {
           Grid snap
         </label>
       </div>
+
+      {confirmNew && (
+        <ConfirmNewDialog
+          onCancel={() => setConfirmNew(false)}
+          onConfirm={() => {
+            setConfirmNew(false);
+            createNewLayout();
+          }}
+        />
+      )}
+      {loadErrors && (
+        <LoadErrorDialog errors={loadErrors} onClose={() => setLoadErrors(null)} />
+      )}
     </header>
   );
 }
@@ -96,7 +157,6 @@ function dropAboveConveyor(conveyor: ConveyorElement): { x: number; y: number; z
   const { length, beltHeight, inclineDeg } = conveyor.properties;
   const incline = degreesToRadians(inclineDeg);
   const half = length / 2;
-  // Mid-belt top surface in element-local space (same pivot maths as ConveyorMesh).
   const local = {
     x: -half + half * Math.cos(incline),
     y: beltHeight + half * Math.sin(incline) + 0.5,

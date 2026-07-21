@@ -27,6 +27,8 @@ interface SimulationState {
   statistics: SceneStatistics;
   setRunning: (running: boolean) => void;
   updateSettings: (patch: Partial<SimulationSettings>) => void;
+  replaceSettings: (settings: SimulationSettings) => void;
+  resetToDefaults: () => void;
   setStatistics: (statistics: SceneStatistics) => void;
   resetStatistics: () => void;
 }
@@ -38,6 +40,13 @@ export const useSimulationStore = create<SimulationState>((set) => ({
 
   setRunning: (running) => set({ running }),
   updateSettings: (patch) => set((state) => ({ settings: { ...state.settings, ...patch } })),
+  replaceSettings: (settings) => set({ settings: { ...settings } }),
+  resetToDefaults: () =>
+    set({
+      running: false,
+      settings: { ...DEFAULT_SIMULATION_SETTINGS },
+      statistics: ZERO_STATISTICS,
+    }),
   setStatistics: (statistics) => set({ statistics }),
   resetStatistics: () => set({ statistics: ZERO_STATISTICS }),
 }));

@@ -313,3 +313,60 @@ button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.modal-dialog {
+  width: min(28rem, 100%);
+  padding: 20px 22px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.modal-dialog h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.modal-dialog p {
+  margin: 0 0 12px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.modal-error-list {
+  margin: 0 0 16px;
+  padding-left: 1.2rem;
+  max-height: 12rem;
+  overflow: auto;
+  font-size: 0.85rem;
+  color: #e8a0a0;
+}
+
+.modal-error-list code {
+  color: #f0c0c0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-danger {
+  border-color: #8a4040;
+  background: #3a2222;
+}
+

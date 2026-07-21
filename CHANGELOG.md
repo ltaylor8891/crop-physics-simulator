@@ -14,6 +14,7 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Added
 
+- Save / load layouts (roadmap Stage 12): **New**, **Load**, **Save** in the toolbar; Ctrl+S / Ctrl+O; drag-drop JSON onto the window; schema-validated parse with migration scaffold; load errors leave the scene untouched; camera pose round-trips.
 - Crop spawning (roadmap Stage 8): enabled spawners emit crops on the fixed physics step at the configured t/h rate (fractional accumulator). `CropPool` + pooled Rapier bodies (`InstancedRigidBodies`); position/velocity jitter; throttle when the pool is full; **Reset** clears crops. Dev seed `?seed=spawn`. Long-run mass rate covered by unit tests within 1%.
 - Properties editor (roadmap Stage 7): schema-driven fields for every element type — editable name, position, rotation, and equipment properties with range validation (invalid input reverts and shows the constraint). Conveyor edits update mesh and physics live.
 - Conveyor physics (roadmap Stage 6): Rapier world with fixed 1/60 s timestep, ground collider, belt and skirt colliders with documented collision groups/materials. Belts use contact velocity injection for surface motion (ADR-016). Toolbar **Drop ball** / **Reset** for temporary test balls.

@@ -1,5 +1,6 @@
 import { Toolbar } from '../components/Toolbar';
 import { ElementLibrary } from '../components/ElementLibrary';
+import { LayoutFileDropTarget } from '../components/LayoutFileDropTarget';
 import { PropertiesPanel } from '../components/PropertiesPanel';
 import { StatusBar } from '../components/StatusBar';
 import { SceneCanvas } from '../rendering/SceneCanvas';
@@ -18,6 +19,7 @@ export function App() {
       </main>
       <PropertiesPanel />
       <StatusBar />
+      <LayoutFileDropTarget />
     </div>
   );
 }

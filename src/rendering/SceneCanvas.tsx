@@ -1,11 +1,12 @@
 import { Component, Suspense, type ErrorInfo, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Grid, OrbitControls } from '@react-three/drei';
+import { Grid } from '@react-three/drei';
 import { PhysicsWorld } from '../physics/PhysicsWorld';
 import { useUiStore } from '../state/uiStore';
 import { BUILD_AREA_SIZE_M } from '../utilities/snap';
 import { PlacedElements } from './PlacedElements';
 import { PlacementLayer } from './PlacementLayer';
+import { SceneCameraControls } from './SceneCameraControls';
 
 /** Initial camera pose (docs/UI_UX_SPECIFICATION.md §Camera Controls). */
 const INITIAL_CAMERA_POSITION: [number, number, number] = [18, 14, 18];
@@ -108,15 +109,7 @@ export function SceneCanvas() {
         <Suspense fallback={null}>
           <PhysicsWorld />
         </Suspense>
-        <OrbitControls
-          makeDefault
-          enabled={!dragging}
-          target={[0, 0, 0]}
-          minDistance={2}
-          maxDistance={150}
-          // Keep the camera above ground level (y >= ~0.5 m near the horizon).
-          maxPolarAngle={Math.PI / 2 - 0.05}
-        />
+        <SceneCameraControls enabled={!dragging} />
       </Canvas>
     </CanvasErrorBoundary>
   );
