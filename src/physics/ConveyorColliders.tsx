@@ -33,10 +33,16 @@ import { Materials } from './materials';
  * API in the bound version; this is the supported equivalent.
  */
 export function ConveyorColliders() {
-  const conveyors = useSceneStore((s) =>
-    Object.values(s.elements).filter(
-      (element): element is ConveyorElement => element.type === 'conveyor',
-    ),
+  // Select the elements record (stable reference); filtering must not run inside
+  // the Zustand selector — a new array each call causes an infinite re-render loop
+  // via useSyncExternalStore ("getSnapshot should be cached").
+  const elements = useSceneStore((s) => s.elements);
+  const conveyors = useMemo(
+    () =>
+      Object.values(elements).filter(
+        (element): element is ConveyorElement => element.type === 'conveyor',
+      ),
+    [elements],
   );
 
   return (
