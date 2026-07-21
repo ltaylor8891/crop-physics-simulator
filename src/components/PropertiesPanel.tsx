@@ -1,12 +1,24 @@
 import { ELEMENT_DESCRIPTORS } from '../elements/registry';
+import {
+  getPropertyPath,
+  NAME_MAX_LENGTH,
+  POSITION_RANGE,
+  PROPERTY_FIELDS,
+  ROTATION_DEG_RANGE,
+  setPropertyPath,
+} from '../elements/propertySchema';
 import { useSceneStore } from '../state/sceneStore';
 import { useUiStore } from '../state/uiStore';
-import { radiansToDegrees } from '../utilities/units';
+import type { SceneElement } from '../types/elements';
+import { degreesToRadians, radiansToDegrees } from '../utilities/units';
+import { CheckboxField } from './fields/CheckboxField';
+import { EnumField } from './fields/EnumField';
+import { NumberField } from './fields/NumberField';
+import { TextField } from './fields/TextField';
 
 /**
  * Right-hand properties panel (docs/UI_UX_SPECIFICATION.md §Properties Panel).
- * Stage 4 shows a read-only summary plus duplicate/delete; editable
- * type-specific fields arrive with the properties editor (Stage 7).
+ * Type-specific fields come from PROPERTY_FIELDS (Stage 7).
  */
 export function PropertiesPanel() {
   const selectedElementId = useUiStore((s) => s.selectedElementId);
@@ -14,6 +26,7 @@ export function PropertiesPanel() {
   const element = useSceneStore((s) =>
     selectedElementId ? s.elements[selectedElementId] : undefined,
   );
+  const updateElement = useSceneStore((s) => s.updateElement);
   const duplicateElement = useSceneStore((s) => s.duplicateElement);
   const removeElement = useSceneStore((s) => s.removeElement);
 
@@ -28,27 +41,128 @@ export function PropertiesPanel() {
     );
   }
 
-  const { position } = element;
+  const idPrefix = element.id;
+  const fields = PROPERTY_FIELDS[element.type];
+
+  const patchProperties = (path: string, value: unknown) => {
+    const nextProperties = setPropertyPath(
+      element.properties as unknown as Record<string, unknown>,
+      path,
+      value,
+    );
+    updateElement(element.id, {
+      properties: nextProperties as unknown as SceneElement['properties'],
+    });
+  };
 
   return (
     <aside className="panel properties-panel" aria-label="Properties">
       <h2>Properties</h2>
-      <dl>
-        <dt>Name</dt>
-        <dd>{element.name}</dd>
-        <dt>Type</dt>
-        <dd>{ELEMENT_DESCRIPTORS[element.type].label}</dd>
-        <dt>Position</dt>
-        <dd>
-          x {position.x.toFixed(2)} m · y {position.y.toFixed(2)} m · z {position.z.toFixed(2)} m
-        </dd>
-        <dt>Rotation</dt>
-        <dd>{radiansToDegrees(element.rotationYaw).toFixed(0)}°</dd>
-      </dl>
-      <p className="hint">
-        Drag to move, R / Shift+R to rotate. Numeric editing arrives with the properties editor
-        (Stage 7).
-      </p>
+
+      <div className="property-form" key={element.id}>
+        <TextField
+          id={`${idPrefix}-name`}
+          label="Name"
+          value={element.name}
+          maxLength={NAME_MAX_LENGTH}
+          onCommit={(name) => updateElement(element.id, { name })}
+        />
+
+        <div className="field field-readonly">
+          <span className="field-readonly-label">Type</span>
+          <span>{ELEMENT_DESCRIPTORS[element.type].label}</span>
+        </div>
+
+        <NumberField
+          id={`${idPrefix}-pos-x`}
+          label="Position X"
+          value={element.position.x}
+          min={POSITION_RANGE.min}
+          max={POSITION_RANGE.max}
+          step={0.1}
+          unit="m"
+          onCommit={(x) => updateElement(element.id, { position: { ...element.position, x } })}
+        />
+        <NumberField
+          id={`${idPrefix}-pos-z`}
+          label="Position Z"
+          value={element.position.z}
+          min={POSITION_RANGE.min}
+          max={POSITION_RANGE.max}
+          step={0.1}
+          unit="m"
+          onCommit={(z) => updateElement(element.id, { position: { ...element.position, z } })}
+        />
+        {element.type === 'spawner' && (
+          <NumberField
+            id={`${idPrefix}-pos-y`}
+            label="Position Y"
+            value={element.position.y}
+            min={0}
+            max={20}
+            step={0.1}
+            unit="m"
+            onCommit={(y) => updateElement(element.id, { position: { ...element.position, y } })}
+          />
+        )}
+        <NumberField
+          id={`${idPrefix}-yaw`}
+          label="Rotation"
+          value={radiansToDegrees(element.rotationYaw)}
+          min={ROTATION_DEG_RANGE.min}
+          max={ROTATION_DEG_RANGE.max}
+          step={1}
+          unit="°"
+          decimals={1}
+          onCommit={(deg) => updateElement(element.id, { rotationYaw: degreesToRadians(deg) })}
+        />
+
+        <h3 className="property-section">Equipment</h3>
+        {fields.map((field) => {
+          if (field.kind === 'number') {
+            const raw = getPropertyPath(element.properties, field.path);
+            const value = typeof raw === 'number' ? raw : field.min;
+            return (
+              <NumberField
+                key={field.path}
+                id={`${idPrefix}-${field.path}`}
+                label={field.label}
+                value={value}
+                min={field.min}
+                max={field.max}
+                step={field.step}
+                unit={field.unit}
+                onCommit={(next) => patchProperties(field.path, next)}
+              />
+            );
+          }
+          if (field.kind === 'boolean') {
+            const raw = getPropertyPath(element.properties, field.path);
+            return (
+              <CheckboxField
+                key={field.path}
+                id={`${idPrefix}-${field.path}`}
+                label={field.label}
+                checked={Boolean(raw)}
+                onChange={(checked) => patchProperties(field.path, checked)}
+              />
+            );
+          }
+          const raw = getPropertyPath(element.properties, field.path);
+          return (
+            <EnumField
+              key={field.path}
+              id={`${idPrefix}-${field.path}`}
+              label={field.label}
+              value={typeof raw === 'string' ? raw : (field.options[0]?.value ?? '')}
+              options={field.options}
+              onChange={(next) => patchProperties(field.path, next)}
+            />
+          );
+        })}
+      </div>
+
+      <p className="hint">Drag to move in the viewport, or R / Shift+R to rotate.</p>
       <div className="panel-actions">
         <button
           type="button"

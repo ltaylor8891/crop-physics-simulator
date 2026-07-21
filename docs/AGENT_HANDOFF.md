@@ -6,18 +6,18 @@ _Last updated: 2026-07-21_
 
 ## Current Project State
 
-- Repository, complete design documentation, CI, and a runnable application exist.
-- Element placement works for all five types; conveyors render as parametric machines.
-- **Conveyor physics is live**: Rapier world (fixed 1/60 s), ground + belt/skirt colliders, belt conveyance via `kinematicVelocity` + per-step translation pin (ADR-006). Toolbar **Drop ball** / **Reset** for Stage 6 testing. Other element types still have placeholder visuals and no physics yet.
-- Dev hooks: `window.__cropSim` (stores including `useDebugStore`), `?seed=conveyors` / `?seed=physics`.
+- Stages 1–7 complete: docs, shell, 3D scene, placement, conveyor rendering, conveyor physics, and a full properties editor.
+- Properties panel edits name, position X/Z (and Y for spawners), rotation (degrees), and type-specific fields from `PROPERTY_FIELDS`. Invalid numbers revert with an inline range message.
+- Conveyor physics uses kinematic-velocity belts; toolbar **Drop ball** / **Reset** for Stage 6 testing.
+- Dev hooks: `window.__cropSim`, `?seed=conveyors` / `?seed=physics`.
 
 ## Current Branch
 
-- `main` after merging `feature/conveyor-physics`. Use focused feature branches for stage-sized changes.
+- `main` after merging `feature/properties-editor`. Use focused feature branches for stage-sized changes.
 
 ## Last Completed Stage
 
-- **Stage 6 — Conveyor physics** (see `docs/ROADMAP.md`). Stages 1–6 complete.
+- **Stage 7 — Properties editor**. Stages 1–7 complete.
 
 ## Work Currently In Progress
 
@@ -25,41 +25,31 @@ _Last updated: 2026-07-21_
 
 ## Next Recommended Task
 
-- **Stage 7 — Properties editor**: type-driven property forms from element descriptors, clamped numeric inputs with inline constraints, name editing, duplicate/delete (buttons already exist). While in the viewport, hand-verify KI-004 (drag-move) and KI-005 (ball rides belt / stopped belt holds). Acceptance criteria in `docs/ROADMAP.md` §Stage 7.
+- **Stage 8 — Crop spawning**: crop type presets are already in `src/elements/cropTypes.ts`; build `CropPool` skeleton and spawn accumulator on the fixed step (`src/simulation/spawning.ts`) using `src/utilities/flow.ts`. While testing, hand-verify KI-004 (drag-move) and KI-005 (ball rides belt). Acceptance criteria in `docs/ROADMAP.md` §Stage 8.
 
 ## Important Files
 
-- `docs/PRODUCT_SCOPE.md` — authoritative scope
-- `docs/TECHNICAL_DESIGN.md` — architecture; read before writing code
-- `docs/DECISIONS.md` — ADRs; do not reverse silently (ADR-006 mechanism now recorded)
-- `docs/PHYSICS_SPECIFICATION.md` — physics contract
-- `src/physics/` — `PhysicsWorld`, `ConveyorColliders`, `GroundCollider`, `DebugBalls`, `beltVelocity`, collision groups, materials
-- `src/elements/registry.ts` — element descriptors
-- `src/rendering/` — visuals (`ConveyorMesh`, placement, selection)
-- `src/state/` — `sceneStore`, `uiStore`, `simulationStore`, `debugStore`
-- `src/utilities/` — flow, snap, ids (unit-tested)
+- `src/elements/propertySchema.ts` — editor field definitions + path get/set
+- `src/components/PropertiesPanel.tsx` + `src/components/fields/` — form UI
+- `src/utilities/validation.ts` — parse/constrain helpers (unit-tested)
+- `src/physics/` — Rapier world, conveyor colliders, debug balls
+- `src/rendering/elements/ConveyorMesh.tsx` — parametric conveyor visuals
+- `docs/DECISIONS.md`, `docs/PHYSICS_SPECIFICATION.md`, `docs/AGENT_HANDOFF.md`
 
 ## Commands
 
 ```bash
-npm ci
-npm run dev
-npm run typecheck
-npm run lint
-npm run test
-npm run build
-npm run format:check
+npm ci && npm run test && npm run typecheck && npm run dev
 ```
 
 ## Test Status
 
-- **Passing**: 52 unit tests across utilities, registry, conveyor geometry, belt velocity/orientation, layout schema.
+- **Passing**: 61 unit tests.
 - **Failing**: none.
 
 ## Known Errors
 
-- None. Open verification gaps: KI-004, KI-005. KI-002 closed.
-- Fixed on `main` (`dc809d7`): Stage 6 briefly crashed the viewport with a Zustand `getSnapshot` infinite loop in `ConveyorColliders` (misreported as “WebGL unavailable”). Refresh if you still see the old error.
+- None. Open verification gaps: KI-004, KI-005. Viewport crash from Stage 6 Zustand loop fixed (`dc809d7`).
 
 ## Uncommitted Work
 
@@ -67,24 +57,14 @@ npm run format:check
 
 ## Architectural Constraints (do not violate)
 
-- 1 world unit = 1 metre; Y-up right-handed; element flow along local +X; yaw in radians CCW about +Y (ADR-003).
-- Fixed physics timestep 1/60 s; simulation logic on fixed steps only (ADR-004).
-- Conveyors via kinematic-velocity surface motion with pinned translation — not moving geometry (ADR-006).
-- Crops from a fixed-size pool with hard cap + spawner throttling (ADR-005) — Stage 8/9.
-- Stores hold serialisable plain data only; per-frame transforms bypass React state.
-- Save format changes require version bump + migration + doc/schema/sample updates.
-
-## Decisions Requiring Review Before Reversal
-
-- All Accepted ADRs in `docs/DECISIONS.md` (ADR-001…ADR-008).
-
-## Areas Requiring User Confirmation
-
-- Crop type presets and build-area / grid-snap assumptions (unchanged).
+- 1 world unit = 1 metre; Y-up; flow along local +X; yaw radians CCW about +Y.
+- Fixed physics timestep 1/60 s; simulation on fixed steps only.
+- Conveyors via kinematic-velocity + pinned translation (ADR-006).
+- Zustand selectors must return stable references (no new arrays/objects from the selector itself).
+- Stores hold serialisable plain data only.
 
 ## Suggested Starting Point for the Next Agent
 
-1. Read `AGENTS.md`, then `README.md`, `docs/PRODUCT_SCOPE.md`, `docs/TECHNICAL_DESIGN.md`, `docs/DECISIONS.md`, and this file.
-2. `git status` + `git log --oneline -15`.
-3. `npm ci && npm run test && npm run typecheck && npm run dev`.
-4. Hand-check KI-005 (Drop ball on a running conveyor), then start Stage 7.
+1. Read `AGENTS.md` and this file; confirm `git status` / recent log.
+2. `npm ci && npm run test && npm run typecheck && npm run dev`.
+3. Start Stage 8 (crop spawning) per `docs/ROADMAP.md`.
