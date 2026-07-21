@@ -59,6 +59,7 @@ npm run format:check
 ## Known Errors
 
 - None. Open verification gaps: KI-004, KI-005. KI-002 closed.
+- Fixed on `main` (`dc809d7`): Stage 6 briefly crashed the viewport with a Zustand `getSnapshot` infinite loop in `ConveyorColliders` (misreported as “WebGL unavailable”). Refresh if you still see the old error.
 
 ## Uncommitted Work
 
