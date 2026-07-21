@@ -10,7 +10,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 4   | Element placement                   | Complete    |
 | 5   | Conveyor rendering                  | Complete    |
 | 6   | Conveyor physics                    | Complete    |
-| 7   | Properties editor                   | Not started |
+| 7   | Properties editor                   | Complete    |
 | 8   | Crop spawning                       | Not started |
 | 9   | Crop physics                        | Not started |
 | 10  | Floor despawning                    | Not started |
@@ -74,7 +74,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: type-driven property forms from element descriptors, clamped numeric inputs with inline constraint messages, name editing, duplicate/delete buttons.
 - **Acceptance criteria**: all documented ranges enforced; invalid entry reverts and shows the constraint; store never holds invalid values.
 - **Dependencies**: Stage 4 (usable with placeholder meshes; richer after 5–6).
-- **Status**: Not started.
+- **Status**: Complete. Schema-driven fields in `src/elements/propertySchema.ts`; number/text commit on blur/Enter with revert-on-invalid; conveyor property edits update mesh and physics colliders live.
 
 ## Stage 8 — Crop spawning
 

@@ -8,7 +8,7 @@ The simulator lets equipment planners and enthusiasts sketch a crop-handling lin
 
 ## Current Development Status
 
-**Stage 6 of 15 complete** — through conveyor physics (Rapier belts carry dynamic bodies). Properties editor is next. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
+**Stage 7 of 15 complete** — through the properties editor. Crop spawning is next. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
 
 ## Main Features
 
@@ -111,7 +111,7 @@ npm run format:check  # Prettier check only (used by CI)
 
 ## Known Limitations
 
-- Only conveyors have physics so far; elevators/spawners/zones are visuals or placeholders. Crop spawning, save/load, and statistics are stages 7–15 of the roadmap.
+- Elevators/spawners/zones still lack full physics/simulation. Crop spawning, save/load, and statistics are stages 8–15 of the roadmap.
 - Physics is an approximation: crops are simple convex bodies, not deformable grains. See [docs/PHYSICS_SPECIFICATION.md](docs/PHYSICS_SPECIFICATION.md).
 - Current issues are tracked in [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
 
