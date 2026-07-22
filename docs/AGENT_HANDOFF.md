@@ -12,15 +12,15 @@ _Last updated: 2026-07-22_
 
 ## Current Branch
 
-- Check `git status` — size/density work may be on a feature branch or uncommitted on `main`.
+- `main` (includes `91560a3` crop size/density).
 
 ## Last Completed Stage
 
-- **Stage 11 — Elevators** (on `main`). Follow-up: spawner size/density distributions.
+- **Stage 11 — Elevators**, plus per-spawner crop size/density (`fileVersion` 2).
 
 ## Work Currently In Progress
 
-- Nothing after size/density implementation (commit if pending).
+- None.
 
 ## Next Recommended Task
 
@@ -49,7 +49,7 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Uncommitted Work
 
-- Check `git status`.
+- None after `91560a3` (handoff tweak may be local).
 
 ## Architectural Constraints (do not violate)
 
