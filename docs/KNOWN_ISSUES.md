@@ -20,6 +20,13 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 - **Proposed resolution**: Clear `TEMPORARILY_DISABLED_ELEMENT_TYPES`, restore schema elevator branch (new `fileVersion`), re-wire UI when re-enabling.
 - **Status**: Open (by design)
 
+### KI-008 — Production build must include Rapier WASM
+
+- **Description**: Vite does not emit `rapier_wasm3d_bg.wasm` next to the JS chunk by default. Without it, `@react-three/rapier` init hangs in Suspense — UI/FPS work, Play toggles, but active crops stay 0.
+- **Severity**: High (broke taynium.com/simulation-app deploy)
+- **Proposed resolution**: post-build `scripts/copy-rapier-wasm.mjs` (via `npm run build`) copies WASM into `dist/assets/`. Always upload full `dist/` including `assets/rapier_wasm3d_bg.wasm`.
+- **Status**: Closed (mitigated in build)
+
 ### KI-002 — Contact surface velocity mechanism unverified in bound Rapier version
 
 - **Description**: ADR-006 selects contact surface velocity for belts, but whether `@react-three/rapier`'s bound Rapier version exposes it directly (vs needing a per-step contact-pair workaround) has not been verified in code.

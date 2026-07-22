@@ -71,7 +71,7 @@ export function Toolbar() {
       <span className="toolbar-brand" title="Taynium">
         <img
           className="toolbar-logo"
-          src="/taynium-logo.svg"
+          src={`${import.meta.env.BASE_URL}taynium-logo.svg`}
           alt="Taynium"
           width={240}
           height={56}

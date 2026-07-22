@@ -10,6 +10,7 @@ _Last updated: 2026-07-22_
 - Post-Reset lag fix (ADR-017) and potato disk visual fix retained; Stage 14 pile-perf pass was reverted at user request.
 - **Bucket elevators temporarily removed**: not in library; `fileVersion` 3 strips them on load; sim/mesh code kept behind `TEMPORARILY_DISABLED_ELEMENT_TYPES`.
 - Toolbar: open file name, Taynium logo (`public/taynium-logo.svg`), copyright.
+- Deploy fix: build copies `rapier_wasm3d_bg.wasm` into `dist/assets/` (required for crops on static hosts).
 - Next major feature: **Stage 14 performance**, or re-enable elevators when requested.
 
 ## Current Branch
@@ -44,15 +45,15 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Test Status
 
-- Run full gate: `npm run typecheck && npm run lint && npm run test && npm run build`.
+- Full gate passed after deploy/WASM fix (`typecheck`, `lint`, `test`, `build`). Confirm `dist/assets/rapier_wasm3d_bg.wasm` exists after build.
 
 ## Known Errors
 
-- None from this fix. Open gaps: KI-004, KI-005; Stage 14 FPS hand-check.
+- None from this fix. Open gaps: KI-004, KI-005; Stage 14 FPS hand-check. KI-008 closed (WASM copy on build).
 
 ## Uncommitted Work
 
-- Check `git status`.
+- None (deploy/WASM fix committed).
 
 ## Architectural Constraints (do not violate)
 

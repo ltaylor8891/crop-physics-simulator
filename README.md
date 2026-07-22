@@ -70,6 +70,10 @@ npm run format:check  # Prettier check only (used by CI)
 
 `npm run build` runs `tsc --noEmit` followed by `vite build`. Output goes to `dist/` (git-ignored). Serve `dist/` with any static file server; there is no server-side component.
 
+The build uses a **relative** asset base (`base: './'` in `vite.config.ts`) so uploading `dist/` under a subfolder (e.g. `https://taynium.com/simulation-app/`) works. Do not hard-code root-absolute URLs like `/assets/…` or `/taynium-logo.svg` in the app.
+
+After `npm run build`, upload the **entire** `dist/` folder (including `dist/assets/rapier_wasm3d_bg.wasm`). Without that WASM file the UI still renders, but Play never creates crops. Hosts must serve `.wasm` as `application/wasm` (GitHub Pages does).
+
 ## Tests
 
 `npm run test` runs Vitest against `src/**/*.test.ts(x)`. Pure logic (unit conversions, spawn-rate calculations, serialization) is unit-tested; rendering and physics behaviour are verified manually per the acceptance criteria in [docs/ROADMAP.md](docs/ROADMAP.md).

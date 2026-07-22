@@ -1,13 +1,24 @@
+import { useEffect, useState } from 'react';
+import { cropRuntime } from '../simulation/cropRuntime';
 import { useSimulationStore } from '../state/simulationStore';
 
 /** Bottom status bar with live scene statistics (docs/UI_UX_SPECIFICATION.md). */
 export function StatusBar() {
   const statistics = useSimulationStore((s) => s.statistics);
+  const running = useSimulationStore((s) => s.running);
   const maxActiveCrops = useSimulationStore((s) => s.settings.maxActiveCrops);
+  const [physicsReady, setPhysicsReady] = useState(() => cropRuntime.isBound);
   const spillPercent =
     statistics.totalMassSpawnedKg > 0
       ? (statistics.spilledMassKg / statistics.totalMassSpawnedKg) * 100
       : 0;
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setPhysicsReady(cropRuntime.isBound);
+    }, 500);
+    return () => window.clearInterval(id);
+  }, []);
 
   return (
     <footer className="status-bar" aria-label="Scene statistics">
@@ -21,6 +32,14 @@ export function StatusBar() {
         {Math.round(statistics.fps)} FPS
       </span>
       {statistics.throttled && <span className="status-throttled">THROTTLED</span>}
+      {running && !physicsReady && (
+        <span
+          className="status-throttled"
+          title="Rapier WASM has not loaded — crops cannot spawn. Redeploy dist/ including assets/rapier_wasm3d_bg.wasm."
+        >
+          PHYSICS LOADING…
+        </span>
+      )}
     </footer>
   );
 }
