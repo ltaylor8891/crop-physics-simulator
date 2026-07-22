@@ -22,6 +22,7 @@ import {
 import { isPointInsideZone } from '../simulation/zoneVolume';
 import { useSceneStore } from '../state/sceneStore';
 import { useSimulationStore } from '../state/simulationStore';
+import { isElementTypeEnabled } from '../elements/registry';
 import type { ElementId, ElevatorElement, SpawnerElement } from '../types/elements';
 import { kgPerSecondToTonnesPerHour } from '../utilities/flow';
 
@@ -62,7 +63,10 @@ export function SpawningSystem() {
 
       const liveElevators = new Set(
         Object.values(state.elements)
-          .filter((el): el is ElevatorElement => el.type === 'elevator')
+          .filter(
+            (el): el is ElevatorElement =>
+              el.type === 'elevator' && isElementTypeEnabled('elevator'),
+          )
           .map((el) => el.id),
       );
       for (const id of elevatorsRef.current.keys()) {
@@ -122,7 +126,8 @@ export function SpawningSystem() {
     }
 
     const elevators = Object.values(elements).filter(
-      (el): el is ElevatorElement => el.type === 'elevator',
+      (el): el is ElevatorElement =>
+        el.type === 'elevator' && isElementTypeEnabled('elevator'),
     );
 
     const intakes = elevators.map((el) => ({

@@ -107,7 +107,8 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
     previousSpeedRef.current = beltSpeed;
     if (!wasStopped || beltSpeed === 0) return;
     world.bodies.forEach((body) => {
-      if (body.isDynamic() && body.isSleeping()) body.wakeUp();
+      // Skip parked pool slots (disabled) — waking all ~3×maxActive crops stalls Reset.
+      if (body.isDynamic() && body.isEnabled() && body.isSleeping()) body.wakeUp();
     });
   }, [beltSpeed, world]);
 
@@ -145,6 +146,7 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
       body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     });
   });
+
 
   return (
     <>

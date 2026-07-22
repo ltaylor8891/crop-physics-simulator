@@ -1,4 +1,4 @@
-import { ELEMENT_DESCRIPTORS, ELEMENT_TYPES } from '../elements/registry';
+import { ELEMENT_DESCRIPTORS, PLACEABLE_ELEMENT_TYPES } from '../elements/registry';
 import { useUiStore } from '../state/uiStore';
 
 /**
@@ -14,7 +14,7 @@ export function ElementLibrary() {
     <aside className="panel element-library" aria-label="Element library">
       <h2>Elements</h2>
       <ul>
-        {ELEMENT_TYPES.map((type) => {
+        {PLACEABLE_ELEMENT_TYPES.map((type) => {
           const descriptor = ELEMENT_DESCRIPTORS[type];
           const active = placementType === type;
           return (

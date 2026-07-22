@@ -90,7 +90,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: instanced crop rendering (one InstancedMesh per crop type), full pool implementation with cap + throttling, CCD, sleeping, material table from `PHYSICS_SPECIFICATION.md`.
 - **Acceptance criteria**: 1 000 active crops at ≥ 60 FPS mid-range / 2 000 at ≥ 30 FPS; crops don't tunnel through belts at 300 m/min; piles settle and sleep.
 - **Dependencies**: Stage 8.
-- **Status**: Complete. Per-type `InstancedRigidBodies` (ball / potato capsule / sugar-beet ball), preset materials, CCD, linear damping 0.05, global `maxActiveCrops` cap. FPS targets remain a Stage 14 hand-check on mid-range hardware.
+- **Status**: Complete. Per-type world-managed Rapier pools + InstancedMesh (sphere visuals), preset materials, CCD, linear damping 0.05, global `maxActiveCrops` cap (ADR-017). FPS targets remain a Stage 14 hand-check on mid-range hardware.
 
 ## Stage 10 — Floor despawning
 

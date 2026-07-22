@@ -32,7 +32,7 @@ body,
   display: grid;
   height: 100%;
   grid-template-columns: 240px 1fr 300px;
-  grid-template-rows: 48px 1fr 32px;
+  grid-template-rows: 64px 1fr 32px;
   grid-template-areas:
     'toolbar toolbar toolbar'
     'library viewport properties'
@@ -44,15 +44,30 @@ body,
   grid-area: toolbar;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   padding: 0 12px;
   background: var(--panel-bg);
   border-bottom: 1px solid var(--panel-border);
+  min-width: 0;
+}
+
+.toolbar-brand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.toolbar-logo {
+  display: block;
+  height: 56px;
+  width: auto;
+  object-fit: contain;
 }
 
 .toolbar-title {
   font-weight: 600;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .toolbar-scene-name {
@@ -60,16 +75,30 @@ body,
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+  max-width: 220px;
 }
 
 .toolbar-group {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .toolbar-group:first-of-type {
   margin-left: auto;
+}
+
+.toolbar-copyright {
+  margin-left: 8px;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  color: var(--text-dim);
 }
 
 .toolbar-toggle {

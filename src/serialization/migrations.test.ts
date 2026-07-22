@@ -1,21 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import { CROP_TYPES } from '../elements/cropTypes';
-import { migrateLayout, migrateV1toV2 } from './migrations';
+import { migrateLayout, migrateV1toV2, migrateV2toV3 } from './migrations';
 
 describe('migrateLayout', () => {
-  it('migrates fileVersion 1 to 2', () => {
+  it('migrates fileVersion 1 through to current', () => {
     const result = migrateLayout({ fileVersion: 1, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(2);
+    expect(result.value.fileVersion).toBe(3);
     expect(result.value.keep).toBe(true);
   });
 
-  it('accepts current fileVersion 2 unchanged', () => {
-    const result = migrateLayout({ fileVersion: 2, keep: true });
+  it('migrates fileVersion 2 to 3', () => {
+    const result = migrateLayout({ fileVersion: 2, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(2);
+    expect(result.value.fileVersion).toBe(3);
+  });
+
+  it('accepts current fileVersion 3 unchanged', () => {
+    const result = migrateLayout({ fileVersion: 3, keep: true });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.fileVersion).toBe(3);
   });
 
   it('rejects non-integer fileVersion', () => {
@@ -24,7 +31,7 @@ describe('migrateLayout', () => {
   });
 
   it('rejects future versions', () => {
-    const result = migrateLayout({ fileVersion: 3 });
+    const result = migrateLayout({ fileVersion: 4 });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.errors[0]?.message).toMatch(/newer version/i);
@@ -53,5 +60,23 @@ describe('migrateV1toV2', () => {
     expect(props.diameterMinMm).toBe(20);
     expect(props.diameterMaxMm).toBe(150);
     expect(props.densityKgPerM3).toBeCloseTo(CROP_TYPES.potato.defaultDensityKgPerM3, 5);
+  });
+});
+
+describe('migrateV2toV3', () => {
+  it('strips elevator elements', () => {
+    const migrated = migrateV2toV3({
+      fileVersion: 2,
+      elements: [
+        { type: 'conveyor', id: 'c1' },
+        { type: 'elevator', id: 'e1' },
+        { type: 'spawner', id: 's1' },
+      ],
+    });
+    expect(migrated.fileVersion).toBe(3);
+    expect(migrated.elements).toEqual([
+      { type: 'conveyor', id: 'c1' },
+      { type: 'spawner', id: 's1' },
+    ]);
   });
 });

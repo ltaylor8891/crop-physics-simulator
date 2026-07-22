@@ -14,7 +14,6 @@ export function StatusBar() {
       <span>
         Active crops {statistics.activeCrops}/{maxActiveCrops}
       </span>
-      <span>In elevator {statistics.inElevator}</span>
       <span title="Rolling 10 s window">In {statistics.throughputInTph.toFixed(1)} t/h</span>
       <span title="Rolling 10 s window">Out {statistics.throughputCollectedTph.toFixed(1)} t/h</span>
       <span>Spilled {spillPercent.toFixed(1)} %</span>

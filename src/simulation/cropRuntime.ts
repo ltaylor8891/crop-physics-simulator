@@ -1,7 +1,7 @@
 /**
  * Bridges per-type CropPools to Rapier bodies bound by CropBodies (ADR-005 / Stage 9).
  * Global active count is capped at `maxActiveCrops`; each crop type has its own
- * InstancedRigidBodies pool of that capacity.
+ * world-managed body pool of that capacity (InstancedMesh for visuals).
  */
 
 import type { RapierCollider, RapierRigidBody } from '@react-three/rapier';
@@ -80,12 +80,14 @@ function visualScale(radius: number, halfHeight: number, shape: 'ball' | 'capsul
 } {
   const r = Math.max(1e-4, radius);
   const sx = r / CROP_MESH_REF_RADIUS;
-  if (shape === 'ball' || halfHeight < MIN_CAPSULE_HALF_HEIGHT) {
+  // Length% ≤ 100 ⇒ halfHeight 0 (sphere). Do not force a tiny halfHeight — that
+  // non-uniform-scales the capsule mesh into a flat disk (sy ≈ 0.02).
+  if (shape === 'ball' || halfHeight <= MIN_CAPSULE_HALF_HEIGHT) {
     return { x: sx, y: sx, z: sx };
   }
   return {
     x: sx,
-    y: Math.max(MIN_CAPSULE_HALF_HEIGHT, halfHeight) / CROP_MESH_REF_HALF_HEIGHT,
+    y: halfHeight / CROP_MESH_REF_HALF_HEIGHT,
     z: sx,
   };
 }
@@ -210,12 +212,9 @@ class CropRuntime {
 
     const preset = CROP_TYPES[activation.cropType];
     const radius = Math.max(1e-4, activation.radius);
-    // Physics colliders are balls (InstancedRigidBodies colliders="ball").
-    // Capsule halfHeight is visual-only for potato meshes.
+    // Physics is always a ball; halfHeight is visual-only (0 when length ≤ diameter).
     const visualHalfHeight =
-      preset.collider.shape === 'capsule'
-        ? Math.max(MIN_CAPSULE_HALF_HEIGHT, activation.halfHeight)
-        : 0;
+      preset.collider.shape === 'capsule' ? Math.max(0, activation.halfHeight) : 0;
 
     collider.setFriction(activation.friction);
     collider.setRestitution(activation.restitution);
@@ -290,41 +289,63 @@ class CropRuntime {
         this.release({ cropType: type, slot: id });
       }
       bucket.pool.releaseAll();
+      // One-shot park of every instance; per-frame sync skips when idle.
+      this.clearInstanceMatrices(type);
     }
     this.globalActive = 0;
   }
 
+  /** Hide all instances for a type (used after reset / reconfigure). */
+  clearInstanceMatrices(cropType: CropTypeId): void {
+    const bucket = this.buckets[cropType];
+    const mesh = bucket.mesh;
+    if (!mesh) return;
+    for (let id = 0; id < bucket.pool.capacity; id++) {
+      this.writeInstanceMatrix(
+        mesh,
+        id,
+        0,
+        PARK_Y - id * 0.02,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+      );
+    }
+    mesh.count = 0;
+    mesh.instanceMatrix.needsUpdate = true;
+  }
+
   /**
-   * Drive instance matrices from body pose + stored scale (after Rapier/Instanced sync).
-   * Inactive slots stay at scale 0 so unit/ref meshes never appear as a giant blob.
+   * Drive instance matrices from body pose + stored scale for **active** slots only.
+   * Inactive matrices are written once on release/reset — rewriting the whole pool
+   * every frame was the main post-overload lag source (capacity × crop types).
    */
   syncInstanceScales(cropType: CropTypeId): void {
     const bucket = this.buckets[cropType];
     const mesh = bucket.mesh;
     if (!mesh) return;
 
-    const capacity = bucket.pool.capacity;
-    for (let id = 0; id < capacity; id++) {
-      const body = bucket.bodies[id];
-      const active = bucket.pool.getSlot(id).active;
-      if (!body || !active) {
-        this.writeInstanceMatrix(
-          mesh,
-          id,
-          0,
-          PARK_Y - id * 0.02,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-        );
-        continue;
+    const activeCount = bucket.pool.activeCount;
+    if (activeCount === 0) {
+      if (mesh.count !== 0) {
+        mesh.count = 0;
       }
+      return;
+    }
 
+    // Sparse slot ids require count ≥ max index + 1; keep full capacity while busy.
+    if (mesh.count !== bucket.pool.capacity) {
+      mesh.count = bucket.pool.capacity;
+    }
+
+    bucket.pool.forEachActive((id) => {
+      const body = bucket.bodies[id];
+      if (!body) return;
       const t = body.translation();
       const r = body.rotation();
       this.writeInstanceMatrix(
@@ -341,7 +362,7 @@ class CropRuntime {
         bucket.scaleY[id]!,
         bucket.scaleZ[id]!,
       );
-    }
+    });
     mesh.instanceMatrix.needsUpdate = true;
   }
 

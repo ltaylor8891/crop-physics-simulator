@@ -60,7 +60,7 @@ High belt friction + zero belt restitution is what makes surface-velocity convey
 - Belt vector = local `+X * (beltSpeed_mPerMin / 60)`, pitched by incline and yawed into world space.
 - Side skirts are separate **`fixed`** colliders (no surface velocity).
 - Expected behaviour: a crop on a running belt travels at the labelled speed (e.g. 60 m/min → 1 m/s along the belt). When the belt is stopped, injection is skipped and crops decelerate by friction rather than instantly freezing.
-- Starting a stopped belt wakes sleeping dynamic bodies in the world so settled piles resume.
+- Starting a stopped belt wakes enabled sleeping dynamic bodies so settled piles resume (parked pool bodies stay disabled).
 
 ## Inclined Conveyor Behaviour
 
@@ -90,12 +90,12 @@ Consequence: elevators never jam or spill internally. This is a deliberate simpl
 ## Physics Sleeping
 
 - Rapier body sleeping stays **enabled** for crops: settled piles (e.g. inside a collection area or heaped on a stopped belt) go to sleep and cost no solver time.
-- Starting a stopped belt must wake sleeping crops on it. Since a surface-velocity change generates no wake event, the belt component explicitly wakes bodies in its bounding volume when `beltSpeed` changes from 0 to non-zero.
+- Starting a stopped belt must wake sleeping crops on it. Since a surface-velocity change generates no wake event, the belt component wakes **enabled** sleeping dynamic bodies when `beltSpeed` changes from 0 to non-zero (parked pool slots stay disabled and are skipped).
 - Bodies in the pool's inactive state are disabled entirely (not merely asleep).
 
 ## Fixed Timestep
 
-- `timeStep = 1/60 s`. The physics world steps on accumulated render time (0–N steps per frame) with rendering interpolation; max 3 catch-up steps per frame, surplus time dropped (simulation slows under heavy load rather than spiralling).
+- `timeStep = 1/60 s`. The physics world steps on accumulated render time (0–N steps per frame) without render interpolation (ADR-017); max 3 catch-up steps per frame, surplus time dropped (simulation slows under heavy load rather than spiralling).
 - All time-based simulation logic (spawn accumulators, despawn timers, elevator transit, statistics windows) advances in the fixed-step callback, never per render frame.
 
 ## Maximum Active Bodies

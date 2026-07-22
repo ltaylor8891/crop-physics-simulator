@@ -58,14 +58,16 @@ export function buildCurrentLayoutFile(): LayoutFile {
 /** Trigger a browser download of the current layout. */
 export function downloadCurrentLayout(): void {
   const layout = buildCurrentLayoutFile();
+  const filename = layoutDownloadFilename(layout.meta.name);
   const json = `${JSON.stringify(layout, null, 2)}\n`;
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = layoutDownloadFilename(layout.meta.name);
+  anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
+  useSceneStore.getState().setOpenFileName(filename);
 }
 
 /**
@@ -82,6 +84,7 @@ export async function loadLayoutFile(file: File): Promise<ParseError[] | null> {
   const parsed = parseLayout(text);
   if (!parsed.ok) return parsed.errors;
   applyLayout(parsed.value);
+  useSceneStore.getState().setOpenFileName(file.name);
   return null;
 }
 

@@ -86,7 +86,7 @@ export const ELEMENT_DESCRIPTORS: Record<ElementType, ElementDescriptor> = {
   },
 };
 
-/** Library panel order. */
+/** All known element types (includes temporarily disabled ones). */
 export const ELEMENT_TYPES: ElementType[] = [
   'conveyor',
   'elevator',
@@ -94,6 +94,24 @@ export const ELEMENT_TYPES: ElementType[] = [
   'collectionZone',
   'despawnZone',
 ];
+
+/**
+ * Bucket elevators are temporarily out of the product (library / saves / sim).
+ * Types, mesh, and `elevator.ts` remain for a quick restore — flip this set empty
+ * and restore the schema elevator branch + `fileVersion` policy when re-enabling.
+ */
+export const TEMPORARILY_DISABLED_ELEMENT_TYPES: ReadonlySet<ElementType> = new Set([
+  'elevator',
+]);
+
+/** Library panel + placement order (excludes temporarily disabled types). */
+export const PLACEABLE_ELEMENT_TYPES: ElementType[] = ELEMENT_TYPES.filter(
+  (type) => !TEMPORARILY_DISABLED_ELEMENT_TYPES.has(type),
+);
+
+export function isElementTypeEnabled(type: ElementType): boolean {
+  return !TEMPORARILY_DISABLED_ELEMENT_TYPES.has(type);
+}
 
 /**
  * Local-space bounding box of an element's placeholder geometry:

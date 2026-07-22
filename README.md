@@ -1,10 +1,10 @@
 # Crop Physics Simulator
 
-A browser-based 3D simulator for agricultural crop-handling equipment. Users place conveyors, elevators, and crop spawners in a 3D scene, configure throughput (tonnes per hour, belt speed, incline), and watch individual crop bodies flow through the machinery under real-time physics.
+A browser-based 3D simulator for agricultural crop-handling equipment. Users place conveyors and crop spawners in a 3D scene, configure throughput (tonnes per hour, belt speed, incline), and watch individual crop bodies flow through the machinery under real-time physics.
 
 ## Purpose
 
-The simulator lets equipment planners and enthusiasts sketch a crop-handling line (intake → conveyors → elevators → collection) and visually sanity-check geometry, belt speeds, transfer points, and throughput before anything is built. It is an **engineering approximation for visualisation and rough validation**, not a certified discrete-element-method (DEM) simulation. See [docs/PHYSICS_SPECIFICATION.md](docs/PHYSICS_SPECIFICATION.md) for the exact fidelity boundaries.
+The simulator lets equipment planners and enthusiasts sketch a crop-handling line (intake → conveyors → collection) and visually sanity-check geometry, belt speeds, transfer points, and throughput before anything is built. It is an **engineering approximation for visualisation and rough validation**, not a certified discrete-element-method (DEM) simulation. See [docs/PHYSICS_SPECIFICATION.md](docs/PHYSICS_SPECIFICATION.md) for the exact fidelity boundaries. Bucket elevators are temporarily unavailable.
 
 ## Current Development Status
 
@@ -14,13 +14,12 @@ The simulator lets equipment planners and enthusiasts sketch a crop-handling lin
 
 Planned feature set (see [docs/PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md) for the authoritative scope):
 
-- Element library: flat/inclined belt conveyors, bucket elevators, crop spawners, collection zones
+- Element library: flat/inclined belt conveyors, crop spawners, collection / despawn zones
 - Real-time rigid-body crop physics (Rapier, WebAssembly)
 - Conveyor motion via contact surface velocity (belts stay static; contacts are driven)
 - Crop spawning driven by throughput (t/h) with per-spawner size distribution, density, and kg-credit mass accounting
 - Floor despawn: crops touching the floor are removed after 3 seconds
-- Elevators: intake → timed transit → rate-capped discharge (buckets not simulated)
-- Scene statistics: active crops, in-elevator, rolling 10 s In/Out t/h, spill %, FPS
+- Scene statistics: active crops, rolling 10 s In/Out t/h, spill %, FPS
 - Versioned JSON save/load of layouts ([docs/SAVE_FILE_FORMAT.md](docs/SAVE_FILE_FORMAT.md))
 
 ## Technology Stack

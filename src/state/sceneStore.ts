@@ -16,6 +16,11 @@ function nowIso(): string {
  */
 interface SceneState {
   sceneName: string;
+  /**
+   * Browser file name of the open layout (`null` = unsaved / New).
+   * Shown in the toolbar; not part of the save JSON.
+   */
+  openFileName: string | null;
   /** ISO 8601 UTC; preserved across saves, reset on New. */
   createdAt: string;
   elements: Record<ElementId, SceneElement>;
@@ -25,16 +30,19 @@ interface SceneState {
   /** Copy an element with a fresh id, offset by 1 m; returns the new id or null. */
   duplicateElement: (id: ElementId) => ElementId | null;
   setSceneName: (name: string) => void;
+  setOpenFileName: (name: string | null) => void;
   clearScene: () => void;
   replaceScene: (next: {
     sceneName: string;
     createdAt: string;
     elements: Record<ElementId, SceneElement>;
+    openFileName?: string | null;
   }) => void;
 }
 
 export const useSceneStore = create<SceneState>((set, get) => ({
   sceneName: 'Untitled scene',
+  openFileName: null,
   createdAt: nowIso(),
   elements: {},
 
@@ -77,13 +85,21 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
   setSceneName: (name) => set({ sceneName: name }),
 
+  setOpenFileName: (name) => set({ openFileName: name }),
+
   clearScene: () =>
-    set({ elements: {}, sceneName: 'Untitled scene', createdAt: nowIso() }),
+    set({
+      elements: {},
+      sceneName: 'Untitled scene',
+      openFileName: null,
+      createdAt: nowIso(),
+    }),
 
   replaceScene: (next) =>
     set({
       sceneName: next.sceneName,
       createdAt: next.createdAt,
       elements: next.elements,
+      openFileName: next.openFileName !== undefined ? next.openFileName : get().openFileName,
     }),
 }));

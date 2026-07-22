@@ -6,17 +6,17 @@ Screen layout, interaction workflows, and input behaviour. Dark theme by default
 
 ```text
 ┌────────────────────────────────────────────────────────────────────┐
-│ TOP TOOLBAR:  [Logo] [New] [Load] [Save]   [▶ Play/⏸ Pause] [⟲ Reset]│
-│               [Grid snap ✓]                    [Stats summary] [?] │
+│ TOP TOOLBAR:  [Taynium logo] Crop Physics Simulator · <file name>  │
+│               [New][Load][Save] [Play][Reset] [Grid]  © Taynium     │
 ├──────────────┬────────────────────────────────────┬────────────────┤
 │ ELEMENT      │                                    │ PROPERTIES     │
 │ LIBRARY      │                                    │ PANEL          │
 │              │           3D VIEWPORT              │                │
 │ ▷ Conveyor   │      (React Three Fiber canvas)    │ (selected      │
-│ ▷ Elevator   │                                    │  element's     │
-│ ▷ Spawner    │                                    │  editable      │
-│ ▷ Collection │                                    │  properties)   │
-│ ▷ Despawn    │                                    │                │
+│ ▷ Spawner    │                                    │  element's     │
+│ ▷ Collection │                                    │  editable      │
+│ ▷ Despawn    │                                    │  properties)   │
+│              │                                    │                │
 │              │                                    │                │
 ├──────────────┴────────────────────────────────────┴────────────────┤
 │ STATUS BAR: Active crops 812/2000 · In 42.0 t/h · Out 39.5 t/h ·   │
@@ -29,9 +29,9 @@ Screen layout, interaction workflows, and input behaviour. Dark theme by default
 
 ## Left-Hand Element Library
 
-- Vertical list of placeable element types: icon/thumbnail, label.
+- Vertical list of placeable element types: icon/thumbnail, label (`PLACEABLE_ELEMENT_TYPES`).
 - Clicking an entry enters **placement mode** for that type (entry shows an active highlight).
-- Disabled entries (not yet implemented) render greyed with a "coming soon" tooltip rather than being hidden, so the roadmap is visible in the product.
+- Bucket elevators are temporarily omitted from the library (not greyed); Stage 11 implementation remains in the repo for restore.
 
 ## Properties Panel (right)
 
@@ -42,9 +42,12 @@ Screen layout, interaction workflows, and input behaviour. Dark theme by default
 
 ## Top Toolbar
 
-- **File group**: New (confirm if scene non-empty), Load (file picker; drag-drop onto window also works), Save (downloads `<scene-name>.json`).
+- **Brand**: Taynium logo + product title “Crop Physics Simulator”.
+- **Open file**: shows the loaded/saved `.json` file name, or “Untitled scene” when no file is open.
+- **File group**: New (confirm if scene non-empty), Load (file picker; drag-drop onto window also works), Save (downloads `<scene-name>.json` and updates the open-file label).
 - **Simulation group**: Play/Pause toggle, Reset (despawns all crops, zeroes statistics; layout untouched).
-- **View group**: Grid-snap toggle (default on, 0.5 m), Help (?) opening a keyboard-shortcut overlay.
+- **View group**: Grid-snap toggle (default on, 0.5 m).
+- **Copyright**: `Copyright © 2026 Taynium. All rights reserved.`
 
 ## Scene Statistics
 

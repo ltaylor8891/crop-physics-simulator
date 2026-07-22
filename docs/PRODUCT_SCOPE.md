@@ -25,7 +25,7 @@ Assume a desktop browser, mouse-and-keyboard interaction, and no prior 3D-softwa
 ## Element Library Requirements
 
 - A left-hand panel lists all placeable element types with name and icon/thumbnail.
-- Initial element types: **flat belt conveyor**, **inclined belt conveyor** (same element with pitch), **bucket elevator**, **crop spawner**, **collection zone**.
+- Initial element types: **flat belt conveyor**, **inclined belt conveyor** (same element with pitch), **crop spawner**, **collection zone**. (**Bucket elevator** is temporarily unavailable — Stage 11 code retained for restore.)
 - Placement: click an element in the library, then click a position on the ground plane (or on top of an existing element) to place it. Escape cancels placement.
 - Every placed element gets a unique stable ID and sensible default dimensions/properties.
 - Placed elements can be selected, moved, rotated (yaw), reconfigured, duplicated, and deleted.
@@ -39,6 +39,8 @@ Assume a desktop browser, mouse-and-keyboard interaction, and no prior 3D-softwa
 - Crops resting on the belt move at belt speed; crops must not fall through the belt at any supported speed.
 
 ## Elevator Requirements
+
+> **Temporarily unavailable** in the shipping UI and save format (`fileVersion` 3 strips elevator elements). Requirements below are retained for when the feature is re-enabled.
 
 - Bucket elevator abstracted as a vertical transport column: **intake zone** at the base, **discharge point** at the top, defined by height (1–30 m) and footprint.
 - Crops entering the intake volume are transported upward and re-emitted at the discharge with a configurable **discharge rate cap** (t/h) and initial horizontal velocity. Individual buckets are **not** physically simulated (see PHYSICS_SPECIFICATION).

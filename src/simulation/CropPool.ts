@@ -89,4 +89,11 @@ export class CropPool {
     }
     return ids;
   }
+
+  /** Iterate active slots without allocating (per-frame hot path). */
+  forEachActive(fn: (id: CropSlotId) => void): void {
+    for (let id = 0; id < this.capacity; id++) {
+      if (this.slots[id]!.active) fn(id);
+    }
+  }
 }

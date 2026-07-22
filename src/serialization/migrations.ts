@@ -44,6 +44,18 @@ export function migrateV1toV2(raw: Record<string, unknown>): Record<string, unkn
 }
 
 /**
+ * V2 → V3: strip bucket elevators (temporarily removed from the product).
+ */
+export function migrateV2toV3(raw: Record<string, unknown>): Record<string, unknown> {
+  const elements = raw.elements;
+  if (!Array.isArray(elements)) {
+    return { ...raw, fileVersion: 3 };
+  }
+  const nextElements = elements.filter((el) => !(isRecord(el) && el.type === 'elevator'));
+  return { ...raw, fileVersion: 3, elements: nextElements };
+}
+
+/**
  * Apply stepwise migrations until `CURRENT_FILE_VERSION`.
  * Returns the migrated object or errors (e.g. unsupported future version).
  */
@@ -80,6 +92,10 @@ export function migrateLayout(
   if (v === 1) {
     current = migrateV1toV2(current);
     v = 2;
+  }
+  if (v === 2) {
+    current = migrateV2toV3(current);
+    v = 3;
   }
 
   if (v !== CURRENT_FILE_VERSION) {

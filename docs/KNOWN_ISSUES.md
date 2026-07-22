@@ -6,11 +6,18 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 
 ### KI-001 — Most product features not yet implemented
 
-- **Description**: Stages 14–15 of the roadmap (performance, release) are designed but not fully built. Stages 1–13 are in place.
+- **Description**: Stages 14–15 of the roadmap (performance, release) are designed but not fully built. Stages 1–13 are in place (elevators temporarily withdrawn from UI — see KI-007).
 - **Severity**: High (expected at this phase, not a defect)
 - **Reproduction**: Stage 14 FPS targets on mid-range hardware still need a hand-check.
 - **Suspected cause**: n/a — project phase.
 - **Proposed resolution**: Proceed through `docs/ROADMAP.md` Stage 14 onwards.
+- **Status**: Open (by design)
+
+### KI-007 — Bucket elevators temporarily unavailable
+
+- **Description**: Elevators are hidden from the library, stripped from saves (`fileVersion` 3), and not simulated. Stage 11 implementation remains in the repo (`TEMPORARILY_DISABLED_ELEMENT_TYPES`).
+- **Severity**: Medium (intentional product pause)
+- **Proposed resolution**: Clear `TEMPORARILY_DISABLED_ELEMENT_TYPES`, restore schema elevator branch (new `fileVersion`), re-wire UI when re-enabling.
 - **Status**: Open (by design)
 
 ### KI-002 — Contact surface velocity mechanism unverified in bound Rapier version

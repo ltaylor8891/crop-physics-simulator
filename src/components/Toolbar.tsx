@@ -15,12 +15,15 @@ import { degreesToRadians } from '../utilities/units';
 import { ConfirmNewDialog } from './ConfirmNewDialog';
 import { LoadErrorDialog } from './LoadErrorDialog';
 
+const COPYRIGHT = 'Copyright © 2026 Taynium. All rights reserved.';
+
 /**
  * Top toolbar (docs/UI_UX_SPECIFICATION.md §Top Toolbar).
  * "Drop ball" is a temporary Stage 6 debug control (docs/ROADMAP.md §Stage 6).
  */
 export function Toolbar() {
   const sceneName = useSceneStore((s) => s.sceneName);
+  const openFileName = useSceneStore((s) => s.openFileName);
   const running = useSimulationStore((s) => s.running);
   const setRunning = useSimulationStore((s) => s.setRunning);
   const gridSnap = useUiStore((s) => s.gridSnap);
@@ -30,6 +33,8 @@ export function Toolbar() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loadErrors, setLoadErrors] = useState<ParseError[] | null>(null);
   const [confirmNew, setConfirmNew] = useState(false);
+
+  const displayedName = openFileName ?? sceneName;
 
   const handleDropBall = () => {
     dropBall(dropPositionAboveSelection());
@@ -63,9 +68,18 @@ export function Toolbar() {
 
   return (
     <header className="toolbar">
+      <span className="toolbar-brand" title="Taynium">
+        <img
+          className="toolbar-logo"
+          src="/taynium-logo.svg"
+          alt="Taynium"
+          width={240}
+          height={56}
+        />
+      </span>
       <span className="toolbar-title">Crop Physics Simulator</span>
-      <span className="toolbar-scene-name" title="Scene name">
-        {sceneName}
+      <span className="toolbar-scene-name" title={openFileName ? 'Open file' : 'Scene name'}>
+        {displayedName}
       </span>
 
       <div className="toolbar-group" aria-label="File">
@@ -124,6 +138,10 @@ export function Toolbar() {
           Grid snap
         </label>
       </div>
+
+      <span className="toolbar-copyright" title={COPYRIGHT}>
+        {COPYRIGHT}
+      </span>
 
       {confirmNew && (
         <ConfirmNewDialog

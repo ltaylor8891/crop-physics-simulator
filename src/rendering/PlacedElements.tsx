@@ -1,12 +1,15 @@
 import { useRef } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
-import { ELEMENT_DESCRIPTORS, getElementBounds } from '../elements/registry';
+import {
+  ELEMENT_DESCRIPTORS,
+  getElementBounds,
+  isElementTypeEnabled,
+} from '../elements/registry';
 import { useSceneStore } from '../state/sceneStore';
 import { useUiStore } from '../state/uiStore';
 import type { SceneElement } from '../types/elements';
 import { clampToBuildArea, snapPositionXZ } from '../utilities/snap';
 import { ConveyorMesh } from './elements/ConveyorMesh';
-import { ElevatorMesh } from './elements/ElevatorMesh';
 import { intersectGround } from './groundRay';
 
 const SELECTION_COLOR = '#4f9cf0';
@@ -22,9 +25,11 @@ export function PlacedElements() {
   const elements = useSceneStore((s) => s.elements);
   return (
     <>
-      {Object.values(elements).map((element) => (
-        <PlacedElement key={element.id} element={element} />
-      ))}
+      {Object.values(elements)
+        .filter((element) => isElementTypeEnabled(element.type))
+        .map((element) => (
+          <PlacedElement key={element.id} element={element} />
+        ))}
     </>
   );
 }
@@ -100,8 +105,6 @@ function PlacedElement({ element }: { element: SceneElement }) {
     >
       {element.type === 'conveyor' ? (
         <ConveyorMesh properties={element.properties} selected={selected} />
-      ) : element.type === 'elevator' ? (
-        <ElevatorMesh properties={element.properties} selected={selected} />
       ) : (
         <mesh
           position={[bounds.center.x, bounds.center.y, bounds.center.z]}

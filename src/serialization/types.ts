@@ -7,7 +7,7 @@ import type { SceneElement, Vec3 } from '../types/elements';
 import type { SimulationSettings } from '../types/settings';
 
 /** Current writer version; bump with a migration when the schema changes. */
-export const CURRENT_FILE_VERSION = 2;
+export const CURRENT_FILE_VERSION = 3;
 
 /** Matches package.json version; informational only in save files. */
 export const APP_VERSION = '0.1.0';
@@ -24,15 +24,6 @@ export interface LayoutCamera {
   target: Vec3;
 }
 
-/** @deprecated Use LayoutFile — kept as alias during V1→V2 transition. */
-export interface LayoutFileV1 {
-  fileVersion: 1 | 2;
-  meta: LayoutMeta;
-  settings: SimulationSettings;
-  elements: SceneElement[];
-  camera: LayoutCamera;
-}
-
 export interface LayoutFileV2 {
   fileVersion: 2;
   meta: LayoutMeta;
@@ -41,7 +32,15 @@ export interface LayoutFileV2 {
   camera: LayoutCamera;
 }
 
-export type LayoutFile = LayoutFileV2;
+export interface LayoutFileV3 {
+  fileVersion: 3;
+  meta: LayoutMeta;
+  settings: SimulationSettings;
+  elements: SceneElement[];
+  camera: LayoutCamera;
+}
+
+export type LayoutFile = LayoutFileV3;
 
 export interface ParseError {
   path: string;

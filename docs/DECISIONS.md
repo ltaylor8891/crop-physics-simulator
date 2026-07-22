@@ -45,7 +45,7 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
 - **Status**: Accepted
 - **Context**: Spawn rates, despawn timers, and physics stability must not depend on the user's display refresh rate (48–240 Hz in practice).
 - **Options considered**: variable timestep (step by frame delta); fixed 1/60 s with accumulator + interpolation; fixed with substeps per frame.
-- **Decision**: Fixed 1/60 s with accumulated stepping and render interpolation (`<Physics timeStep={1/60}>`), max 3 catch-up steps per render frame; all time-based simulation logic runs in fixed-step callbacks.
+- **Decision**: Fixed 1/60 s with accumulated stepping (`<Physics timeStep={1/60}>`), max 3 catch-up steps per render frame; all time-based simulation logic runs in fixed-step callbacks. Render interpolation was later turned off — see ADR-017.
 - **Consequences**: Frame-rate-independent behaviour and stable contacts. Under sustained overload the simulation slows down rather than freezing (accepted trade-off). Simulation logic must never use render delta time.
 
 ## ADR-005 — Object pooling for crops
@@ -107,3 +107,18 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
   - Belts are `fixed` rigid bodies (skirts unchanged).
   - Still not a native Rapier contact-surface-velocity API (KI-002 remains closed with this workaround).
   - Docs: `PHYSICS_SPECIFICATION.md` §Conveyor Surface Velocity; code: `ConveyorColliders.tsx`, `beltVelocity.ts`.
+
+## ADR-017 — No Rapier render interpolation with pooled crops
+
+- **Date**: 2026-07-22
+- **Status**: Accepted (narrows ADR-004)
+- **Context**: After filling the crop pool and hitting Reset, the sim stayed laggy with zero active crops. `@react-three/rapier` with `interpolate` snapshots **every** rigid body each physics step; InstancedRigidBodies also wrote instance matrices for every parked slot every frame. With three type pools × `maxActiveCrops` that is thousands of bodies of dead work.
+- **Options considered**:
+  1. Keep interpolation + InstancedRigidBodies; lower default `maxActiveCrops`
+  2. Disable `interpolate`; keep InstancedRigidBodies; sync only active instance matrices
+  3. Disable `interpolate`; create pooled bodies via the Rapier world API; sync only active InstancedMesh slots
+- **Decision**: Option 3. `<Physics interpolate={false}>`; `CropBodies` owns world-created disabled bodies + InstancedMesh; `cropRuntime.syncInstanceScales` updates active slots only; belt start wakes only enabled sleeping dynamics.
+- **Consequences**:
+  - Slightly less smooth motion when the render rate diverges from 60 Hz (acceptable for this tool).
+  - Fixed 1/60 s stepping (ADR-004) unchanged.
+  - Code: `PhysicsWorld.tsx`, `CropBodies.tsx`, `cropRuntime.ts`, `ConveyorColliders.tsx`.

@@ -25,7 +25,7 @@ describe('serializeLayout / parseLayout round-trip', () => {
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
 
-    expect(parsed.value.fileVersion).toBe(2);
+    expect(parsed.value.fileVersion).toBe(3);
     expect(parsed.value.meta.name).toBe(sampleLayout.meta.name);
     expect(parsed.value.meta.createdAt).toBe(sampleLayout.meta.createdAt);
     expect(parsed.value.meta.modifiedAt).toBe('2026-07-21T20:00:00.000Z');

@@ -8,7 +8,17 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Breaking save-format changes
 
+- `fileVersion` 3: bucket elevators removed from the schema; V2 files migrate by stripping `type: "elevator"` elements. Elevators are temporarily unavailable in the library and status bar (Stage 11 code retained).
 - `fileVersion` 2: spawners require `diameterMinMm`, `diameterMaxMm`, `diameterBias`, `lengthMinPct`, `lengthMaxPct`, `lengthBias`, `densityKgPerM3`. V1 files migrate with type defaults.
+
+### Changed
+
+- Toolbar shows the open layout file name (or “Untitled scene”), Taynium logo, and copyright notice.
+
+### Fixed
+
+- Potatoes rendering as flat disks: near-zero capsule half-height was non-uniform-scaled on a capsule mesh; visuals are spheres (matching ball physics / length% ≤ 100).
+- Post-overload lag after **Reset**: crop pools no longer rewrite every parked instance matrix each frame; bodies are world-managed (not `InstancedRigidBodies`); Rapier render interpolation disabled (ADR-017); belt start wakes only enabled dynamics.
 
 ### Added
 

@@ -1,5 +1,5 @@
 {
-  "fileVersion": 2,
+  "fileVersion": 3,
   "meta": {
     "name": "Sample intake line",
     "createdAt": "2026-07-21T19:00:00Z",
@@ -63,24 +63,10 @@
       }
     },
     {
-      "id": "el_elevator0001",
-      "type": "elevator",
-      "name": "Main elevator",
-      "position": { "x": 7.5, "y": 0, "z": 0 },
-      "rotationYaw": 0,
-      "properties": {
-        "height": 8,
-        "footprint": { "x": 1.2, "z": 1.2 },
-        "transportSpeed": 2,
-        "dischargeRateCap": 60,
-        "dischargeVelocity": 1.5
-      }
-    },
-    {
       "id": "el_collect00001",
       "type": "collectionZone",
       "name": "Store bin",
-      "position": { "x": 10.5, "y": 0, "z": 0 },
+      "position": { "x": 8.5, "y": 0, "z": 0 },
       "rotationYaw": 0,
       "properties": {
         "size": { "x": 3, "y": 3, "z": 3 }

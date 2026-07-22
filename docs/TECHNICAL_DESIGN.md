@@ -84,7 +84,7 @@ Rules: store data is serialisable plain objects only; components subscribe with 
 
 ## Physics Timestep
 
-- **Fixed timestep, 1/60 s** (`timeStep={1/60}` on `<Physics>`), with `@react-three/rapier` accumulating render-frame time and stepping 0–N times per frame; rendering interpolates between steps (ADR-004).
+- **Fixed timestep, 1/60 s** (`timeStep={1/60}` on `<Physics>`), with `@react-three/rapier` accumulating render-frame time and stepping 0–N times per frame (ADR-004). Render interpolation is **off** (ADR-017) so pooled crop bodies are not snapshotted every step.
 - Simulation logic that accumulates over time (spawn-rate accumulator, despawn timers) hooks the physics step (fixed-step callbacks), not the render frame, so behaviour is frame-rate independent.
 - A cap of 3 catch-up steps per render frame prevents the spiral of death on slow machines; excess time is dropped (simulation slows rather than freezes).
 
@@ -108,10 +108,10 @@ Size is sampled with bipolar bias over the spawner’s diameter/length ranges (c
 
 ## Object Pooling
 
-- A `CropPool` pre-allocates `maxActiveCrops` (default 2 000) slots at world creation: rigid body + collider + instanced-mesh slot each, created once and reused.
-- Inactive bodies are disabled (`setEnabled(false)`) and parked far below the floor; their instance scale is zeroed.
+- A `CropPool` pre-allocates `maxActiveCrops` (default 2 000) slots per crop type at world creation: Rapier rigid body + ball collider (world API) + InstancedMesh slot, created once and reused (ADR-005 / ADR-017).
+- Inactive bodies are disabled (`setEnabled(false)`) and parked far below the floor; instance matrices are zeroed on release/reset and only **active** slots are rewritten each frame.
 - `acquire()` returns `null` when exhausted — spawners treat that as throttling, never allocate. `release()` resets velocity/forces and disables the body.
-- Pool avoids per-crop GC pressure and WASM allocation churn (ADR-005).
+- Pool avoids per-crop GC pressure and WASM allocation churn; bodies are not mounted as `InstancedRigidBodies` so parked slots are not in the R3F per-frame rigid-body sync map.
 
 ## Save-File Architecture
 
@@ -138,10 +138,10 @@ Size is sampled with bipolar bias over the spawner’s diameter/length ranges (c
 ## Performance Strategy
 
 - Instanced crop rendering (one draw call per crop type).
-- Object pooling; hard active-body cap with spawner throttling.
+- Object pooling; hard active-body cap with spawner throttling; no Rapier render interpolation (ADR-017).
 - Rapier body sleeping enabled — settled crops stop consuming solver time.
 - Statistics UI updates at ~4 Hz; per-frame data never flows through React state.
-- Simple collider shapes only (balls/capsules/cuboids); no trimesh colliders for crops.
+- Simple collider shapes only (balls/cuboids); no trimesh colliders for crops.
 - If needed later: reduce solver iterations, lower crop cap on weak devices, LOD for distant crops.
 
 ## Extension Points for Future Equipment

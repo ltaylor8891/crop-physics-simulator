@@ -2,6 +2,7 @@
  * Store snapshot → LayoutFile (docs/TECHNICAL_DESIGN.md §Save-File Architecture).
  */
 
+import { isElementTypeEnabled } from '../elements/registry';
 import type { ElementId, SceneElement } from '../types/elements';
 import type { SimulationSettings } from '../types/settings';
 import {
@@ -25,7 +26,9 @@ export interface SerializeLayoutInput {
 export function serializeLayout(input: SerializeLayoutInput): LayoutFile {
   const now = (input.now ?? (() => new Date()))().toISOString();
   const name = clampName(input.sceneName);
-  const elements = Object.values(input.elements).sort((a, b) => a.id.localeCompare(b.id));
+  const elements = Object.values(input.elements)
+    .filter((el) => isElementTypeEnabled(el.type))
+    .sort((a, b) => a.id.localeCompare(b.id));
 
   return {
     fileVersion: CURRENT_FILE_VERSION,

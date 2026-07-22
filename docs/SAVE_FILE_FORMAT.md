@@ -2,20 +2,20 @@
 
 Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.json`](../schemas/layout.schema.json). Working example: [`examples/sample-layout.json`](../examples/sample-layout.json). Serialization code: `src/serialization/`.
 
-**Current file version: 2**
+**Current file version: 3**
 
 ## Principles
 
 - One self-contained JSON document per layout; no external references.
 - `fileVersion` is a monotonically increasing integer. Readers migrate old files forward one version at a time; writers always write the current version.
 - Unknown top-level or per-element fields are rejected by strict validation (schema `additionalProperties: false`) — better to fail loudly than half-load.
-- Runtime state (live crops, statistics, elevator queues) is **never** saved.
+- Runtime state (live crops, statistics) is **never** saved.
 
 ## Root Schema
 
 ```jsonc
 {
-  "fileVersion": 2,          // integer, required
+  "fileVersion": 3,          // integer, required
   "meta": { ... },           // scene metadata, required
   "settings": { ... },       // simulation settings, required
   "elements": [ ... ],       // scene elements, required (may be empty)
@@ -51,7 +51,7 @@ Every element shares the common envelope; `properties` is a tagged union discrim
 ```jsonc
 {
   "id": "el_4h8s0q2mzk1x",   // ^el_[a-z0-9]{12}$, unique within file
-  "type": "conveyor",         // conveyor | elevator | spawner | collectionZone | despawnZone
+  "type": "conveyor",         // conveyor | spawner | collectionZone | despawnZone
   "name": "Intake belt",      // 1–64 chars
   "position": { "x": 0, "y": 0, "z": 0 },   // metres, world space (see below)
   "rotationYaw": 0,           // radians, CCW about +Y from above, 0 = local +X along world +X
@@ -86,17 +86,9 @@ Dimensions are type-specific properties in metres: scalars (`length`, `width`, `
 }
 ```
 
-### `type: "elevator"`
+### `type: "elevator"` (removed in fileVersion 3)
 
-```jsonc
-{
-  "height": 8, // m, 1–30
-  "footprint": { "x": 1.2, "z": 1.2 }, // m, each 0.5–4
-  "transportSpeed": 2, // m/s, 0.5–5
-  "dischargeRateCap": 60, // t/h, 0.1–500
-  "dischargeVelocity": 1.5, // m/s horizontal at discharge, 0–5
-}
-```
+Bucket elevators are temporarily unavailable. V2 (and older) layouts that contain `type: "elevator"` elements have those elements **stripped** by `migrateV2toV3`. The type is not accepted by the current schema.
 
 ### Spawner Settings (`type: "spawner"`)
 
@@ -147,4 +139,4 @@ Both use:
 
 ## Example JSON Layout
 
-See [`examples/sample-layout.json`](../examples/sample-layout.json) — a spawner feeding an inclined conveyor into an elevator that discharges over a collection zone. The sample is validated against the schema in unit tests, so it cannot silently drift out of date.
+See [`examples/sample-layout.json`](../examples/sample-layout.json) — a spawner feeding flat + inclined conveyors into a collection zone. The sample is validated against the schema in unit tests, so it cannot silently drift out of date.

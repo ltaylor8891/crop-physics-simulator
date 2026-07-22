@@ -1,17 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import {
-  InstancedRigidBodies,
-  type InstancedRigidBodyProps,
-  type RapierRigidBody,
-} from '@react-three/rapier';
+import { useRapier, type RapierCollider, type RapierRigidBody } from '@react-three/rapier';
 import type { InstancedMesh } from 'three';
 import { CROP_TYPES } from '../elements/cropTypes';
-import {
-  CROP_MESH_REF_HALF_HEIGHT,
-  CROP_MESH_REF_RADIUS,
-  cropRuntime,
-} from '../simulation/cropRuntime';
+import { CROP_MESH_REF_RADIUS, cropRuntime } from '../simulation/cropRuntime';
 import { useSimulationStore } from '../state/simulationStore';
 import type { CropTypeId } from '../types/elements';
 import { CROP_COLLISION_GROUPS } from './collisionGroups';
@@ -23,14 +15,14 @@ const CROP_TYPE_IDS = Object.keys(CROP_TYPES) as CropTypeId[];
 const CROP_LINEAR_DAMPING = 0.05;
 
 /**
- * Pre-allocated crop rigid bodies — one InstancedRigidBodies pool per crop type.
+ * Pre-allocated crop rigid bodies — one InstancedMesh + Rapier pool per crop type.
  *
- * Uses `colliders="ball"` so each instance gets its own collider (via AnyCollider
- * props cloning). A single shared colliderNodes element only mounts on one body
- * and left the rest without colliders (crops intersecting).
+ * Bodies are created via the Rapier world API (not InstancedRigidBodies). The R3F
+ * wrapper registers every instance in a per-frame mesh sync, including disabled
+ * parked slots (~3 × maxActiveCrops), which stayed expensive after Reset.
  *
- * Physics is always a ball sized to the sampled radius; potato visuals may still
- * use a capsule mesh. cropRuntime resizes + sets density on spawn.
+ * Physics and visuals are balls sized to the sampled radius (length% ≤ 100 keeps
+ * potatoes spherical). cropRuntime sets density on spawn.
  */
 export function CropBodies() {
   const capacity = useSimulationStore((s) => s.settings.maxActiveCrops);
@@ -56,102 +48,67 @@ function CropTypePool({
   capacity: number;
 }) {
   const preset = CROP_TYPES[cropType];
-  const bodiesRef = useRef<(RapierRigidBody | null)[] | null>(null);
   const meshRef = useRef<InstancedMesh>(null);
-
-  const instances: InstancedRigidBodyProps[] = useMemo(
-    () =>
-      Array.from({ length: capacity }, (_, id) => ({
-        key: `${cropType}-${id}`,
-        position: [0, PARK_Y - id * 0.02, 0] as [number, number, number],
-        scale: [0, 0, 0] as [number, number, number],
-      })),
-    [capacity, cropType],
-  );
+  const { world, rapier } = useRapier();
 
   useEffect(() => {
-    let cancelled = false;
-    let timer: ReturnType<typeof setInterval> | undefined;
+    const bodies: RapierRigidBody[] = [];
+    const colliders: RapierCollider[] = [];
 
-    const tryBind = (): boolean => {
-      const bodies = bodiesRef.current;
-      if (!bodies) return false;
+    for (let id = 0; id < capacity; id++) {
+      const bodyDesc = rapier.RigidBodyDesc.dynamic()
+        .setTranslation(0, PARK_Y - id * 0.02, 0)
+        .setEnabled(false)
+        .setCcdEnabled(true)
+        .setLinearDamping(CROP_LINEAR_DAMPING)
+        .setAngularDamping(0.5);
+      const body = world.createRigidBody(bodyDesc);
+      const colliderDesc = rapier.ColliderDesc.ball(CROP_MESH_REF_RADIUS)
+        .setFriction(preset.friction)
+        .setRestitution(preset.restitution)
+        .setCollisionGroups(CROP_COLLISION_GROUPS)
+        .setSolverGroups(CROP_COLLISION_GROUPS);
+      const collider = world.createCollider(colliderDesc, body);
+      bodies.push(body);
+      colliders.push(collider);
+      cropRuntime.bindSlot(cropType, id, body, collider);
+    }
 
-      let ready = 0;
-      for (let id = 0; id < capacity; id++) {
-        const body = bodies[id] ?? null;
-        if (!body) {
-          cropRuntime.bindSlot(cropType, id, null, null);
-          continue;
-        }
-        const collider = body.numColliders() > 0 ? body.collider(0) : null;
-        cropRuntime.bindSlot(cropType, id, body, collider);
-        if (collider) ready += 1;
-      }
-
-      const mesh = meshRef.current;
-      cropRuntime.bindMesh(cropType, mesh);
-      if (mesh) {
-        mesh.count = capacity;
-        mesh.frustumCulled = false;
-      }
-
-      return ready === capacity;
-    };
-
-    if (!tryBind()) {
-      timer = setInterval(() => {
-        if (cancelled) return;
-        if (tryBind() && timer !== undefined) {
-          clearInterval(timer);
-          timer = undefined;
-        }
-      }, 50);
+    const mesh = meshRef.current;
+    cropRuntime.bindMesh(cropType, mesh);
+    if (mesh) {
+      mesh.count = 0;
+      mesh.frustumCulled = false;
+      cropRuntime.clearInstanceMatrices(cropType);
     }
 
     return () => {
-      cancelled = true;
-      if (timer !== undefined) clearInterval(timer);
       cropRuntime.bindMesh(cropType, null);
       for (let id = 0; id < capacity; id++) {
         cropRuntime.bindSlot(cropType, id, null, null);
       }
+      for (const body of bodies) {
+        if (world.getRigidBody(body.handle)) {
+          world.removeRigidBody(body);
+        }
+      }
     };
-  }, [capacity, cropType, instances]);
+  }, [capacity, cropType, preset.friction, preset.restitution, rapier, world]);
 
-  // After InstancedRigidBodies pose sync — own matrices + scale.
+  // Own the instance matrices — active slots only (see cropRuntime.syncInstanceScales).
   useFrame(() => {
     cropRuntime.syncInstanceScales(cropType);
-  }, -1);
+  });
 
   return (
-    <InstancedRigidBodies
-      ref={bodiesRef}
-      instances={instances}
-      type="dynamic"
-      colliders="ball"
-      ccd
-      linearDamping={CROP_LINEAR_DAMPING}
-      angularDamping={0.5}
-      collisionGroups={CROP_COLLISION_GROUPS}
-      friction={preset.friction}
-      restitution={preset.restitution}
+    <instancedMesh
+      ref={meshRef}
+      args={[undefined, undefined, capacity]}
+      castShadow
+      frustumCulled={false}
     >
-      <instancedMesh
-        ref={meshRef}
-        args={[undefined, undefined, capacity]}
-        castShadow
-        frustumCulled={false}
-      >
-        {preset.collider.shape === 'ball' ? (
-          <sphereGeometry args={[CROP_MESH_REF_RADIUS, 10, 10]} />
-        ) : (
-          <capsuleGeometry
-            args={[CROP_MESH_REF_RADIUS, CROP_MESH_REF_HALF_HEIGHT * 2, 4, 8]}
-          />
-        )}
-        <meshStandardMaterial color={preset.color} />
-      </instancedMesh>
-    </InstancedRigidBodies>
+      <sphereGeometry args={[CROP_MESH_REF_RADIUS, 10, 10]} />
+      <meshStandardMaterial color={preset.color} />
+    </instancedMesh>
   );
 }
