@@ -4,6 +4,7 @@ import { Grid } from '@react-three/drei';
 import { PhysicsWorld } from '../physics/PhysicsWorld';
 import { useUiStore } from '../state/uiStore';
 import { BUILD_AREA_SIZE_M } from '../utilities/snap';
+import { FpsReporter } from './FpsReporter';
 import { PlacedElements } from './PlacedElements';
 import { PlacementLayer } from './PlacementLayer';
 import { SceneCameraControls } from './SceneCameraControls';
@@ -109,6 +110,7 @@ export function SceneCanvas() {
         <Suspense fallback={null}>
           <PhysicsWorld />
         </Suspense>
+        <FpsReporter />
         <SceneCameraControls enabled={!dragging} />
       </Canvas>
     </CanvasErrorBoundary>

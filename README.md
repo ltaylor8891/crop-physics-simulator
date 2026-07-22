@@ -8,7 +8,7 @@ The simulator lets equipment planners and enthusiasts sketch a crop-handling lin
 
 ## Current Development Status
 
-**Stages 1–12 complete** — through elevators, crop physics, despawn zones, and save/load. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
+**Stages 1–13 complete** — through elevators, crop size/density, save/load, and rolling statistics. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
 
 ## Main Features
 
@@ -20,7 +20,7 @@ Planned feature set (see [docs/PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md) for the 
 - Crop spawning driven by throughput (t/h) with per-spawner size distribution, density, and kg-credit mass accounting
 - Floor despawn: crops touching the floor are removed after 3 seconds
 - Elevators: intake → timed transit → rate-capped discharge (buckets not simulated)
-- Scene statistics: active crops, in-elevator count, throughput in/out, spilled mass
+- Scene statistics: active crops, in-elevator, rolling 10 s In/Out t/h, spill %, FPS
 - Versioned JSON save/load of layouts ([docs/SAVE_FILE_FORMAT.md](docs/SAVE_FILE_FORMAT.md))
 
 ## Technology Stack

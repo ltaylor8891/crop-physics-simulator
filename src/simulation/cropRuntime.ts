@@ -10,6 +10,7 @@ import { CROP_TYPES, sphereVolumeM3 } from '../elements/cropTypes';
 import { useSimulationStore } from '../state/simulationStore';
 import type { CropTypeId, Vec3 } from '../types/elements';
 import { CropPool, type CropSlotId } from './CropPool';
+import { RollingMassWindow } from './rollingWindow';
 
 export interface CropActivation {
   cropType: CropTypeId;
@@ -377,6 +378,7 @@ class CropRuntime {
    */
   tickZoneDespawn(
     zones: ReadonlyArray<{
+      id: string;
       kind: 'collection' | 'despawn';
       position: Vec3;
       rotationYaw: number;
@@ -388,10 +390,11 @@ class CropRuntime {
       yaw: number,
       size: Vec3,
     ) => boolean,
-  ): { collectedKg: number; spilledKg: number } {
+  ): { collectedKg: number; spilledKg: number; collectedByZoneId: Record<string, number> } {
     let collectedKg = 0;
     let spilledKg = 0;
-    if (zones.length === 0) return { collectedKg, spilledKg };
+    const collectedByZoneId: Record<string, number> = {};
+    if (zones.length === 0) return { collectedKg, spilledKg, collectedByZoneId };
 
     for (const type of CROP_TYPE_IDS) {
       const bucket = this.buckets[type];
@@ -404,13 +407,17 @@ class CropRuntime {
           if (!isInside(point, zone.position, zone.rotationYaw, zone.size)) continue;
           const mass = bucket.pool.getSlot(id).massKg;
           this.release({ cropType: type, slot: id });
-          if (zone.kind === 'collection') collectedKg += mass;
-          else spilledKg += mass;
+          if (zone.kind === 'collection') {
+            collectedKg += mass;
+            collectedByZoneId[zone.id] = (collectedByZoneId[zone.id] ?? 0) + mass;
+          } else {
+            spilledKg += mass;
+          }
           break;
         }
       }
     }
-    return { collectedKg, spilledKg };
+    return { collectedKg, spilledKg, collectedByZoneId };
   }
 
   /**
@@ -458,20 +465,40 @@ class CropRuntime {
 /** Process-wide runtime used by the physics step and UI reset. */
 export const cropRuntime = new CropRuntime();
 
-/** Spawn counters + accumulator clear for Toolbar Reset. */
+/** Spawn counters + rolling throughput windows for Toolbar Reset / Stage 13. */
 export const cropSpawnStats = {
   massSpawnedKg: 0,
   spilledMassKg: 0,
   collectedMassKg: 0,
   statsAge: 0,
   simulationTime: 0,
+  /** Rolling 10 s window of spawned mass (throughput in). */
+  inWindow: new RollingMassWindow(),
+  /** Rolling 10 s window of collected mass (throughput out, total). */
+  outWindow: new RollingMassWindow(),
+  /** Per collection-zone rolling windows. */
+  zoneOutWindows: new Map<string, RollingMassWindow>(),
+  /** Latest physics fixed-step duration (ms), for status bar. */
+  lastPhysicsStepMs: 0,
   clearAccumulators: null as null | (() => void),
+  zoneWindow(zoneId: string): RollingMassWindow {
+    let w = this.zoneOutWindows.get(zoneId);
+    if (!w) {
+      w = new RollingMassWindow();
+      this.zoneOutWindows.set(zoneId, w);
+    }
+    return w;
+  },
   reset() {
     this.massSpawnedKg = 0;
     this.spilledMassKg = 0;
     this.collectedMassKg = 0;
     this.statsAge = 0;
     this.simulationTime = 0;
+    this.lastPhysicsStepMs = 0;
+    this.inWindow.clear();
+    this.outWindow.clear();
+    this.zoneOutWindows.clear();
     this.clearAccumulators?.();
   },
 };

@@ -9,6 +9,7 @@ physics steps (or is pure and unit-tested), never on render frames.
 | `cropRuntime.ts` | Per-type Rapier pools, floor + zone + elevator-intake |
 | `spawning.ts` | Per-spawner kg-credit accumulator, emit pose + size |
 | `cropSize.ts` | Biased diameter/length sampling, volume, mass from density |
+| `rollingWindow.ts` | Rolling 10 s mass windows for In/Out t/h (Stage 13) |
 | `elevator.ts` | Transit queue, intake/discharge poses, rate-capped emit |
 | `zoneVolume.ts` | Collection/despawn/intake AABB tests |
 

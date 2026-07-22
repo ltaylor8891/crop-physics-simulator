@@ -10,6 +10,7 @@ import {
 } from '../elements/propertySchema';
 import { clampDiameterRangeMm, clampLengthPct } from '../simulation/cropSize';
 import { useSceneStore } from '../state/sceneStore';
+import { useSimulationStore } from '../state/simulationStore';
 import { useUiStore } from '../state/uiStore';
 import type { CropTypeId, SceneElement } from '../types/elements';
 import { degreesToRadians, radiansToDegrees } from '../utilities/units';
@@ -31,6 +32,10 @@ export function PropertiesPanel() {
   const updateElement = useSceneStore((s) => s.updateElement);
   const duplicateElement = useSceneStore((s) => s.duplicateElement);
   const removeElement = useSceneStore((s) => s.removeElement);
+  const zoneCollectedTph = useSimulationStore(
+    (s) =>
+      selectedElementId ? (s.statistics.collectedTphByZoneId[selectedElementId] ?? 0) : 0,
+  );
 
   if (!element) {
     return (
@@ -143,6 +148,12 @@ export function PropertiesPanel() {
         />
 
         <h3 className="property-section">Equipment</h3>
+        {element.type === 'collectionZone' && (
+          <div className="field field-readonly">
+            <span className="field-readonly-label">Collected (10 s)</span>
+            <span>{zoneCollectedTph.toFixed(1)} t/h</span>
+          </div>
+        )}
         {fields.map((field) => {
           if (field.kind === 'number') {
             const raw = getPropertyPath(element.properties, field.path);

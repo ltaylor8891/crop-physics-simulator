@@ -16,7 +16,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 10  | Floor despawning                    | Complete    |
 | 11  | Elevators                           | Complete    |
 | 12  | Saving and loading                  | Complete    |
-| 13  | Statistics                          | Not started |
+| 13  | Statistics                          | Complete    |
 | 14  | Performance optimisation            | Not started |
 | 15  | Testing and release preparation     | Not started |
 
@@ -122,7 +122,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: statistics accumulation on the fixed step, rolling 10 s throughput windows, status-bar UI at ~4 Hz, throttled indicator, reset behaviour.
 - **Acceptance criteria**: with a 40 t/h spawner feeding a collection zone losslessly, "in" and "collected" both read 40 ± 2 t/h after warm-up; spill % consistent with spilled/spawned mass.
 - **Dependencies**: Stages 8, 10 (11 for elevator counts).
-- **Status**: Not started.
+- **Status**: Complete. `RollingMassWindow` for In/Out + per collection zone; status bar FPS + physics step tooltip; Reset clears windows.
 
 ## Stage 14 — Performance optimisation
 

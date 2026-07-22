@@ -66,7 +66,7 @@ The scene description in the store is the single source of truth. Rendering and 
 Zustand stores, kept small and focused:
 
 - `sceneStore` — placed elements (`Record<ElementId, SceneElement>`), add/update/remove/duplicate actions, scene metadata.
-- `simulationStore` — running/paused, simulation settings (gravity, crop cap), and live statistics (updated at ~4 Hz, not per frame, to avoid re-render storms).
+- `simulationStore` — running/paused, simulation settings (gravity, crop cap), and live statistics (updated at ~4 Hz, not per frame, to avoid re-render storms). Throughput In/Out use rolling 10 s mass windows (`rollingWindow.ts`) on the fixed step; FPS is sampled from the render loop (`FpsReporter`).
 - `uiStore` — selection, placement mode, panel visibility, camera state snapshot for saving.
 
 Rules: store data is serialisable plain objects only; components subscribe with selectors; per-frame data (body transforms) bypasses the store entirely and flows directly from Rapier to the instanced mesh inside `useFrame`.

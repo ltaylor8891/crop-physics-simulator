@@ -73,19 +73,19 @@ export function SpawningSystem() {
 
   useAfterPhysicsStep(() => {
     if (!cropRuntime.isBound) return;
+    const stepStarted = performance.now();
 
     cropSpawnStats.simulationTime += PHYSICS_DT;
+    const simTime = cropSpawnStats.simulationTime;
     const floorDespawnSeconds = useSimulationStore.getState().settings.floorDespawnSeconds;
-    const spilled = cropRuntime.tickFloorDespawn(
-      cropSpawnStats.simulationTime,
-      floorDespawnSeconds,
-    );
+    const spilled = cropRuntime.tickFloorDespawn(simTime, floorDespawnSeconds);
     if (spilled > 0) {
       cropSpawnStats.spilledMassKg += spilled;
     }
 
     const elements = useSceneStore.getState().elements;
     const zones: Array<{
+      id: string;
       kind: 'collection' | 'despawn';
       position: { x: number; y: number; z: number };
       rotationYaw: number;
@@ -94,6 +94,7 @@ export function SpawningSystem() {
     for (const el of Object.values(elements)) {
       if (el.type === 'collectionZone') {
         zones.push({
+          id: el.id,
           kind: 'collection',
           position: el.position,
           rotationYaw: el.rotationYaw,
@@ -101,6 +102,7 @@ export function SpawningSystem() {
         });
       } else if (el.type === 'despawnZone') {
         zones.push({
+          id: el.id,
           kind: 'despawn',
           position: el.position,
           rotationYaw: el.rotationYaw,
@@ -112,6 +114,12 @@ export function SpawningSystem() {
     const zoneResult = cropRuntime.tickZoneDespawn(zones, isPointInsideZone);
     cropSpawnStats.collectedMassKg += zoneResult.collectedKg;
     cropSpawnStats.spilledMassKg += zoneResult.spilledKg;
+    if (zoneResult.collectedKg > 0) {
+      cropSpawnStats.outWindow.push(simTime, zoneResult.collectedKg);
+    }
+    for (const [zoneId, kg] of Object.entries(zoneResult.collectedByZoneId)) {
+      cropSpawnStats.zoneWindow(zoneId).push(simTime, kg);
+    }
 
     const elevators = Object.values(elements).filter(
       (el): el is ElevatorElement => el.type === 'elevator',
@@ -206,6 +214,7 @@ export function SpawningSystem() {
       (el): el is SpawnerElement => el.type === 'spawner',
     );
 
+    let stepSpawnedKg = 0;
     for (const spawner of spawners) {
       let state = accumulatorsRef.current.get(spawner.id);
       if (!state) {
@@ -240,6 +249,7 @@ export function SpawningSystem() {
         }
         spawned += 1;
         cropSpawnStats.massSpawnedKg += pose.massKg;
+        stepSpawnedKg += pose.massKg;
       }
 
       if (spawned < tick.requested) {
@@ -250,25 +260,47 @@ export function SpawningSystem() {
       }
     }
 
+    if (stepSpawnedKg > 0) {
+      cropSpawnStats.inWindow.push(simTime, stepSpawnedKg);
+    }
+
     const throttled = stepThrottled || cropRuntime.pool.isExhausted;
     const inElevator = countInElevator(elevatorsRef.current.values());
+    cropSpawnStats.lastPhysicsStepMs = performance.now() - stepStarted;
 
     cropSpawnStats.statsAge += PHYSICS_DT;
     if (cropSpawnStats.statsAge >= 1 / STATS_HZ) {
       cropSpawnStats.statsAge = 0;
-      const t = cropSpawnStats.simulationTime;
       const prev = useSimulationStore.getState().statistics;
+      const liveZoneIds = new Set(
+        Object.values(elements)
+          .filter((el) => el.type === 'collectionZone')
+          .map((el) => el.id),
+      );
+      for (const id of cropSpawnStats.zoneOutWindows.keys()) {
+        if (!liveZoneIds.has(id)) cropSpawnStats.zoneOutWindows.delete(id);
+      }
+      const collectedTphByZoneId: Record<string, number> = {};
+      for (const id of liveZoneIds) {
+        collectedTphByZoneId[id] = kgPerSecondToTonnesPerHour(
+          cropSpawnStats.zoneWindow(id).rateKgPerSecond(simTime),
+        );
+      }
       useSimulationStore.getState().setStatistics({
         ...prev,
         activeCrops: cropRuntime.pool.activeCount,
         inElevator,
         totalMassSpawnedKg: cropSpawnStats.massSpawnedKg,
         spilledMassKg: cropSpawnStats.spilledMassKg,
-        throughputInTph:
-          t > 0 ? kgPerSecondToTonnesPerHour(cropSpawnStats.massSpawnedKg / t) : 0,
-        throughputCollectedTph:
-          t > 0 ? kgPerSecondToTonnesPerHour(cropSpawnStats.collectedMassKg / t) : 0,
+        throughputInTph: kgPerSecondToTonnesPerHour(
+          cropSpawnStats.inWindow.rateKgPerSecond(simTime),
+        ),
+        throughputCollectedTph: kgPerSecondToTonnesPerHour(
+          cropSpawnStats.outWindow.rateKgPerSecond(simTime),
+        ),
+        collectedTphByZoneId,
         throttled,
+        physicsStepMs: cropSpawnStats.lastPhysicsStepMs,
       });
     }
   });

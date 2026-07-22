@@ -8,10 +8,18 @@ export interface SceneStatistics {
   /** Crops currently in elevator transit queues (hidden from the scene). */
   inElevator: number;
   totalMassSpawnedKg: number;
+  /** Rolling 10 s throughput in (t/h). */
   throughputInTph: number;
+  /** Rolling 10 s throughput collected, all zones (t/h). */
   throughputCollectedTph: number;
+  /** Rolling 10 s collected t/h keyed by collection-zone element id. */
+  collectedTphByZoneId: Record<string, number>;
   spilledMassKg: number;
   throttled: boolean;
+  /** Smoothed render FPS. */
+  fps: number;
+  /** Last physics fixed-step wall time (ms). */
+  physicsStepMs: number;
 }
 
 const ZERO_STATISTICS: SceneStatistics = {
@@ -20,8 +28,11 @@ const ZERO_STATISTICS: SceneStatistics = {
   totalMassSpawnedKg: 0,
   throughputInTph: 0,
   throughputCollectedTph: 0,
+  collectedTphByZoneId: {},
   spilledMassKg: 0,
   throttled: false,
+  fps: 0,
+  physicsStepMs: 0,
 };
 
 interface SimulationState {
@@ -33,6 +44,7 @@ interface SimulationState {
   replaceSettings: (settings: SimulationSettings) => void;
   resetToDefaults: () => void;
   setStatistics: (statistics: SceneStatistics) => void;
+  patchStatistics: (patch: Partial<SceneStatistics>) => void;
   resetStatistics: () => void;
 }
 
@@ -51,5 +63,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
       statistics: ZERO_STATISTICS,
     }),
   setStatistics: (statistics) => set({ statistics }),
+  patchStatistics: (patch) =>
+    set((state) => ({ statistics: { ...state.statistics, ...patch } })),
   resetStatistics: () => set({ statistics: ZERO_STATISTICS }),
 }));

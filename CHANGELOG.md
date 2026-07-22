@@ -12,6 +12,7 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Added
 
+- Scene statistics (roadmap Stage 13): rolling 10 s In/Out t/h windows, per collection-zone collected rate in the properties panel, status-bar FPS (physics step ms in tooltip), THROTTLED badge; Reset clears rolling windows.
 - Per-spawner crop size distribution and density: diameter min/max (mm) with bipolar bias, length as % of diameter with bias, and density (kg/m³). Mass = ρV; spawners use a kg-credit accumulator so t/h stays accurate with variable sizes. Crop-type diameter limits are fixed in code (potato 20–150 mm, etc.).
 - Elevators (roadmap Stage 11): parametric casing/head/spout mesh; base intake AABB; transit delay `height/transportSpeed`; FIFO queue with `dischargeRateCap` fractional accumulator; discharge along local +X with spawn-style jitter; status bar **In elevator** count.
 - Crop physics (roadmap Stage 9): one instanced pool per crop type (ball / capsule / ball) with preset friction, restitution, mass, CCD, and light linear damping; global active cap still `maxActiveCrops`.

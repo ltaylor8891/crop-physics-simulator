@@ -6,32 +6,32 @@ _Last updated: 2026-07-22_
 
 ## Current Project State
 
-- Stages 1–12 complete on `main`.
-- Per-spawner crop size + density (`fileVersion` 2) implemented; kg-credit spawning.
-- Next major feature: **Stage 13 statistics** (rolling windows).
+- Stages 1–13 complete on `feature/statistics` (merge to `main` when ready).
+- Rolling 10 s In/Out throughput, per-zone collected t/h, FPS in status bar.
+- Next major feature: **Stage 14 performance**.
 
 ## Current Branch
 
-- `main` (includes `91560a3` crop size/density).
+- `feature/statistics` (or `main` after merge).
 
 ## Last Completed Stage
 
-- **Stage 11 — Elevators**, plus per-spawner crop size/density (`fileVersion` 2).
+- **Stage 13 — Statistics**.
 
 ## Work Currently In Progress
 
-- None.
+- Verify + commit/push if pending.
 
 ## Next Recommended Task
 
-- **Stage 13 — Statistics**.
+- Merge/push Stage 13, then **Stage 14 — Performance optimisation**.
 
 ## Important Files
 
-- `src/simulation/cropSize.ts` — bias sample, volume, mass
-- `src/simulation/spawning.ts` — kg-credit accumulator
-- `src/elements/cropTypes.ts` — size limits + default density
-- `src/serialization/migrations.ts` — V1→V2 spawner defaults
+- `src/simulation/rollingWindow.ts` — 10 s mass windows
+- `src/physics/SpawningSystem.tsx` — credits windows on the fixed step
+- `src/rendering/FpsReporter.tsx` — render FPS → store
+- `src/components/StatusBar.tsx`
 
 ## Commands
 
@@ -41,15 +41,15 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Test Status
 
-- Run `npm run test` after changes (expect size/migration tests included).
+- Run `npm run test` (includes rolling-window rate tests).
 
 ## Known Errors
 
-- None. Open gaps: KI-004, KI-005; Stage 13–15 remaining.
+- None. Open gaps: KI-004, KI-005; Stage 14 FPS hand-check.
 
 ## Uncommitted Work
 
-- None after `91560a3` (handoff tweak may be local).
+- Check `git status`.
 
 ## Architectural Constraints (do not violate)
 
@@ -60,5 +60,5 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Suggested Starting Point for the Next Agent
 
-1. Commit/push size-density work if still local.
-2. Start Stage 13 statistics per `docs/ROADMAP.md`.
+1. Merge `feature/statistics` → `main` if not already.
+2. Start Stage 14 performance per `docs/ROADMAP.md`.
