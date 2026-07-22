@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/crop-physics-simulator/layout.schema.json",
-  "title": "Crop Physics Simulator Layout (fileVersion 1)",
+  "title": "Crop Physics Simulator Layout (fileVersion 2)",
   "description": "Versioned save-file format for simulator layouts. Human-readable specification: docs/SAVE_FILE_FORMAT.md",
   "type": "object",
   "additionalProperties": false,
   "required": ["fileVersion", "meta", "settings", "elements", "camera"],
   "properties": {
-    "fileVersion": { "const": 1 },
+    "fileVersion": { "const": 2 },
     "meta": {
       "type": "object",
       "additionalProperties": false,
@@ -139,7 +139,19 @@
             "properties": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["cropType", "throughput", "emitArea", "enabled"],
+              "required": [
+                "cropType",
+                "throughput",
+                "emitArea",
+                "enabled",
+                "diameterMinMm",
+                "diameterMaxMm",
+                "diameterBias",
+                "lengthMinPct",
+                "lengthMaxPct",
+                "lengthBias",
+                "densityKgPerM3"
+              ],
               "properties": {
                 "cropType": { "enum": ["wheatClump", "potato", "sugarBeet"] },
                 "throughput": { "type": "number", "minimum": 0.1, "maximum": 500 },
@@ -152,7 +164,14 @@
                     "z": { "type": "number", "minimum": 0.1, "maximum": 3 }
                   }
                 },
-                "enabled": { "type": "boolean" }
+                "enabled": { "type": "boolean" },
+                "diameterMinMm": { "type": "number", "minimum": 20, "maximum": 200 },
+                "diameterMaxMm": { "type": "number", "minimum": 20, "maximum": 200 },
+                "diameterBias": { "type": "number", "minimum": -100, "maximum": 100 },
+                "lengthMinPct": { "type": "number", "minimum": 0, "maximum": 100 },
+                "lengthMaxPct": { "type": "number", "minimum": 0, "maximum": 100 },
+                "lengthBias": { "type": "number", "minimum": -100, "maximum": 100 },
+                "densityKgPerM3": { "type": "number", "minimum": 50, "maximum": 2000 }
               }
             }
           }

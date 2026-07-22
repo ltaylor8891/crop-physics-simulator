@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import {
-  BallCollider,
-  CapsuleCollider,
   InstancedRigidBodies,
   type InstancedRigidBodyProps,
   type RapierRigidBody,
 } from '@react-three/rapier';
 import type { InstancedMesh } from 'three';
 import { CROP_TYPES } from '../elements/cropTypes';
-import { cropRuntime } from '../simulation/cropRuntime';
+import {
+  CROP_MESH_REF_HALF_HEIGHT,
+  CROP_MESH_REF_RADIUS,
+  cropRuntime,
+} from '../simulation/cropRuntime';
 import { useSimulationStore } from '../state/simulationStore';
 import type { CropTypeId } from '../types/elements';
 import { CROP_COLLISION_GROUPS } from './collisionGroups';
@@ -20,8 +23,14 @@ const CROP_TYPE_IDS = Object.keys(CROP_TYPES) as CropTypeId[];
 const CROP_LINEAR_DAMPING = 0.05;
 
 /**
- * Pre-allocated crop rigid bodies — one InstancedRigidBodies pool per crop type
- * (docs/ROADMAP.md §Stage 9 / ADR-005). Global active count is capped at maxActiveCrops.
+ * Pre-allocated crop rigid bodies — one InstancedRigidBodies pool per crop type.
+ *
+ * Uses `colliders="ball"` so each instance gets its own collider (via AnyCollider
+ * props cloning). A single shared colliderNodes element only mounts on one body
+ * and left the rest without colliders (crops intersecting).
+ *
+ * Physics is always a ball sized to the sampled radius; potato visuals may still
+ * use a capsule mesh. cropRuntime resizes + sets density on spawn.
  */
 export function CropBodies() {
   const capacity = useSimulationStore((s) => s.settings.maxActiveCrops);
@@ -55,6 +64,7 @@ function CropTypePool({
       Array.from({ length: capacity }, (_, id) => ({
         key: `${cropType}-${id}`,
         position: [0, PARK_Y - id * 0.02, 0] as [number, number, number],
+        scale: [0, 0, 0] as [number, number, number],
       })),
     [capacity, cropType],
   );
@@ -80,6 +90,7 @@ function CropTypePool({
       }
 
       const mesh = meshRef.current;
+      cropRuntime.bindMesh(cropType, mesh);
       if (mesh) {
         mesh.count = capacity;
         mesh.frustumCulled = false;
@@ -101,41 +112,30 @@ function CropTypePool({
     return () => {
       cancelled = true;
       if (timer !== undefined) clearInterval(timer);
+      cropRuntime.bindMesh(cropType, null);
       for (let id = 0; id < capacity; id++) {
         cropRuntime.bindSlot(cropType, id, null, null);
       }
     };
   }, [capacity, cropType, instances]);
 
-  const colliderNode =
-    preset.collider.shape === 'ball' ? (
-      <BallCollider
-        key={`${cropType}-ball`}
-        args={[preset.collider.radius]}
-        collisionGroups={CROP_COLLISION_GROUPS}
-        friction={preset.friction}
-        restitution={preset.restitution}
-      />
-    ) : (
-      <CapsuleCollider
-        key={`${cropType}-capsule`}
-        args={[preset.collider.halfHeight, preset.collider.radius]}
-        collisionGroups={CROP_COLLISION_GROUPS}
-        friction={preset.friction}
-        restitution={preset.restitution}
-      />
-    );
+  // After InstancedRigidBodies pose sync — own matrices + scale.
+  useFrame(() => {
+    cropRuntime.syncInstanceScales(cropType);
+  }, -1);
 
   return (
     <InstancedRigidBodies
       ref={bodiesRef}
       instances={instances}
       type="dynamic"
-      colliders={false}
+      colliders="ball"
       ccd
       linearDamping={CROP_LINEAR_DAMPING}
+      angularDamping={0.5}
       collisionGroups={CROP_COLLISION_GROUPS}
-      colliderNodes={[colliderNode]}
+      friction={preset.friction}
+      restitution={preset.restitution}
     >
       <instancedMesh
         ref={meshRef}
@@ -144,10 +144,10 @@ function CropTypePool({
         frustumCulled={false}
       >
         {preset.collider.shape === 'ball' ? (
-          <sphereGeometry args={[preset.collider.radius, 10, 10]} />
+          <sphereGeometry args={[CROP_MESH_REF_RADIUS, 10, 10]} />
         ) : (
           <capsuleGeometry
-            args={[preset.collider.radius, preset.collider.halfHeight * 2, 4, 8]}
+            args={[CROP_MESH_REF_RADIUS, CROP_MESH_REF_HALF_HEIGHT * 2, 4, 8]}
           />
         )}
         <meshStandardMaterial color={preset.color} />

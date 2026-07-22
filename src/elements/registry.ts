@@ -1,5 +1,6 @@
 import type { ElementId, ElementType, SceneElement, Vec3 } from '../types/elements';
 import { generateElementId } from '../utilities/ids';
+import { defaultSpawnerSizeProperties } from './cropTypes';
 
 /**
  * Element descriptor registry (docs/TECHNICAL_DESIGN.md §Extension Points).
@@ -60,6 +61,7 @@ export const ELEMENT_DESCRIPTORS: Record<ElementType, ElementDescriptor> = {
       throughput: 40,
       emitArea: { x: 0.6, z: 0.6 },
       enabled: true,
+      ...defaultSpawnerSizeProperties('potato'),
     }),
   },
   collectionZone: {

@@ -37,11 +37,12 @@ A bucket elevator abstracted as a vertical transport column (buckets are not sim
 An emitter volume that creates crop bodies.
 
 - **Origin**: centre of the emission face (bottom face of the spawner box).
-- Properties: `cropType` (preset id), `throughput` (t/h), `emitArea` `{x, z}` (m), `enabled` (boolean).
+- Properties: `cropType` (preset id), `throughput` (t/h), `emitArea` `{x, z}` (m), `enabled` (boolean), size distribution (`diameterMinMm`/`diameterMaxMm`, bipolar `diameterBias`, `lengthMinPct`/`lengthMaxPct`, `lengthBias`), and `densityKgPerM3`.
+- Diameter range is clamped to fixed per-type limits in code (e.g. potato 20–150 mm). Length percent is total tuber length as a fraction of diameter (`L = pct/100 × D`); capsule `halfHeight = max(0,(L−D)/2)` (sphere when `L ≤ D`); ball types use diameter only.
 
 ### Crop (runtime object)
 
-An individual rigid body representing one piece/clump of crop. Defined by a **crop type preset**: `id`, `label`, collider shape (ball/capsule) and size (m), `mass` (kg), `friction`, `restitution`, display colour. Presets live in code (`src/elements/cropTypes.ts`), not in save files; save files reference presets by id.
+An individual rigid body representing one piece/clump of crop. Defined by a **crop type preset**: `id`, `label`, collider shape (ball/capsule), default density, friction, restitution, display colour, and size limits. Presets live in code (`src/elements/cropTypes.ts`), not in save files; save files reference presets by id. Runtime mass is `density × volume` from the spawner’s sampled size (not a fixed preset mass).
 
 ### Collection Zone
 

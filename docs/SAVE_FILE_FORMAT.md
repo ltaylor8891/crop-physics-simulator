@@ -2,7 +2,7 @@
 
 Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.json`](../schemas/layout.schema.json). Working example: [`examples/sample-layout.json`](../examples/sample-layout.json). Serialization code: `src/serialization/`.
 
-**Current file version: 1**
+**Current file version: 2**
 
 ## Principles
 
@@ -15,7 +15,7 @@ Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.j
 
 ```jsonc
 {
-  "fileVersion": 1,          // integer, required
+  "fileVersion": 2,          // integer, required
   "meta": { ... },           // scene metadata, required
   "settings": { ... },       // simulation settings, required
   "elements": [ ... ],       // scene elements, required (may be empty)
@@ -106,10 +106,17 @@ Dimensions are type-specific properties in metres: scalars (`length`, `width`, `
   "throughput": 40, // t/h, 0.1–500
   "emitArea": { "x": 0.6, "z": 0.6 }, // m, each 0.1–3
   "enabled": true,
+  "diameterMinMm": 20, // mm, 20–200 (clamped to crop-type preset limits at spawn)
+  "diameterMaxMm": 150,
+  "diameterBias": 0, // −100…100; 0 = uniform; negative favours small
+  "lengthMinPct": 0, // total length as % of diameter (0–100): L=(pct/100)×D; balls ignore for geometry
+  "lengthMaxPct": 100,
+  "lengthBias": 0, // −100…100
+  "densityKgPerM3": 777.46, // kg/m³; mass = density × volume
 }
 ```
 
-Spawner `position.y` is the height of the emission face (typically above a belt), and is the one element type whose `y` is normally non-zero.
+Spawner `position.y` is the height of the emission face (typically above a belt), and is the one element type whose `y` is normally non-zero. `fileVersion` 1 layouts are migrated by filling size/density defaults from the crop type.
 
 ### Collection Zones (`type: "collectionZone"`) and Despawn Zones (`type: "despawnZone"`)
 

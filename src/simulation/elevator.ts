@@ -3,14 +3,13 @@
  * Pure — no React/Rapier. Wired from SpawningSystem on the physics step.
  */
 
-import { CROP_TYPES } from '../elements/cropTypes';
 import type { CropTypeId, ElevatorElement, Vec3 } from '../types/elements';
 import { advanceSpawnAccumulator, cropsPerSecond } from '../utilities/flow';
+import { defaultCropGeometry, type RandomFn } from './cropSize';
 import {
   SPAWN_BASE_DOWNWARD_SPEED,
   SPAWN_VELOCITY_JITTER_HORIZONTAL,
   SPAWN_VELOCITY_JITTER_VERTICAL,
-  type RandomFn,
 } from './spawning';
 
 /** Intake sensor height above footprint base (m). */
@@ -148,7 +147,7 @@ export function tickElevatorDischarge(
   }
 
   const headType = queue[0]!.cropType;
-  const headMass = CROP_TYPES[headType].mass;
+  const headMass = defaultCropGeometry(headType).massKg;
   const rate = cropsPerSecond(elevator.properties.dischargeRateCap, headMass);
   const { spawnCount, accumulator } = advanceSpawnAccumulator(
     state.accumulator,

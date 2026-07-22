@@ -17,7 +17,7 @@ Planned feature set (see [docs/PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md) for the 
 - Element library: flat/inclined belt conveyors, bucket elevators, crop spawners, collection zones
 - Real-time rigid-body crop physics (Rapier, WebAssembly)
 - Conveyor motion via contact surface velocity (belts stay static; contacts are driven)
-- Crop spawning driven by throughput settings (t/h → kg/s → crops/s)
+- Crop spawning driven by throughput (t/h) with per-spawner size distribution, density, and kg-credit mass accounting
 - Floor despawn: crops touching the floor are removed after 3 seconds
 - Elevators: intake → timed transit → rate-capped discharge (buckets not simulated)
 - Scene statistics: active crops, in-elevator count, throughput in/out, spilled mass

@@ -4,14 +4,14 @@
  */
 
 import { migrateLayout } from './migrations';
-import type { LayoutFileV1, ParseError, ParseResult } from './types';
+import type { LayoutFile, ParseError, ParseResult } from './types';
 import { validateLayout } from './validateLayout';
 
 /**
  * Accepts a parsed JSON value or a JSON string.
  * Pipeline: parse → fileVersion/migrate → schema validate.
  */
-export function parseLayout(input: unknown): ParseResult<LayoutFileV1> {
+export function parseLayout(input: unknown): ParseResult<LayoutFile> {
   let value: unknown = input;
 
   if (typeof input === 'string') {
@@ -40,7 +40,7 @@ export function parseLayout(input: unknown): ParseResult<LayoutFileV1> {
     return { ok: false, errors };
   }
 
-  return { ok: true, value: migrated.value as unknown as LayoutFileV1 };
+  return { ok: true, value: migrated.value as unknown as LayoutFile };
 }
 
 /** Format parse errors for the load-failure dialog. */

@@ -48,14 +48,14 @@ Assume a desktop browser, mouse-and-keyboard interaction, and no prior 3D-softwa
 ## Crop Spawning Requirements
 
 - Spawner is a placeable box volume with a downward-facing emission face.
-- Configurable: **crop type** (from a small preset list, e.g. wheat-like sphere, potato-like capsule, sugar-beet-like larger body), **throughput** in tonnes per hour (0.1–500 t/h), **enabled/disabled**.
-- Spawn rate in crops/second is derived from throughput and per-crop mass; fractional crops accumulate so long-run average matches the target exactly.
+- Configurable: **crop type** (from a small preset list, e.g. wheat-like sphere, potato-like capsule, sugar-beet-like larger body), **throughput** in tonnes per hour (0.1–500 t/h), **enabled/disabled**, **size distribution** (diameter range + bias, length-as-%-of-diameter range + bias), and **density** (kg/m³).
+- Mass throughput is realised with a kg-credit accumulator: each spawn samples size → volume → mass (`ρV`); long-run average t/h matches the target. Variable mass does not require scanning all active bodies.
 - Spawned crops get small random jitter in position and velocity so they do not stack in a perfect column.
 - Spawning pauses automatically when the active-body cap is reached and resumes when capacity frees up (this is recorded in statistics as "throttled").
 
 ## Crop Physics Requirements
 
-- Each crop is an individual rigid body with mass, friction, and restitution per crop type.
+- Each crop is an individual rigid body with sampled size, mass from density×volume, and friction/restitution from its crop type.
 - Crops collide with machines and with each other.
 - Crops are affected by gravity (9.81 m/s² downward).
 - Crops on a moving belt travel with the belt via contact surface velocity.

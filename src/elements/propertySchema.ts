@@ -70,6 +70,14 @@ export const PROPERTY_FIELDS: Record<ElementType, PropertyFieldDef[]> = {
     numberField('throughput', 'Throughput', 0.1, 500, 't/h', 0.1),
     numberField('emitArea.x', 'Emit area X', 0.1, 3, 'm', 0.05),
     numberField('emitArea.z', 'Emit area Z', 0.1, 3, 'm', 0.05),
+    // Diameter UI range spans all crop types; spawn clamps to the active type’s limits.
+    numberField('diameterMinMm', 'Diameter min', 20, 200, 'mm', 1),
+    numberField('diameterMaxMm', 'Diameter max', 20, 200, 'mm', 1),
+    numberField('diameterBias', 'Diameter bias', -100, 100, '', 1),
+    numberField('lengthMinPct', 'Length min', 0, 100, '% of diam', 1),
+    numberField('lengthMaxPct', 'Length max', 0, 100, '% of diam', 1),
+    numberField('lengthBias', 'Length bias', -100, 100, '', 1),
+    numberField('densityKgPerM3', 'Density', 50, 2000, 'kg/m³', 1),
     { kind: 'boolean', path: 'enabled', label: 'Enabled' },
   ],
   collectionZone: [

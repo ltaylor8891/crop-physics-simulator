@@ -1,13 +1,21 @@
 /**
  * Spawner fixed-step emission (docs/TECHNICAL_DESIGN.md §Crop Spawning Calculation).
  * Pure — no React/Rapier. Wired from SpawningSystem on the physics step.
+ *
+ * Throughput uses a kg-credit accumulator so variable crop masses still match t/h.
  */
 
-import { CROP_TYPES } from '../elements/cropTypes';
+import { defaultSpawnerSizeProperties } from '../elements/cropTypes';
 import type { SpawnerElement, Vec3 } from '../types/elements';
-import { advanceSpawnAccumulator, cropsPerSecond } from '../utilities/flow';
+import { tonnesPerHourToKgPerSecond } from '../utilities/flow';
+import { sampleCropGeometry, type RandomFn } from './cropSize';
 
-/** Cap leftover fractional credit while throttled so recovery does not burst. */
+export type { RandomFn } from './cropSize';
+
+/** Cap leftover mass credit (kg) while throttled so recovery does not burst. */
+export const THROTTLED_CREDIT_KG_CAP = 2;
+
+/** @deprecated Crop-count throttle cap — still used by elevators. */
 export const THROTTLED_ACCUMULATOR_CAP = 1;
 
 /** Base downward emission speed (m/s). */
@@ -20,16 +28,21 @@ export const SPAWN_VELOCITY_JITTER_HORIZONTAL = 0.15;
 export const SPAWN_VELOCITY_JITTER_VERTICAL = 0.1;
 
 export interface SpawnerRuntimeState {
-  accumulator: number;
+  /** Accumulated mass credit (kg) toward the next spawn(s). */
+  creditKg: number;
 }
 
 export interface SpawnPose {
   position: Vec3;
   velocity: Vec3;
+  radius: number;
+  halfHeight: number;
+  massKg: number;
+  shape: 'ball' | 'capsule';
 }
 
 export interface SpawnerTickResult {
-  accumulator: number;
+  creditKg: number;
   /** How many crops this step wants to emit (before pool throttling). */
   requested: number;
   /** Poses for each requested crop (length === requested). */
@@ -37,11 +50,8 @@ export interface SpawnerTickResult {
 }
 
 export function createSpawnerRuntimeState(): SpawnerRuntimeState {
-  return { accumulator: 0 };
+  return { creditKg: 0 };
 }
-
-/** Uniform sample in [0, 1). Injected for deterministic tests. */
-export type RandomFn = () => number;
 
 /**
  * World-space position on the spawner's emission face (origin = face centre),
@@ -73,8 +83,8 @@ export function sampleEmitVelocity(random: RandomFn = Math.random): Vec3 {
 }
 
 /**
- * Advance one spawner's fractional accumulator for `dt` seconds.
- * Does not touch the pool — caller acquires slots and may call `applyThrottleCap`.
+ * Advance one spawner's mass credit for `dt` seconds and sample poses.
+ * Does not touch the pool — caller acquires slots and may call `applyThrottleCreditCap`.
  */
 export function tickSpawner(
   state: SpawnerRuntimeState,
@@ -83,31 +93,42 @@ export function tickSpawner(
   random: RandomFn = Math.random,
 ): SpawnerTickResult {
   if (!spawner.properties.enabled || spawner.properties.throughput <= 0 || dtSeconds <= 0) {
-    return { accumulator: state.accumulator, requested: 0, poses: [] };
+    return { creditKg: state.creditKg, requested: 0, poses: [] };
   }
 
-  const preset = CROP_TYPES[spawner.properties.cropType];
-  const rate = cropsPerSecond(spawner.properties.throughput, preset.mass);
-  const { spawnCount, accumulator } = advanceSpawnAccumulator(
-    state.accumulator,
-    rate,
-    dtSeconds,
-  );
-
+  let creditKg =
+    state.creditKg + tonnesPerHourToKgPerSecond(spawner.properties.throughput) * dtSeconds;
   const poses: SpawnPose[] = [];
-  for (let i = 0; i < spawnCount; i++) {
+
+  // Safety: never emit more than a burst of bodies in one step.
+  const maxPerStep = 64;
+  while (poses.length < maxPerStep) {
+    const geom = sampleCropGeometry(spawner.properties.cropType, spawner.properties, random);
+    if (creditKg < geom.massKg) break;
+    creditKg -= geom.massKg;
     poses.push({
       position: sampleEmitPosition(spawner, random),
       velocity: sampleEmitVelocity(random),
+      radius: geom.radius,
+      halfHeight: geom.halfHeight,
+      massKg: geom.massKg,
+      shape: geom.shape,
     });
   }
 
-  return { accumulator, requested: spawnCount, poses };
+  return { creditKg, requested: poses.length, poses };
 }
 
 /**
- * After a partial emit due to pool exhaustion: put unspawned credit back into the
- * accumulator but cap it (docs/PHYSICS_SPECIFICATION.md §Maximum Active Bodies).
+ * After a partial emit due to pool exhaustion: put unmet mass back into credit
+ * but cap it (docs/PHYSICS_SPECIFICATION.md §Maximum Active Bodies).
+ */
+export function applyThrottleCreditCap(creditKg: number, unmetMassKg: number): number {
+  return Math.min(creditKg + unmetMassKg, THROTTLED_CREDIT_KG_CAP);
+}
+
+/**
+ * Crop-count throttle (elevators). Caps leftover fractional credit.
  */
 export function applyThrottleCap(
   fractionalRemainder: number,
@@ -126,14 +147,22 @@ export function measureSpawnedMassKg(
   dtSeconds: number,
   random: RandomFn = () => 0.5,
 ): { massKg: number; crops: number } {
-  const preset = CROP_TYPES[spawner.properties.cropType];
   let state = createSpawnerRuntimeState();
+  let massKg = 0;
   let crops = 0;
   const steps = Math.round(durationSeconds / dtSeconds);
   for (let i = 0; i < steps; i++) {
     const tick = tickSpawner(state, spawner, dtSeconds, random);
-    state = { accumulator: tick.accumulator };
-    crops += tick.requested;
+    state = { creditKg: tick.creditKg };
+    for (const pose of tick.poses) {
+      massKg += pose.massKg;
+      crops += 1;
+    }
   }
-  return { massKg: crops * preset.mass, crops };
+  return { massKg, crops };
+}
+
+/** Defaults for tests / migration helpers. */
+export function spawnerSizeDefaults(cropType: SpawnerElement['properties']['cropType']) {
+  return defaultSpawnerSizeProperties(cropType);
 }

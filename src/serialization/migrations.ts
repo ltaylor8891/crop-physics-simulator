@@ -3,7 +3,45 @@
  * Each migrateVnToVn+1 is a pure function; chain runs oldest→newest before schema validation.
  */
 
+import { defaultSpawnerSizeProperties } from '../elements/cropTypes';
+import type { CropTypeId } from '../types/elements';
 import { CURRENT_FILE_VERSION, type ParseError } from './types';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * V1 → V2: add per-spawner size distribution + density defaults.
+ */
+export function migrateV1toV2(raw: Record<string, unknown>): Record<string, unknown> {
+  const elements = raw.elements;
+  if (!Array.isArray(elements)) {
+    return { ...raw, fileVersion: 2 };
+  }
+
+  const nextElements = elements.map((el) => {
+    if (!isRecord(el) || el.type !== 'spawner' || !isRecord(el.properties)) return el;
+    const props = el.properties;
+    const cropType =
+      props.cropType === 'wheatClump' ||
+      props.cropType === 'potato' ||
+      props.cropType === 'sugarBeet'
+        ? (props.cropType as CropTypeId)
+        : 'potato';
+    const defaults = defaultSpawnerSizeProperties(cropType);
+    return {
+      ...el,
+      properties: {
+        ...defaults,
+        ...props,
+        cropType,
+      },
+    };
+  });
+
+  return { ...raw, fileVersion: 2, elements: nextElements };
+}
 
 /**
  * Apply stepwise migrations until `CURRENT_FILE_VERSION`.
@@ -37,20 +75,24 @@ export function migrateLayout(
     };
   }
 
-  // V1 is current — no migrations yet. When bumping, chain e.g.:
-  // let current = raw; let v = version;
-  // if (v === 1) { current = migrateV1toV2(current); v = 2; }
-  if (version < CURRENT_FILE_VERSION) {
+  let current: Record<string, unknown> = { ...raw };
+  let v = version;
+  if (v === 1) {
+    current = migrateV1toV2(current);
+    v = 2;
+  }
+
+  if (v !== CURRENT_FILE_VERSION) {
     return {
       ok: false,
       errors: [
         {
           path: '/fileVersion',
-          message: `Missing migration from fileVersion ${version} to ${CURRENT_FILE_VERSION}`,
+          message: `Missing migration from fileVersion ${v} to ${CURRENT_FILE_VERSION}`,
         },
       ],
     };
   }
 
-  return { ok: true, value: { ...raw, fileVersion: CURRENT_FILE_VERSION } };
+  return { ok: true, value: { ...current, fileVersion: CURRENT_FILE_VERSION } };
 }

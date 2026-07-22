@@ -6,32 +6,32 @@ _Last updated: 2026-07-22_
 
 ## Current Project State
 
-- Stages 1–12 complete on `feature/elevators` (merge to `main` when ready).
-- Elevators: intake → transit queue → rate-capped discharge; parametric mesh; **In elevator** in the status bar.
+- Stages 1–12 complete on `main`.
+- Per-spawner crop size + density (`fileVersion` 2) implemented; kg-credit spawning.
 - Next major feature: **Stage 13 statistics** (rolling windows).
 
 ## Current Branch
 
-- `feature/elevators` (based on `main` after Stage 9/10 merge).
+- Check `git status` — size/density work may be on a feature branch or uncommitted on `main`.
 
 ## Last Completed Stage
 
-- **Stage 11 — Elevators**.
+- **Stage 11 — Elevators** (on `main`). Follow-up: spawner size/density distributions.
 
 ## Work Currently In Progress
 
-- Nothing after Stage 11 implementation (verify + commit pending if not done).
+- Nothing after size/density implementation (commit if pending).
 
 ## Next Recommended Task
 
-- Merge/push `feature/elevators`, then **Stage 13 — Statistics**.
+- **Stage 13 — Statistics**.
 
 ## Important Files
 
-- `src/simulation/elevator.ts` — transit, intake/discharge poses, rate cap
-- `src/physics/SpawningSystem.tsx` — fixed-step elevator + spawn + despawn
-- `src/rendering/elements/ElevatorMesh.tsx`
-- `src/simulation/cropRuntime.ts` — `tickElevatorIntake`
+- `src/simulation/cropSize.ts` — bias sample, volume, mass
+- `src/simulation/spawning.ts` — kg-credit accumulator
+- `src/elements/cropTypes.ts` — size limits + default density
+- `src/serialization/migrations.ts` — V1→V2 spawner defaults
 
 ## Commands
 
@@ -41,25 +41,24 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Test Status
 
-- **Passing**: 110 unit tests (typecheck, lint, build clean).
-- **Failing**: none known.
+- Run `npm run test` after changes (expect size/migration tests included).
 
 ## Known Errors
 
-- None. Open gaps: KI-004, KI-005; Stage 9 FPS acceptance is interactive (Stage 14); Stage 13 will replace session-average t/h with rolling windows.
+- None. Open gaps: KI-004, KI-005; Stage 13–15 remaining.
 
 ## Uncommitted Work
 
-- Stage 11 elevator implementation on `feature/elevators` (check `git status`).
+- Check `git status`.
 
 ## Architectural Constraints (do not violate)
 
 - 1 world unit = 1 metre; Y-up; flow along local +X; yaw radians CCW about +Y.
 - Fixed physics timestep 1/60 s; simulation on fixed steps only.
 - Crops: per-type pools; global `maxActiveCrops` cap (ADR-005).
-- Save format: versioned JSON, schema-validated.
+- Save format: versioned JSON, schema-validated; current `fileVersion` 2.
 
 ## Suggested Starting Point for the Next Agent
 
-1. Merge `feature/elevators` → `main` and push if not already.
+1. Commit/push size-density work if still local.
 2. Start Stage 13 statistics per `docs/ROADMAP.md`.

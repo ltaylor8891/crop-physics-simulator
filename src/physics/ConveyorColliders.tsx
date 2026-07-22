@@ -141,6 +141,8 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
       const current = body.linvel();
       const next = velocityWithBeltSurface(current, surfaceVel, normal);
       body.setLinvel(next, true);
+      // Surface-velocity carriage — kill spin so crops are conveyed, not rolling.
+      body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     });
   });
 

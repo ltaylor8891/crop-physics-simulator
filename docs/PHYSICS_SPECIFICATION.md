@@ -26,6 +26,13 @@ Rapier interaction groups (16-bit membership/filter):
 - Fully enabled: crops stack, pile, and jostle each other. This is what produces burden depth on belts and realistic piling at transfer points.
 - Crop colliders are **balls or capsules only** (cheap, stable). **[approximation]** Real grain shape, deformation, and interlocking are not modelled; piles will look somewhat "bouncier" and rounder than reality.
 
+## Variable Crop Size **[approximation]**
+
+- Each spawner samples diameter (mm) and length percent with bipolar bias (−100…+100, 0 = uniform) within its configured ranges, clamped to fixed per-type limits in `cropTypes.ts`.
+- Length percent: total length `L = (pct/100)×D`. Capsule: `halfHeight = max(0,(L−D)/2)` (sphere when `L ≤ D`, which is always for pct in 0–100). Ball crop types use diameter only.
+- Mass = `densityKgPerM3 × volume` (sphere or capsule). Throughput uses a **kg-credit** accumulator so long-run t/h stays exact without iterating active bodies for mass.
+- Visuals use unit instanced meshes scaled per instance to match the collider. Elevator discharge uses each type’s mid-limit diameter, 100% length, and default density (no per-elevator size UI yet).
+
 ## Crop-to-Machine Collision
 
 - Machines use cuboid colliders. **Belt surfaces**, **skirts, casings, and the ground** are `fixed`. Belt conveyance uses per-step contact velocity injection (see §Conveyor Surface Velocity), not a moving kinematic body.
@@ -41,8 +48,8 @@ Default material values (plausible defaults, **not measured** — tune freely bu
 | Belt top surface                            | 0.9      | 0.0         |
 | Machine casing / skirts                     | 0.4      | 0.1         |
 | Ground plane                                | 0.6      | 0.2         |
-| Wheat-clump crop (ball r≈0.06 m, 0.03 kg)   | 0.5      | 0.15        |
-| Potato crop (capsule ≈0.08×0.05 m, 0.25 kg) | 0.6      | 0.25        |
+| Wheat-clump crop (ball; size varies)        | 0.5      | 0.15        |
+| Potato crop (capsule; size varies)          | 0.6      | 0.25        |
 | Sugar-beet crop (ball r≈0.09 m, 0.9 kg)     | 0.7      | 0.2         |
 
 High belt friction + zero belt restitution is what makes surface-velocity conveyance behave like a real belt grip.

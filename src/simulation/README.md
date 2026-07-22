@@ -7,7 +7,8 @@ physics steps (or is pure and unit-tested), never on render frames.
 | --- | --- |
 | `CropPool.ts` | Logical slot acquire/release with hard cap (ADR-005) |
 | `cropRuntime.ts` | Per-type Rapier pools, floor + zone + elevator-intake |
-| `spawning.ts` | Per-spawner fractional accumulator, emit pose jitter |
+| `spawning.ts` | Per-spawner kg-credit accumulator, emit pose + size |
+| `cropSize.ts` | Biased diameter/length sampling, volume, mass from density |
 | `elevator.ts` | Transit queue, intake/discharge poses, rate-capped emit |
 | `zoneVolume.ts` | Collection/despawn/intake AABB tests |
 

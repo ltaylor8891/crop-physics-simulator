@@ -1,5 +1,5 @@
 /**
- * Store snapshot → LayoutFileV1 (docs/TECHNICAL_DESIGN.md §Save-File Architecture).
+ * Store snapshot → LayoutFile (docs/TECHNICAL_DESIGN.md §Save-File Architecture).
  */
 
 import type { ElementId, SceneElement } from '../types/elements';
@@ -8,7 +8,7 @@ import {
   APP_VERSION,
   CURRENT_FILE_VERSION,
   type LayoutCamera,
-  type LayoutFileV1,
+  type LayoutFile,
 } from './types';
 
 export interface SerializeLayoutInput {
@@ -22,13 +22,13 @@ export interface SerializeLayoutInput {
   now?: () => Date;
 }
 
-export function serializeLayout(input: SerializeLayoutInput): LayoutFileV1 {
+export function serializeLayout(input: SerializeLayoutInput): LayoutFile {
   const now = (input.now ?? (() => new Date()))().toISOString();
   const name = clampName(input.sceneName);
   const elements = Object.values(input.elements).sort((a, b) => a.id.localeCompare(b.id));
 
   return {
-    fileVersion: CURRENT_FILE_VERSION as 1,
+    fileVersion: CURRENT_FILE_VERSION,
     meta: {
       name,
       createdAt: input.createdAt || now,

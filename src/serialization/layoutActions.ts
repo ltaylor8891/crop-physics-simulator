@@ -11,10 +11,10 @@ import { resetCropSimulation } from '../simulation/cropRuntime';
 import { layoutDownloadFilename } from './filenames';
 import { parseLayout, formatParseErrors } from './parseLayout';
 import { serializeLayout } from './serializeLayout';
-import type { LayoutFileV1, ParseError } from './types';
+import type { LayoutFile, ParseError } from './types';
 
 /** Replace scene + settings + camera; clear simulation runtime. */
-export function applyLayout(layout: LayoutFileV1): void {
+export function applyLayout(layout: LayoutFile): void {
   useSimulationStore.getState().setRunning(false);
   resetCropSimulation();
   useDebugStore.getState().clearBalls();
@@ -42,7 +42,7 @@ export function createNewLayout(): void {
   useUiStore.getState().cancelPlacement();
 }
 
-export function buildCurrentLayoutFile(): LayoutFileV1 {
+export function buildCurrentLayoutFile(): LayoutFile {
   const scene = useSceneStore.getState();
   const simulation = useSimulationStore.getState();
   const ui = useUiStore.getState();

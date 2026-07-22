@@ -2,6 +2,7 @@
 import { useAfterPhysicsStep } from '@react-three/rapier';
 import { CROP_TYPES } from '../elements/cropTypes';
 import { cropRuntime, cropSpawnStats } from '../simulation/cropRuntime';
+import { defaultCropGeometry } from '../simulation/cropSize';
 import {
   countInElevator,
   createElevatorRuntimeState,
@@ -13,6 +14,7 @@ import {
 } from '../simulation/elevator';
 import {
   applyThrottleCap,
+  applyThrottleCreditCap,
   createSpawnerRuntimeState,
   tickSpawner,
   type SpawnerRuntimeState,
@@ -158,13 +160,16 @@ export function SpawningSystem() {
 
       for (const pose of tick.discharges) {
         const preset = CROP_TYPES[pose.cropType];
+        const geom = defaultCropGeometry(pose.cropType);
         const handle = cropRuntime.spawn({
           cropType: pose.cropType,
-          massKg: preset.mass,
+          massKg: geom.massKg,
           friction: preset.friction,
           restitution: preset.restitution,
           position: pose.position,
           velocity: pose.velocity,
+          radius: geom.radius,
+          halfHeight: geom.halfHeight,
         });
         if (handle === null) {
           stepThrottled = true;
@@ -174,7 +179,6 @@ export function SpawningSystem() {
       }
 
       if (discharged < tick.requested) {
-        // Put unemitted crops back at the front of the queue and throttle credit.
         const unmet = tick.discharges.slice(discharged);
         elevatorsRef.current.set(elev.id, {
           accumulator: applyThrottleCap(
@@ -212,33 +216,37 @@ export function SpawningSystem() {
       const tick = tickSpawner(state, spawner, PHYSICS_DT);
       const preset = CROP_TYPES[spawner.properties.cropType];
       let spawned = 0;
+      let unmetMassKg = 0;
 
       for (const pose of tick.poses) {
         const handle = cropRuntime.spawn({
           cropType: spawner.properties.cropType,
-          massKg: preset.mass,
+          massKg: pose.massKg,
           friction: preset.friction,
           restitution: preset.restitution,
           position: pose.position,
           velocity: pose.velocity,
+          radius: pose.radius,
+          halfHeight: pose.halfHeight,
         });
 
         if (handle === null) {
+          unmetMassKg += pose.massKg;
+          for (let i = spawned + 1; i < tick.poses.length; i++) {
+            unmetMassKg += tick.poses[i]!.massKg;
+          }
           stepThrottled = true;
           break;
         }
         spawned += 1;
-        cropSpawnStats.massSpawnedKg += preset.mass;
+        cropSpawnStats.massSpawnedKg += pose.massKg;
       }
 
       if (spawned < tick.requested) {
-        state.accumulator = applyThrottleCap(
-          tick.accumulator,
-          tick.requested - spawned,
-        );
+        state.creditKg = applyThrottleCreditCap(tick.creditKg, unmetMassKg);
         stepThrottled = true;
       } else {
-        state.accumulator = tick.accumulator;
+        state.creditKg = tick.creditKg;
       }
     }
 

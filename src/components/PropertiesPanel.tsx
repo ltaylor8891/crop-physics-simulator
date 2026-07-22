@@ -1,3 +1,4 @@
+import { CROP_TYPES, defaultSpawnerSizeProperties } from '../elements/cropTypes';
 import { ELEMENT_DESCRIPTORS } from '../elements/registry';
 import {
   getPropertyPath,
@@ -7,9 +8,10 @@ import {
   ROTATION_DEG_RANGE,
   setPropertyPath,
 } from '../elements/propertySchema';
+import { clampDiameterRangeMm, clampLengthPct } from '../simulation/cropSize';
 import { useSceneStore } from '../state/sceneStore';
 import { useUiStore } from '../state/uiStore';
-import type { SceneElement } from '../types/elements';
+import type { CropTypeId, SceneElement } from '../types/elements';
 import { degreesToRadians, radiansToDegrees } from '../utilities/units';
 import { CheckboxField } from './fields/CheckboxField';
 import { EnumField } from './fields/EnumField';
@@ -45,11 +47,34 @@ export function PropertiesPanel() {
   const fields = PROPERTY_FIELDS[element.type];
 
   const patchProperties = (path: string, value: unknown) => {
-    const nextProperties = setPropertyPath(
+    let nextProperties = setPropertyPath(
       element.properties as unknown as Record<string, unknown>,
       path,
       value,
-    );
+    ) as Record<string, unknown>;
+
+    if (element.type === 'spawner') {
+      if (path === 'cropType' && typeof value === 'string') {
+        // Reset density + diameter range to the new type’s defaults (plan).
+        const size = defaultSpawnerSizeProperties(value as CropTypeId);
+        nextProperties = { ...nextProperties, ...size, cropType: value };
+      } else {
+        const cropType = nextProperties.cropType as CropTypeId;
+        if (cropType in CROP_TYPES) {
+          const diam = clampDiameterRangeMm(
+            cropType,
+            Number(nextProperties.diameterMinMm),
+            Number(nextProperties.diameterMaxMm),
+          );
+          const len = clampLengthPct(
+            Number(nextProperties.lengthMinPct),
+            Number(nextProperties.lengthMaxPct),
+          );
+          nextProperties = { ...nextProperties, ...diam, ...len };
+        }
+      }
+    }
+
     updateElement(element.id, {
       properties: nextProperties as unknown as SceneElement['properties'],
     });

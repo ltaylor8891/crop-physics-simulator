@@ -2,15 +2,15 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import type { ErrorObject, ValidateFunction } from 'ajv';
 import layoutSchema from '../../schemas/layout.schema.json';
-import type { LayoutFileV1, ParseError } from './types';
+import type { LayoutFile, ParseError } from './types';
 
-let validator: ValidateFunction<LayoutFileV1> | null = null;
+let validator: ValidateFunction<LayoutFile> | null = null;
 
-function getValidator(): ValidateFunction<LayoutFileV1> {
+function getValidator(): ValidateFunction<LayoutFile> {
   if (!validator) {
     const ajv = new Ajv2020({ allErrors: true, strict: true });
     addFormats(ajv);
-    validator = ajv.compile<LayoutFileV1>(layoutSchema);
+    validator = ajv.compile<LayoutFile>(layoutSchema);
   }
   return validator;
 }

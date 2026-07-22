@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { CROP_TYPES } from '../elements/cropTypes';
 import type { ElevatorElement } from '../types/elements';
 import { kgPerSecondToTonnesPerHour, tonnesPerHourToKgPerSecond } from '../utilities/flow';
+import { defaultCropGeometry } from './cropSize';
 import {
   countInElevator,
   createElevatorRuntimeState,
@@ -116,7 +116,7 @@ describe('tickElevatorDischarge', () => {
       transportSpeed: 100,
       dischargeRateCap: cap,
     });
-    const mass = CROP_TYPES.potato.mass;
+    const mass = defaultCropGeometry('potato').massKg;
     let state = createElevatorRuntimeState();
     const duration = 30;
     const dt = 1 / 60;

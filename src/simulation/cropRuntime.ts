@@ -5,7 +5,8 @@
  */
 
 import type { RapierCollider, RapierRigidBody } from '@react-three/rapier';
-import { CROP_TYPES, type CropTypePreset } from '../elements/cropTypes';
+import { Matrix4, Quaternion, Vector3, type InstancedMesh } from 'three';
+import { CROP_TYPES, sphereVolumeM3 } from '../elements/cropTypes';
 import { useSimulationStore } from '../state/simulationStore';
 import type { CropTypeId, Vec3 } from '../types/elements';
 import { CropPool, type CropSlotId } from './CropPool';
@@ -17,6 +18,10 @@ export interface CropActivation {
   restitution: number;
   position: Vec3;
   velocity: Vec3;
+  /** Collider radius (m) */
+  radius: number;
+  /** Capsule half-height (m); 0 for balls / spheres */
+  halfHeight: number;
 }
 
 export interface CropHandle {
@@ -25,7 +30,17 @@ export interface CropHandle {
 }
 
 const PARK_Y = -100;
+/** Reference mesh/collider size in CropBodies — visuals scale relative to this. */
+export const CROP_MESH_REF_RADIUS = 0.05;
+export const CROP_MESH_REF_HALF_HEIGHT = 0.05;
+/** Rapier rejects / destabilises zero-length capsules. */
+const MIN_CAPSULE_HALF_HEIGHT = 1e-3;
+
 const CROP_TYPE_IDS = Object.keys(CROP_TYPES) as CropTypeId[];
+const _mat = new Matrix4();
+const _pos = new Vector3();
+const _quat = new Quaternion();
+const _scale = new Vector3();
 
 interface TypeBucket {
   pool: CropPool;
@@ -33,8 +48,13 @@ interface TypeBucket {
   colliders: (RapierCollider | null)[];
   /** Approximate half-extent used for floor-contact tests. */
   contactRadii: number[];
+  /** Visual scale relative to CROP_MESH_REF_* geometry. */
+  scaleX: number[];
+  scaleY: number[];
+  scaleZ: number[];
   floorContactAt: (number | null)[];
   boundBodies: number;
+  mesh: InstancedMesh | null;
 }
 
 function emptyBucket(capacity: number): TypeBucket {
@@ -42,15 +62,31 @@ function emptyBucket(capacity: number): TypeBucket {
     pool: new CropPool(capacity),
     bodies: Array.from({ length: capacity }, () => null),
     colliders: Array.from({ length: capacity }, () => null),
-    contactRadii: Array.from({ length: capacity }, () => 0.06),
+    contactRadii: Array.from({ length: capacity }, () => CROP_MESH_REF_RADIUS),
+    scaleX: Array.from({ length: capacity }, () => 0),
+    scaleY: Array.from({ length: capacity }, () => 0),
+    scaleZ: Array.from({ length: capacity }, () => 0),
     floorContactAt: Array.from({ length: capacity }, () => null),
     boundBodies: 0,
+    mesh: null,
   };
 }
 
-function contactExtent(preset: CropTypePreset): number {
-  if (preset.collider.shape === 'ball') return preset.collider.radius;
-  return preset.collider.halfHeight + preset.collider.radius;
+function visualScale(radius: number, halfHeight: number, shape: 'ball' | 'capsule'): {
+  x: number;
+  y: number;
+  z: number;
+} {
+  const r = Math.max(1e-4, radius);
+  const sx = r / CROP_MESH_REF_RADIUS;
+  if (shape === 'ball' || halfHeight < MIN_CAPSULE_HALF_HEIGHT) {
+    return { x: sx, y: sx, z: sx };
+  }
+  return {
+    x: sx,
+    y: Math.max(MIN_CAPSULE_HALF_HEIGHT, halfHeight) / CROP_MESH_REF_HALF_HEIGHT,
+    z: sx,
+  };
 }
 
 class CropRuntime {
@@ -70,11 +106,17 @@ class CropRuntime {
     };
   }
 
-  /** True once every type pool has all rigid body refs bound. */
+  /** True once every type pool has all rigid body + collider refs bound. */
   get isBound(): boolean {
     return CROP_TYPE_IDS.every((type) => {
       const bucket = this.buckets[type];
-      return bucket.boundBodies === bucket.pool.capacity && bucket.boundBodies > 0;
+      if (bucket.boundBodies !== bucket.pool.capacity || bucket.boundBodies <= 0) {
+        return false;
+      }
+      for (let i = 0; i < bucket.pool.capacity; i++) {
+        if (!bucket.colliders[i]) return false;
+      }
+      return true;
     });
   }
 
@@ -91,6 +133,10 @@ class CropRuntime {
     }
   }
 
+  bindMesh(cropType: CropTypeId, mesh: InstancedMesh | null): void {
+    this.buckets[cropType].mesh = mesh;
+  }
+
   bindSlot(
     cropType: CropTypeId,
     id: CropSlotId,
@@ -105,6 +151,9 @@ class CropRuntime {
       body.setEnabled(false);
       body.setTranslation({ x: 0, y: PARK_Y - id * 0.02, z: 0 }, false);
     }
+    bucket.scaleX[id] = 0;
+    bucket.scaleY[id] = 0;
+    bucket.scaleZ[id] = 0;
     let bound = 0;
     for (let i = 0; i < bucket.pool.capacity; i++) {
       if (bucket.bodies[i]) bound += 1;
@@ -120,6 +169,27 @@ class CropRuntime {
     const collider = body.collider(0);
     bucket.colliders[id] = collider;
     return collider;
+  }
+
+  private writeInstanceMatrix(
+    mesh: InstancedMesh,
+    id: CropSlotId,
+    x: number,
+    y: number,
+    z: number,
+    qx: number,
+    qy: number,
+    qz: number,
+    qw: number,
+    sx: number,
+    sy: number,
+    sz: number,
+  ): void {
+    _pos.set(x, y, z);
+    _quat.set(qx, qy, qz, qw);
+    _scale.set(sx, sy, sz);
+    _mat.compose(_pos, _quat, _scale);
+    mesh.setMatrixAt(id, _mat);
   }
 
   spawn(activation: CropActivation): CropHandle | null {
@@ -138,23 +208,34 @@ class CropRuntime {
     }
 
     const preset = CROP_TYPES[activation.cropType];
+    const radius = Math.max(1e-4, activation.radius);
+    // Physics colliders are balls (InstancedRigidBodies colliders="ball").
+    // Capsule halfHeight is visual-only for potato meshes.
+    const visualHalfHeight =
+      preset.collider.shape === 'capsule'
+        ? Math.max(MIN_CAPSULE_HALF_HEIGHT, activation.halfHeight)
+        : 0;
+
     collider.setFriction(activation.friction);
     collider.setRestitution(activation.restitution);
-    if (preset.collider.shape === 'ball') {
-      collider.setRadius(preset.collider.radius);
-    } else {
-      collider.setRadius(preset.collider.radius);
-      collider.setHalfHeight(preset.collider.halfHeight);
-    }
+    collider.setRadius(radius);
+    // Density from mass/volume so Rapier gets correct mass + inertia for contacts.
+    const volumeM3 = sphereVolumeM3(radius);
+    const density = activation.massKg / Math.max(volumeM3, 1e-12);
+    collider.setDensity(density);
 
-    body.setAdditionalMass(activation.massKg, true);
     body.setTranslation(activation.position, true);
     body.setLinvel(activation.velocity, true);
     body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     body.setEnabled(true);
     body.wakeUp();
 
-    bucket.contactRadii[id] = contactExtent(preset);
+    const shape = preset.collider.shape === 'ball' ? 'ball' : 'capsule';
+    const scale = visualScale(radius, visualHalfHeight, shape);
+    bucket.scaleX[id] = scale.x;
+    bucket.scaleY[id] = scale.y;
+    bucket.scaleZ[id] = scale.z;
+    bucket.contactRadii[id] = radius;
     bucket.floorContactAt[id] = null;
     this.globalActive += 1;
 
@@ -175,8 +256,30 @@ class CropRuntime {
       body.setTranslation({ x: 0, y: PARK_Y - handle.slot * 0.02, z: 0 }, false);
     }
     bucket.floorContactAt[handle.slot] = null;
+    bucket.scaleX[handle.slot] = 0;
+    bucket.scaleY[handle.slot] = 0;
+    bucket.scaleZ[handle.slot] = 0;
     bucket.pool.release(handle.slot);
     this.globalActive = Math.max(0, this.globalActive - 1);
+
+    const mesh = bucket.mesh;
+    if (mesh) {
+      this.writeInstanceMatrix(
+        mesh,
+        handle.slot,
+        0,
+        PARK_Y - handle.slot * 0.02,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+      );
+      mesh.instanceMatrix.needsUpdate = true;
+    }
   }
 
   reset(): void {
@@ -190,6 +293,57 @@ class CropRuntime {
     this.globalActive = 0;
   }
 
+  /**
+   * Drive instance matrices from body pose + stored scale (after Rapier/Instanced sync).
+   * Inactive slots stay at scale 0 so unit/ref meshes never appear as a giant blob.
+   */
+  syncInstanceScales(cropType: CropTypeId): void {
+    const bucket = this.buckets[cropType];
+    const mesh = bucket.mesh;
+    if (!mesh) return;
+
+    const capacity = bucket.pool.capacity;
+    for (let id = 0; id < capacity; id++) {
+      const body = bucket.bodies[id];
+      const active = bucket.pool.getSlot(id).active;
+      if (!body || !active) {
+        this.writeInstanceMatrix(
+          mesh,
+          id,
+          0,
+          PARK_Y - id * 0.02,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+        );
+        continue;
+      }
+
+      const t = body.translation();
+      const r = body.rotation();
+      this.writeInstanceMatrix(
+        mesh,
+        id,
+        t.x,
+        t.y,
+        t.z,
+        r.x,
+        r.y,
+        r.z,
+        r.w,
+        bucket.scaleX[id]!,
+        bucket.scaleY[id]!,
+        bucket.scaleZ[id]!,
+      );
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+  }
+
   tickFloorDespawn(simulationTime: number, floorDespawnSeconds: number): number {
     let spilledKg = 0;
     for (const type of CROP_TYPE_IDS) {
@@ -199,7 +353,7 @@ class CropRuntime {
         if (!body || !body.isEnabled()) continue;
 
         const y = body.translation().y;
-        const extent = bucket.contactRadii[id] ?? 0.06;
+        const extent = bucket.contactRadii[id] ?? CROP_MESH_REF_RADIUS;
         const onFloor = y <= extent + 0.05;
 
         if (onFloor && bucket.floorContactAt[id] === null) {

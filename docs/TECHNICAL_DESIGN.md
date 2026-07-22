@@ -94,14 +94,17 @@ Belts do not move geometrically. Each belt's top-surface collider is `fixed`; af
 
 ## Crop Spawning Calculation
 
-For a spawner with target throughput `Q` (t/h) and crop type of mass `m` (kg):
+For a spawner with target throughput `Q` (t/h) and variable per-crop mass:
 
 ```text
-massRate  = Q * 1000 / 3600        // kg/s
-cropsPerSecond = massRate / m      // crops/s
+massRate = Q * 1000 / 3600        // kg/s
+// each step:
+creditKg += massRate * dt
+while creditKg >= nextSampledMass:
+  spawn(sample); creditKg -= sample.massKg
 ```
 
-Each fixed physics step (`dt`), the spawner accumulates `cropsPerSecond * dt` into a fractional accumulator and spawns `floor(accumulator)` crops, keeping the remainder. This makes the long-run average exact even when `cropsPerSecond * dt < 1`. Implemented in `src/utilities/flow.ts` + `src/simulation/spawning.ts`; unit-tested.
+Size is sampled with bipolar bias over the spawner’s diameter/length ranges (clamped to crop-type limits); mass = `densityKgPerM3 × volume`. Stats credit the stored per-slot mass — never a full-pool mass scan. Implemented in `src/simulation/cropSize.ts` + `src/simulation/spawning.ts`; unit-tested.
 
 ## Object Pooling
 
@@ -113,7 +116,7 @@ Each fixed physics step (`dt`), the spawner accumulates `cropsPerSecond * dt` in
 ## Save-File Architecture
 
 - `src/serialization` converts between store state and the versioned JSON format defined in `SAVE_FILE_FORMAT.md` / `schemas/layout.schema.json`.
-- `serializeLayout(state) → LayoutFileV1` and `parseLayout(json) → Result<LayoutFileV1, ParseError[]>` are pure functions (unit-testable, no DOM).
+- `serializeLayout(state) → LayoutFile` and `parseLayout(json) → Result<LayoutFile, ParseError[]>` are pure functions (unit-testable, no DOM).
 - Loading: parse JSON → check `fileVersion` → run migrations old→new one version at a time → validate → replace store state atomically. Any error aborts before the store is touched.
 - File I/O (download blob / file picker) is a thin layer in `src/components` on top of the pure functions.
 

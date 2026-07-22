@@ -1,5 +1,5 @@
 {
-  "fileVersion": 1,
+  "fileVersion": 2,
   "meta": {
     "name": "Sample intake line",
     "createdAt": "2026-07-21T19:00:00Z",
@@ -22,7 +22,14 @@
         "cropType": "potato",
         "throughput": 40,
         "emitArea": { "x": 0.6, "z": 0.6 },
-        "enabled": true
+        "enabled": true,
+        "diameterMinMm": 20,
+        "diameterMaxMm": 150,
+        "diameterBias": 0,
+        "lengthMinPct": 0,
+        "lengthMaxPct": 100,
+        "lengthBias": 0,
+        "densityKgPerM3": 777.46
       }
     },
     {

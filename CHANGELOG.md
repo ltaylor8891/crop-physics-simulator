@@ -6,15 +6,13 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ## [Unreleased]
 
-### Fixed
+### Breaking save-format changes
 
-- Crops jumping near collection zones overlapping conveyors: belt speed is applied only on top-surface contacts (not side/end hits), and despawned bodies are disabled before they are teleported out of the world.
-- Crop instances vanishing at some camera angles: disable frustum culling on the pooled `InstancedMesh` (bounds are based on the mesh origin, not per-instance transforms).
-- Spawning stuck on **THROTTLED**: crop body/collider binding now retries until the pool is ready (and no longer reports throttle while unbound). Floor despawn after `floorDespawnSeconds` returns crops to the pool so the cap can recover.
-- Belt speed accuracy: riders now travel at the labelled m/min (converted to m/s) via per-step contact velocity injection on a fixed belt collider (ADR-016), instead of relying on friction against a pinned kinematic belt. Removed debug-ball linear damping that systematically undershot belt speed.
+- `fileVersion` 2: spawners require `diameterMinMm`, `diameterMaxMm`, `diameterBias`, `lengthMinPct`, `lengthMaxPct`, `lengthBias`, `densityKgPerM3`. V1 files migrate with type defaults.
 
 ### Added
 
+- Per-spawner crop size distribution and density: diameter min/max (mm) with bipolar bias, length as % of diameter with bias, and density (kg/m³). Mass = ρV; spawners use a kg-credit accumulator so t/h stays accurate with variable sizes. Crop-type diameter limits are fixed in code (potato 20–150 mm, etc.).
 - Elevators (roadmap Stage 11): parametric casing/head/spout mesh; base intake AABB; transit delay `height/transportSpeed`; FIFO queue with `dischargeRateCap` fractional accumulator; discharge along local +X with spawn-style jitter; status bar **In elevator** count.
 - Crop physics (roadmap Stage 9): one instanced pool per crop type (ball / capsule / ball) with preset friction, restitution, mass, CCD, and light linear damping; global active cap still `maxActiveCrops`.
 - Floor and zone despawn (roadmap Stage 10): ground contact despawn after `floorDespawnSeconds`; immediate collection/despawn zone volumes with collected vs spilled mass accounting.

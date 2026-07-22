@@ -66,6 +66,22 @@ export interface SpawnerProperties {
   /** m emission face (each 0.1–3) */
   emitArea: AxisXZ;
   enabled: boolean;
+  /** Diameter range (mm), clamped to crop-type preset limits at spawn */
+  diameterMinMm: number;
+  diameterMaxMm: number;
+  /** −100…100; 0 = uniform; negative favours small, positive favours large */
+  diameterBias: number;
+  /**
+   * Total tuber length as % of diameter (0–100): L = (pct/100)×D.
+   * Capsule halfHeight = max(0,(L−D)/2); with pct≤100 this is always a sphere.
+   * Ball types ignore length for geometry.
+   */
+  lengthMinPct: number;
+  lengthMaxPct: number;
+  /** −100…100 length bias */
+  lengthBias: number;
+  /** kg/m³ — mass = density × volume */
+  densityKgPerM3: number;
 }
 
 export interface ZoneProperties {
