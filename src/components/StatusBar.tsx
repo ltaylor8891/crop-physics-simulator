@@ -35,7 +35,7 @@ export function StatusBar() {
       {running && !physicsReady && (
         <span
           className="status-throttled"
-          title="Rapier WASM has not loaded — crops cannot spawn. Redeploy dist/ including assets/rapier_wasm3d_bg.wasm."
+          title="Crop physics pools are not bound — crops cannot spawn. If this persists more than a few seconds, check the browser console for Rapier/WASM errors."
         >
           PHYSICS LOADING…
         </span>

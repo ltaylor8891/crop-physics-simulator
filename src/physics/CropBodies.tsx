@@ -27,10 +27,6 @@ const CROP_LINEAR_DAMPING = 0.05;
 export function CropBodies() {
   const capacity = useSimulationStore((s) => s.settings.maxActiveCrops);
 
-  useEffect(() => {
-    cropRuntime.configure(capacity);
-  }, [capacity]);
-
   return (
     <>
       {CROP_TYPE_IDS.map((cropType) => (
@@ -52,6 +48,13 @@ function CropTypePool({
   const { world, rapier } = useRapier();
 
   useEffect(() => {
+    // Size the runtime buckets before binding. Must happen here, not in a parent
+    // effect: child effects fire before the parent's, so a parent-side configure
+    // would reset the buckets after this pool has bound its slots (that ordering
+    // silently emptied every pool in production builds, where StrictMode's second
+    // effect pass doesn't exist to re-bind them).
+    cropRuntime.configure(capacity);
+
     const bodies: RapierRigidBody[] = [];
     const colliders: RapierCollider[] = [];
 

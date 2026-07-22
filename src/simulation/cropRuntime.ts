@@ -124,10 +124,11 @@ class CropRuntime {
   }
 
   configure(capacity: number): void {
-    const already =
-      this.maxActive === capacity &&
-      CROP_TYPE_IDS.every((type) => this.buckets[type].boundBodies === capacity);
-    if (already) return;
+    // Reset only on a real capacity change. Callers bind slots after configure;
+    // re-running configure(sameCapacity) must NOT wipe those bindings — React runs
+    // sibling/parent effects after the first pool has already bound (production
+    // mounts effects once; only StrictMode's dev double-pass hid this).
+    if (this.maxActive === capacity) return;
 
     this.maxActive = capacity;
     this.globalActive = 0;
