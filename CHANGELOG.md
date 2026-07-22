@@ -13,7 +13,8 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Fixed
 
-- Production deploy: Rapier WASM was missing from `dist/assets/`, so physics never mounted and crops never spawned while the UI still looked fine; build now copies `rapier_wasm3d_bg.wasm` beside the JS bundle.
+- Crops never spawned in production builds (status bar stuck on **PHYSICS LOADING…**): the crop pools were reset after binding because React runs child effects before the parent effect that configured them; dev builds were unaffected only because StrictMode's second effect pass re-bound the pools. Pool configuration now happens before binding and only resets on a real capacity change (KI-008).
+- Production deploy hardening (superseded diagnosis of the above): build copies `rapier_wasm3d_bg.wasm` beside the JS bundle. Kept, though `rapier3d-compat` embeds the WASM and the copy is believed unnecessary.
 - Potatoes rendering as flat disks: near-zero capsule half-height was non-uniform-scaled on a capsule mesh; visuals are spheres (matching ball physics / length% ≤ 100).
 - Post-overload lag after **Reset**: crop pools no longer rewrite every parked instance matrix each frame; bodies are world-managed (not `InstancedRigidBodies`); Rapier render interpolation disabled (ADR-017); belt start wakes only enabled dynamics.
 

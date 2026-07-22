@@ -20,12 +20,13 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 - **Proposed resolution**: Clear `TEMPORARILY_DISABLED_ELEMENT_TYPES`, restore schema elevator branch (new `fileVersion`), re-wire UI when re-enabling.
 - **Status**: Open (by design)
 
-### KI-008 — Production build must include Rapier WASM
+### KI-008 — Crops never spawned in production builds (misdiagnosed as missing WASM)
 
-- **Description**: Vite does not emit `rapier_wasm3d_bg.wasm` next to the JS chunk by default. Without it, `@react-three/rapier` init hangs in Suspense — UI/FPS work, Play toggles, but active crops stay 0.
+- **Description**: In production builds (deployed or `vite preview`), Play showed **PHYSICS LOADING…** forever and active crops stayed 0 while UI/FPS worked. Originally diagnosed as `rapier_wasm3d_bg.wasm` missing from `dist/assets/`; that was wrong — `@dimforge/rapier3d-compat` embeds the WASM as base64 and never fetches it.
 - **Severity**: High (broke taynium.com/simulation-app deploy)
-- **Proposed resolution**: post-build `scripts/copy-rapier-wasm.mjs` (via `npm run build`) copies WASM into `dist/assets/`. Always upload full `dist/` including `assets/rapier_wasm3d_bg.wasm`.
-- **Status**: Closed (mitigated in build)
+- **Actual cause**: React runs child effects before parent effects. `CropTypePool` effects bound all crop bodies, then the parent `CropBodies` effect called `cropRuntime.configure()`, whose reset condition wiped every bucket. Dev never showed it because StrictMode's second effect pass re-bound into the already-configured buckets.
+- **Resolution**: `configure()` resets only on a real capacity change and is called inside each pool's bind effect before binding (regression-tested in `src/simulation/cropRuntime.test.ts`). Verified live against `vite preview`: crops spawn at the configured t/h. The WASM copy step in `npm run build` is retained but believed unnecessary.
+- **Status**: Closed (root cause fixed 2026-07-22)
 
 ### KI-002 — Contact surface velocity mechanism unverified in bound Rapier version
 

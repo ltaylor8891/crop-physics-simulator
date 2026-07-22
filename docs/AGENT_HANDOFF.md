@@ -7,6 +7,7 @@ _Last updated: 2026-07-22_
 ## Current Project State
 
 - Stages 1–13 complete on **`main`** (merged from `feature/statistics`).
+- **Production crop-spawn bug root-caused and fixed**: crops never spawned in any production build — not a WASM issue (KI-008 rewritten). `CropBodies`' parent effect reset the pools after the per-type child effects had bound them; StrictMode's dev-only second effect pass masked it. Fix: `cropRuntime.configure()` resets only on real capacity change and runs inside each pool's bind effect. Verified live against `vite preview` (crops spawn, ~40 t/h in, no PHYSICS LOADING).
 - Post-Reset lag fix (ADR-017) and potato disk visual fix retained; Stage 14 pile-perf pass was reverted at user request.
 - **Bucket elevators temporarily removed**: not in library; `fileVersion` 3 strips them on load; sim/mesh code kept behind `TEMPORARILY_DISABLED_ELEMENT_TYPES`.
 - Toolbar: open file name, Taynium logo (`public/taynium-logo.svg`), copyright.
@@ -45,15 +46,16 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Test Status
 
-- Full gate passed after deploy/WASM fix (`typecheck`, `lint`, `test`, `build`). Confirm `dist/assets/rapier_wasm3d_bg.wasm` exists after build.
+- Full gate passed with the crop-spawn fix (`typecheck`, `lint`, `test` 136/136 incl. 3 new regression tests, `build`). Production behaviour hand-verified in a browser against `vite preview` of `dist/`.
 
 ## Known Errors
 
-- None from this fix. Open gaps: KI-004, KI-005; Stage 14 FPS hand-check. KI-008 closed (WASM copy on build).
+- None from this fix. Open gaps: KI-004, KI-005; Stage 14 FPS hand-check. KI-008 closed for real (pool reset ordering, not WASM).
 
 ## Uncommitted Work
 
-- None (deploy/WASM fix committed).
+- None. The crop-spawn fix is committed to `main` (fix: code + tests, docs: changelog/KI-008/handoff). The pre-existing `initRapier()` stash was dropped at the user's request (superseded by the root-cause fix).
+- `.claude/launch.json` (untracked) contains a machine-specific npm path for browser preview — do not commit.
 
 ## Architectural Constraints (do not violate)
 
