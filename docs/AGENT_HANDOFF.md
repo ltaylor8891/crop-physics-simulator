@@ -6,7 +6,7 @@ _Last updated: 2026-07-22_
 
 ## Current Project State
 
-- Stages 1–13 complete on `feature/statistics` (merge to `main` when ready).
+- Stages 1–13 complete on **`main`** (merged from `feature/statistics`).
 - Post-Reset lag fix (ADR-017) and potato disk visual fix retained; Stage 14 pile-perf pass was reverted at user request.
 - **Bucket elevators temporarily removed**: not in library; `fileVersion` 3 strips them on load; sim/mesh code kept behind `TEMPORARILY_DISABLED_ELEMENT_TYPES`.
 - Toolbar: open file name, Taynium logo (`public/taynium-logo.svg`), copyright.
@@ -14,20 +14,20 @@ _Last updated: 2026-07-22_
 
 ## Current Branch
 
-- `feature/statistics`
+- `main`
 
 ## Last Completed Stage
 
-- **Stage 13 — Statistics**.
+- **Stage 13 — Statistics** (plus follow-up pool/visual/branding fixes).
 
 ## Work Currently In Progress
 
-- None — verify + commit if not yet committed.
+- None.
 
 ## Next Recommended Task
 
-1. Commit/push pending Reset-lag + disk fixes; merge `feature/statistics` → `main`.
-2. **Stage 14 — Performance optimisation** when the user wants another pass.
+1. **Stage 14 — Performance optimisation** when dense piles need another pass.
+2. Or Stage 15 release prep / hand-check after using the app on `main`.
 
 ## Important Files
 
@@ -63,5 +63,5 @@ npm ci && npm run test && npm run typecheck && npm run dev
 
 ## Suggested Starting Point for the Next Agent
 
-1. Confirm Reset-lag + sphere visual fixes are committed.
-2. Merge Stage 13 branch; start Stage 14 only when requested.
+1. Work from `main` (already includes Stage 13 + pool/branding fixes).
+2. Start Stage 14 only when requested; otherwise Stage 15 / hand-check.
