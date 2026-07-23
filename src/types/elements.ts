@@ -29,6 +29,21 @@ export interface ElementBase<TType extends ElementType, TProps> {
   properties: TProps;
 }
 
+/**
+ * Optional diverter: an angled high-side wall that locks to the belt surface to
+ * deflect crop across the belt. `length = 0` means "no diverter" (nothing rendered
+ * or collided). Positioned along the belt from the infeed end and angled in the
+ * belt plane about its local +Y.
+ */
+export interface DiverterProperties {
+  /** m along the belt from the infeed (−length/2) end (0–50). */
+  offsetAlongBelt: number;
+  /** m, wall length; 0 = no diverter (0–20). */
+  length: number;
+  /** degrees, rotation in the belt plane about local +Y (−80–80). */
+  angleDeg: number;
+}
+
 export interface ConveyorProperties {
   /** m, along local X (1–50) */
   length: number;
@@ -42,6 +57,10 @@ export interface ConveyorProperties {
   beltSpeed: number;
   /** side-skirt walls */
   skirts: boolean;
+  /** support legs from ground to belt underside; off lets belts stack vertically */
+  showLegs: boolean;
+  /** diverter attachment; `length = 0` means none */
+  diverter: DiverterProperties;
 }
 
 export interface ElevatorProperties {

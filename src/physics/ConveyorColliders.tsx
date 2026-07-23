@@ -6,8 +6,12 @@ import {
   useRapier,
   type RapierCollider,
 } from '@react-three/rapier';
+import { Quaternion, Vector3 } from 'three';
 import {
   BELT_THICKNESS,
+  DIVERTER_HEIGHT,
+  DIVERTER_THICKNESS,
+  diverterLocalCenter,
   SKIRT_HEIGHT,
   SKIRT_THICKNESS,
 } from '../rendering/elements/conveyorGeometry';
@@ -59,7 +63,7 @@ export function ConveyorColliders() {
 
 function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
   const { properties, position, rotationYaw } = conveyor;
-  const { length, width, beltHeight, inclineDeg, beltSpeed, skirts } = properties;
+  const { length, width, beltHeight, inclineDeg, beltSpeed, skirts, diverter } = properties;
   const beltColliderRef = useRef<RapierCollider>(null);
   const { world } = useRapier();
 
@@ -91,6 +95,36 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
     () => beltOrientationQuaternion(rotationYaw, inclineDeg),
     [rotationYaw, inclineDeg],
   );
+
+  // Diverter high-side wall: fixed collider on the belt surface (length 0 = none).
+  const diverterWorld = useMemo(() => {
+    const local = diverterLocalCenter(
+      length,
+      beltHeight,
+      degreesToRadians(inclineDeg),
+      diverter.offsetAlongBelt,
+    );
+    const rotated = rotateYaw(local, rotationYaw);
+    return { x: position.x + rotated.x, y: position.y + rotated.y, z: position.z + rotated.z };
+  }, [
+    length,
+    beltHeight,
+    inclineDeg,
+    diverter.offsetAlongBelt,
+    rotationYaw,
+    position.x,
+    position.y,
+    position.z,
+  ]);
+
+  // Belt orientation, then the diverter's own rotation about the belt-local +Y.
+  const diverterQuat = useMemo(() => {
+    const q = new Quaternion(orientation[0], orientation[1], orientation[2], orientation[3]);
+    q.multiply(
+      new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), degreesToRadians(diverter.angleDeg)),
+    );
+    return [q.x, q.y, q.z, q.w] as [number, number, number, number];
+  }, [orientation, diverter.angleDeg]);
 
   // Keep latest vectors for the after-step callback without re-subscribing.
   const surfaceVelRef = useRef(worldLinvel);
@@ -186,6 +220,22 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
             </RigidBody>
           );
         })}
+
+      {diverter.length > 0 && (
+        <RigidBody
+          type="fixed"
+          position={[diverterWorld.x, diverterWorld.y, diverterWorld.z]}
+          quaternion={diverterQuat}
+          colliders={false}
+        >
+          <CuboidCollider
+            args={[diverter.length / 2, DIVERTER_HEIGHT / 2, DIVERTER_THICKNESS / 2]}
+            collisionGroups={MACHINE_COLLISION_GROUPS}
+            friction={Materials.machine.friction}
+            restitution={Materials.machine.restitution}
+          />
+        </RigidBody>
+      )}
     </>
   );
 }

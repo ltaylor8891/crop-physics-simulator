@@ -2,7 +2,7 @@
 
 Living plan for the feature program on the **`develop`** branch, kept isolated from `main` (which stays at Stages 1–13 + performance/release). This document is the approved, phased plan; **nothing here is implemented until the user requests a specific phase.** As each phase lands, fold its detail into the standard docs (`ROADMAP.md` stage, `DECISIONS.md` ADR, `PRODUCT_SCOPE.md`, `PHYSICS_SPECIFICATION.md`, `SAVE_FILE_FORMAT.md`, `CHANGELOG.md`) and trim it here to a pointer.
 
-_Last updated: 2026-07-23 — plan approved, no phase implemented yet._
+_Last updated: 2026-07-23 — Phase A implemented on `develop` (roadmap Stage 16, ADR-018). Phases B–G planned, not started._
 
 ## Context
 
@@ -38,9 +38,9 @@ Adding an element type touches this fixed set (verified in the current code):
 
 ---
 
-## Phase A — Conveyor enhancements (legs toggle, diverter attachment)
+## Phase A — Conveyor enhancements (legs toggle, diverter attachment) — ✅ DONE
 
-Smallest, self-contained, no new simulation subsystem. Good first phase to validate the `develop` workflow.
+Implemented on `develop` (roadmap Stage 16, ADR-018, `fileVersion` 4). Smallest, self-contained, no new simulation subsystem.
 
 - **Legs toggle**: add `showLegs: boolean` to `ConveyorProperties`; `PROPERTY_FIELDS.conveyor` boolean field; `ConveyorMesh.tsx` skips leg geometry when false (leg math already isolated in `conveyorGeometry.ts::computeLegs`). No physics change (legs are visual). Requires a save-format migration to default `showLegs: true` on V3 files.
 - **Diverter attachment**: add an optional `diverter?: { offsetAlongBelt: number; length: number; angleDeg: number }` to `ConveyorProperties` (an attachment, so it stays within the conveyor element per "locks to the belt surface"). Render an angled wall in `ConveyorMesh.tsx`; add a matching **fixed thin cuboid collider** in `ConveyorColliders.tsx` (in `MACHINE_COLLISION_GROUPS`), transformed by belt yaw/incline so it sits on the deck. Property fields for offset/length/angle. Diverter with `length = 0` (default) means "none".

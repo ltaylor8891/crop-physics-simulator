@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/crop-physics-simulator/layout.schema.json",
-  "title": "Crop Physics Simulator Layout (fileVersion 3)",
+  "title": "Crop Physics Simulator Layout (fileVersion 4)",
   "description": "Versioned save-file format for simulator layouts. Human-readable specification: docs/SAVE_FILE_FORMAT.md",
   "type": "object",
   "additionalProperties": false,
   "required": ["fileVersion", "meta", "settings", "elements", "camera"],
   "properties": {
-    "fileVersion": { "const": 3 },
+    "fileVersion": { "const": 4 },
     "meta": {
       "type": "object",
       "additionalProperties": false,
@@ -86,14 +86,25 @@
             "properties": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["length", "width", "beltHeight", "inclineDeg", "beltSpeed", "skirts"],
+              "required": [
+                "length",
+                "width",
+                "beltHeight",
+                "inclineDeg",
+                "beltSpeed",
+                "skirts",
+                "showLegs",
+                "diverter"
+              ],
               "properties": {
                 "length": { "type": "number", "minimum": 1, "maximum": 50 },
                 "width": { "type": "number", "minimum": 0.3, "maximum": 3 },
                 "beltHeight": { "type": "number", "minimum": 0.2, "maximum": 5 },
                 "inclineDeg": { "type": "number", "minimum": -30, "maximum": 30 },
                 "beltSpeed": { "type": "number", "minimum": 0, "maximum": 300 },
-                "skirts": { "type": "boolean" }
+                "skirts": { "type": "boolean" },
+                "showLegs": { "type": "boolean" },
+                "diverter": { "$ref": "#/$defs/diverterProperties" }
               }
             }
           }
@@ -160,6 +171,16 @@
           }
         }
       ]
+    },
+    "diverterProperties": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offsetAlongBelt", "length", "angleDeg"],
+      "properties": {
+        "offsetAlongBelt": { "type": "number", "minimum": 0, "maximum": 50 },
+        "length": { "type": "number", "minimum": 0, "maximum": 20 },
+        "angleDeg": { "type": "number", "minimum": -80, "maximum": 80 }
+      }
     },
     "zoneProperties": {
       "type": "object",

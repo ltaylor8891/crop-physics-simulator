@@ -56,6 +56,30 @@ export function migrateV2toV3(raw: Record<string, unknown>): Record<string, unkn
 }
 
 /**
+ * V3 → V4: conveyors gain `showLegs` (default on) and a `diverter` attachment
+ * (default length 0 = none). Older conveyors are back-filled with these defaults.
+ */
+export function migrateV3toV4(raw: Record<string, unknown>): Record<string, unknown> {
+  const elements = raw.elements;
+  if (!Array.isArray(elements)) {
+    return { ...raw, fileVersion: 4 };
+  }
+  const nextElements = elements.map((el) => {
+    if (!isRecord(el) || el.type !== 'conveyor' || !isRecord(el.properties)) return el;
+    const props = el.properties;
+    return {
+      ...el,
+      properties: {
+        showLegs: true,
+        diverter: { offsetAlongBelt: 0, length: 0, angleDeg: 0 },
+        ...props,
+      },
+    };
+  });
+  return { ...raw, fileVersion: 4, elements: nextElements };
+}
+
+/**
  * Apply stepwise migrations until `CURRENT_FILE_VERSION`.
  * Returns the migrated object or errors (e.g. unsupported future version).
  */
@@ -96,6 +120,10 @@ export function migrateLayout(
   if (v === 2) {
     current = migrateV2toV3(current);
     v = 3;
+  }
+  if (v === 3) {
+    current = migrateV3toV4(current);
+    v = 4;
   }
 
   if (v !== CURRENT_FILE_VERSION) {

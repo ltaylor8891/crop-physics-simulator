@@ -43,6 +43,8 @@ describe('createElement', () => {
       inclineDeg: 0,
       beltSpeed: 90,
       skirts: true,
+      showLegs: true,
+      diverter: { offsetAlongBelt: 0, length: 0, angleDeg: 0 },
     });
   });
 });

@@ -12,6 +12,8 @@ export const RAIL_HEIGHT = 0.12;
 export const RAIL_WIDTH = 0.06;
 export const SKIRT_HEIGHT = 0.18;
 export const SKIRT_THICKNESS = 0.04;
+export const DIVERTER_HEIGHT = 0.25;
+export const DIVERTER_THICKNESS = 0.04;
 
 const LEG_SPACING = 2.5;
 const LEG_END_MARGIN = 0.4;
@@ -42,6 +44,50 @@ export function computeLegs(length: number, beltHeight: number, inclineRad: numb
     legs.push({ x: -length / 2 + d * Math.cos(inclineRad), height: undersideY });
   }
   return legs;
+}
+
+export interface DiverterPlacement {
+  /** Belt-assembly-local X of the wall centre (belt centre at 0, discharge at +length/2). */
+  innerX: number;
+  /** Belt-assembly-local Y of the wall centre (belt top at 0, wall sits above). */
+  innerY: number;
+}
+
+/**
+ * Diverter wall centre in the belt-assembly inner frame (same frame as the belt
+ * mesh: belt top at y = 0, belt spans x ∈ [−length/2, +length/2]). The wall sits
+ * on the belt surface, `offsetAlongBelt` metres from the infeed (−length/2) end.
+ * Rotation by `angleDeg` about local +Y is applied by the caller and does not
+ * move the centre. Used by ConveyorMesh (renders in this frame directly).
+ */
+export function diverterPlacement(length: number, offsetAlongBelt: number): DiverterPlacement {
+  return {
+    innerX: -length / 2 + offsetAlongBelt,
+    innerY: DIVERTER_HEIGHT / 2,
+  };
+}
+
+/**
+ * Diverter wall centre in element-local space (origin at footprint centre, ground
+ * level, before yaw), accounting for the belt's incline pivot about the infeed end.
+ * Used by ConveyorColliders to place the fixed wall collider. Mirrors the belt/skirt
+ * transforms in beltVelocity.ts.
+ */
+export function diverterLocalCenter(
+  length: number,
+  beltHeight: number,
+  inclineRad: number,
+  offsetAlongBelt: number,
+): { x: number; y: number; z: number } {
+  const d = offsetAlongBelt;
+  const h = DIVERTER_HEIGHT / 2;
+  const cos = Math.cos(inclineRad);
+  const sin = Math.sin(inclineRad);
+  return {
+    x: -length / 2 + d * cos - h * sin,
+    y: beltHeight + d * sin + h * cos,
+    z: 0,
+  };
 }
 
 /** Chevron tip x-positions along the belt (assembly space, belt centre at 0). */

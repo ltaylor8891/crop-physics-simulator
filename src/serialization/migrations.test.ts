@@ -1,28 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import { CROP_TYPES } from '../elements/cropTypes';
-import { migrateLayout, migrateV1toV2, migrateV2toV3 } from './migrations';
+import { migrateLayout, migrateV1toV2, migrateV2toV3, migrateV3toV4 } from './migrations';
 
 describe('migrateLayout', () => {
   it('migrates fileVersion 1 through to current', () => {
     const result = migrateLayout({ fileVersion: 1, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(3);
+    expect(result.value.fileVersion).toBe(4);
     expect(result.value.keep).toBe(true);
   });
 
-  it('migrates fileVersion 2 to 3', () => {
+  it('migrates fileVersion 2 to current', () => {
     const result = migrateLayout({ fileVersion: 2, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(3);
+    expect(result.value.fileVersion).toBe(4);
   });
 
-  it('accepts current fileVersion 3 unchanged', () => {
-    const result = migrateLayout({ fileVersion: 3, keep: true });
+  it('accepts current fileVersion 4 unchanged', () => {
+    const result = migrateLayout({ fileVersion: 4, keep: true });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(3);
+    expect(result.value.fileVersion).toBe(4);
   });
 
   it('rejects non-integer fileVersion', () => {
@@ -31,7 +31,7 @@ describe('migrateLayout', () => {
   });
 
   it('rejects future versions', () => {
-    const result = migrateLayout({ fileVersion: 4 });
+    const result = migrateLayout({ fileVersion: 5 });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.errors[0]?.message).toMatch(/newer version/i);
@@ -78,5 +78,54 @@ describe('migrateV2toV3', () => {
       { type: 'conveyor', id: 'c1' },
       { type: 'spawner', id: 's1' },
     ]);
+  });
+});
+
+describe('migrateV3toV4', () => {
+  it('back-fills showLegs and diverter defaults on conveyors', () => {
+    const migrated = migrateV3toV4({
+      fileVersion: 3,
+      elements: [
+        {
+          type: 'conveyor',
+          id: 'c1',
+          properties: {
+            length: 6,
+            width: 0.8,
+            beltHeight: 0.75,
+            inclineDeg: 0,
+            beltSpeed: 90,
+            skirts: true,
+          },
+        },
+        { type: 'spawner', id: 's1', properties: { throughput: 40 } },
+      ],
+    });
+    expect(migrated.fileVersion).toBe(4);
+    const els = migrated.elements as Array<{ type: string; properties: Record<string, unknown> }>;
+    expect(els[0]!.properties.showLegs).toBe(true);
+    expect(els[0]!.properties.diverter).toEqual({ offsetAlongBelt: 0, length: 0, angleDeg: 0 });
+    // Non-conveyor elements are untouched.
+    expect(els[1]!.properties).toEqual({ throughput: 40 });
+  });
+
+  it('does not overwrite conveyor fields already present', () => {
+    const migrated = migrateV3toV4({
+      fileVersion: 3,
+      elements: [
+        {
+          type: 'conveyor',
+          id: 'c1',
+          properties: {
+            showLegs: false,
+            diverter: { offsetAlongBelt: 2, length: 1, angleDeg: 20 },
+          },
+        },
+      ],
+    });
+    const props = (migrated.elements as Array<{ properties: Record<string, unknown> }>)[0]!
+      .properties;
+    expect(props.showLegs).toBe(false);
+    expect(props.diverter).toEqual({ offsetAlongBelt: 2, length: 1, angleDeg: 20 });
   });
 });

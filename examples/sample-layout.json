@@ -1,5 +1,5 @@
 {
-  "fileVersion": 3,
+  "fileVersion": 4,
   "meta": {
     "name": "Sample intake line",
     "createdAt": "2026-07-21T19:00:00Z",
@@ -44,7 +44,9 @@
         "beltHeight": 0.75,
         "inclineDeg": 0,
         "beltSpeed": 90,
-        "skirts": true
+        "skirts": true,
+        "showLegs": true,
+        "diverter": { "offsetAlongBelt": 0, "length": 0, "angleDeg": 0 }
       }
     },
     {
@@ -59,7 +61,9 @@
         "beltHeight": 0.75,
         "inclineDeg": 15,
         "beltSpeed": 110,
-        "skirts": true
+        "skirts": true,
+        "showLegs": true,
+        "diverter": { "offsetAlongBelt": 3, "length": 1.5, "angleDeg": 35 }
       }
     },
     {

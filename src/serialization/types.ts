@@ -7,7 +7,7 @@ import type { SceneElement, Vec3 } from '../types/elements';
 import type { SimulationSettings } from '../types/settings';
 
 /** Current writer version; bump with a migration when the schema changes. */
-export const CURRENT_FILE_VERSION = 3;
+export const CURRENT_FILE_VERSION = 4;
 
 /** Matches package.json version; informational only in save files. */
 export const APP_VERSION = '0.1.0';
@@ -40,7 +40,16 @@ export interface LayoutFileV3 {
   camera: LayoutCamera;
 }
 
-export type LayoutFile = LayoutFileV3;
+/** V4: conveyors gain `showLegs` and a `diverter` attachment. */
+export interface LayoutFileV4 {
+  fileVersion: 4;
+  meta: LayoutMeta;
+  settings: SimulationSettings;
+  elements: SceneElement[];
+  camera: LayoutCamera;
+}
+
+export type LayoutFile = LayoutFileV4;
 
 export interface ParseError {
   path: string;

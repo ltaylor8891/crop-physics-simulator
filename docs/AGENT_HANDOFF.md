@@ -24,7 +24,7 @@ _Last updated: 2026-07-22_
 
 ## Work Currently In Progress
 
-- None.
+- `develop` feature program (`docs/DEVELOP_PROGRAM.md`). **Phase A complete** (conveyor legs toggle + diverter attachment; roadmap Stage 16, ADR-018, `fileVersion` 4). Phases B–G planned, not started. `main` is untouched.
 
 ## Next Recommended Task
 
@@ -64,7 +64,7 @@ npm run typecheck && npm run lint && npm run format:check && npm run test && npm
 - 1 world unit = 1 metre; Y-up; flow along local +X; yaw radians CCW about +Y.
 - Fixed physics timestep 1/60 s; simulation on fixed steps only.
 - Crops: per-type pools; global `maxActiveCrops` cap (ADR-005); no Rapier render interpolation with pools (ADR-017).
-- Save format: versioned JSON, schema-validated; current `fileVersion` 3.
+- Save format: versioned JSON, schema-validated; current `fileVersion` 4 (on `develop`; `main` is at 3).
 
 ## Suggested Starting Point for the Next Agent
 

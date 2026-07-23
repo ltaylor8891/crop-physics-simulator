@@ -56,6 +56,10 @@ export const PROPERTY_FIELDS: Record<ElementType, PropertyFieldDef[]> = {
     numberField('inclineDeg', 'Incline', -30, 30, '°', 1),
     numberField('beltSpeed', 'Belt speed', 0, 300, 'm/min', 1),
     { kind: 'boolean', path: 'skirts', label: 'Side skirts' },
+    { kind: 'boolean', path: 'showLegs', label: 'Support legs' },
+    numberField('diverter.offsetAlongBelt', 'Diverter position', 0, 50, 'm', 0.1),
+    numberField('diverter.length', 'Diverter length', 0, 20, 'm', 0.1),
+    numberField('diverter.angleDeg', 'Diverter angle', -80, 80, '°', 1),
   ],
   elevator: [
     numberField('height', 'Height', 1, 30, 'm', 0.1),

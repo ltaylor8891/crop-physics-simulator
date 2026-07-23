@@ -5,6 +5,9 @@ import {
   BELT_THICKNESS,
   computeChevronPositions,
   computeLegs,
+  DIVERTER_HEIGHT,
+  DIVERTER_THICKNESS,
+  diverterPlacement,
   RAIL_HEIGHT,
   RAIL_WIDTH,
   SKIRT_HEIGHT,
@@ -25,6 +28,7 @@ const BELT_COLOR = '#2f3338';
 const FRAME_COLOR = '#55606a';
 const SKIRT_COLOR = '#46525c';
 const CHEVRON_COLOR = '#e0b45c';
+const DIVERTER_COLOR = '#c98a3c';
 const SELECTION_COLOR = '#4f9cf0';
 
 interface ConveyorMeshProps {
@@ -33,14 +37,18 @@ interface ConveyorMeshProps {
 }
 
 export function ConveyorMesh({ properties, selected }: ConveyorMeshProps) {
-  const { length, width, beltHeight, inclineDeg, skirts } = properties;
+  const { length, width, beltHeight, inclineDeg, skirts, showLegs, diverter } = properties;
   const inclineRad = degreesToRadians(inclineDeg);
 
   const legs = useMemo(
-    () => computeLegs(length, beltHeight, inclineRad),
-    [length, beltHeight, inclineRad],
+    () => (showLegs ? computeLegs(length, beltHeight, inclineRad) : []),
+    [showLegs, length, beltHeight, inclineRad],
   );
   const chevrons = useMemo(() => computeChevronPositions(length), [length]);
+  const diverterPlace = useMemo(
+    () => diverterPlacement(length, diverter.offsetAlongBelt),
+    [length, diverter.offsetAlongBelt],
+  );
 
   const emissive = selected ? SELECTION_COLOR : '#000000';
   const emissiveIntensity = selected ? 0.35 : 0;
@@ -112,6 +120,18 @@ export function ConveyorMesh({ properties, selected }: ConveyorMeshProps) {
                 {material(CHEVRON_COLOR)}
               </mesh>
             )),
+          )}
+
+          {/* Diverter high-side wall on the belt surface (length 0 = none). */}
+          {diverter.length > 0 && (
+            <mesh
+              position={[diverterPlace.innerX, diverterPlace.innerY, 0]}
+              rotation={[0, degreesToRadians(diverter.angleDeg), 0]}
+              castShadow
+            >
+              <boxGeometry args={[diverter.length, DIVERTER_HEIGHT, DIVERTER_THICKNESS]} />
+              {material(DIVERTER_COLOR)}
+            </mesh>
           )}
         </group>
       </group>

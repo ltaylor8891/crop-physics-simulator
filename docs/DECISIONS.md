@@ -122,3 +122,19 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
   - Slightly less smooth motion when the render rate diverges from 60 Hz (acceptable for this tool).
   - Fixed 1/60 s stepping (ADR-004) unchanged.
   - Code: `PhysicsWorld.tsx`, `CropBodies.tsx`, `cropRuntime.ts`, `ConveyorColliders.tsx`.
+
+## ADR-018 — Conveyor attachments modeled as optional sub-properties, not separate elements
+
+- **Date**: 2026-07-23
+- **Status**: Accepted
+- **Context**: The `develop` feature program (Phase A, `docs/DEVELOP_PROGRAM.md`) adds a **diverter** — an angled high-side wall that locks to a conveyor's belt surface to deflect crop across it. A diverter has no independent existence: it is positioned along a specific belt, pitches and yaws with that belt, and moves when the belt moves. The same phase adds a **support-legs on/off** toggle so belts can stack vertically without leg posts blocking crop passing underneath.
+- **Options considered**:
+  1. Diverter as its own placeable element type, positioned and kept in sync with a conveyor by the user.
+  2. Diverter as an optional sub-object on `ConveyorProperties`, rendered and collided within the conveyor's own component.
+- **Decision**: Option 2. `ConveyorProperties` gains `showLegs: boolean` and `diverter: { offsetAlongBelt, length, angleDeg }`; `length = 0` means "no diverter". The wall mesh renders in the belt-assembly inner frame (`ConveyorMesh`), and a matching `fixed` cuboid collider is placed via `diverterLocalCenter` + belt orientation composed with the diverter's own yaw (`ConveyorColliders`). Standalone freestanding transfer elements (hopper, chute — Phase B) remain their own element types; only belt-locked attachments live inside the conveyor.
+- **Consequences**:
+  - No cross-element sync problem: the diverter is always consistent with its belt.
+  - `ConveyorProperties` grows required fields → `fileVersion` 4 with `migrateV3toV4` back-filling defaults (`showLegs: true`, diverter length 0).
+  - Geometry maths (`diverterPlacement`, `diverterLocalCenter`) stays pure and unit-tested in `conveyorGeometry.ts`; the quaternion composition uses three.js in the collider component.
+  - Only one attachment shape is supported for now; a second belt-locked attachment would extend the same pattern.
+  - Code: `types/elements.ts`, `elements/registry.ts`, `elements/propertySchema.ts`, `rendering/elements/ConveyorMesh.tsx` + `conveyorGeometry.ts`, `physics/ConveyorColliders.tsx`, `serialization/migrations.ts`.
