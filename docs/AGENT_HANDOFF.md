@@ -42,11 +42,13 @@ _Last updated: 2026-07-22_
 
 ```bash
 npm ci && npm run test && npm run typecheck && npm run dev
+# full pre-finish gate (matches CI):
+npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build
 ```
 
 ## Test Status
 
-- Full gate passed with the crop-spawn fix (`typecheck`, `lint`, `test` 136/136 incl. 3 new regression tests, `build`). Production behaviour hand-verified in a browser against `vite preview` of `dist/`.
+- Full gate green including `format:check` (136/136 tests). **CI is green for the first time in project history** — every one of the previous 17 runs failed on the Prettier format step because the documented local gate omitted `format:check`; the tree was reformatted (26 files) and AGENTS.md/CLAUDE.md now list the full CI gate. Production crop-spawn behaviour hand-verified against `vite preview` of `dist/`.
 
 ## Known Errors
 
