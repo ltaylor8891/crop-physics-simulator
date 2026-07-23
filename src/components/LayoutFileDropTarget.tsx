@@ -18,8 +18,7 @@ export function LayoutFileDropTarget() {
     const onDrop = (event: DragEvent) => {
       const file = event.dataTransfer?.files?.[0];
       if (!file) return;
-      const isJson =
-        file.name.toLowerCase().endsWith('.json') || file.type === 'application/json';
+      const isJson = file.name.toLowerCase().endsWith('.json') || file.type === 'application/json';
       if (!isJson) return;
       event.preventDefault();
       void loadLayoutFile(file).then((errors) => {

@@ -80,7 +80,10 @@ export function clampDiameterRangeMm(
   return { diameterMinMm: min, diameterMaxMm: max };
 }
 
-export function clampLengthPct(minPct: number, maxPct: number): {
+export function clampLengthPct(
+  minPct: number,
+  maxPct: number,
+): {
   lengthMinPct: number;
   lengthMaxPct: number;
 } {
@@ -151,12 +154,7 @@ export function sampleCropGeometry(
     props.diameterBias,
     random,
   );
-  const lengthPct = sampleBiasedRange(
-    len.lengthMinPct,
-    len.lengthMaxPct,
-    props.lengthBias,
-    random,
-  );
+  const lengthPct = sampleBiasedRange(len.lengthMinPct, len.lengthMaxPct, props.lengthBias, random);
 
   return geometryFromSize(preset, mmToMetres(diameterMm), lengthPct, props.densityKgPerM3);
 }

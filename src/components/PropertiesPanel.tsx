@@ -32,9 +32,8 @@ export function PropertiesPanel() {
   const updateElement = useSceneStore((s) => s.updateElement);
   const duplicateElement = useSceneStore((s) => s.duplicateElement);
   const removeElement = useSceneStore((s) => s.removeElement);
-  const zoneCollectedTph = useSimulationStore(
-    (s) =>
-      selectedElementId ? (s.statistics.collectedTphByZoneId[selectedElementId] ?? 0) : 0,
+  const zoneCollectedTph = useSimulationStore((s) =>
+    selectedElementId ? (s.statistics.collectedTphByZoneId[selectedElementId] ?? 0) : 0,
   );
 
   if (!element) {

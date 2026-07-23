@@ -36,13 +36,7 @@ export function CropBodies() {
   );
 }
 
-function CropTypePool({
-  cropType,
-  capacity,
-}: {
-  cropType: CropTypeId;
-  capacity: number;
-}) {
+function CropTypePool({ cropType, capacity }: { cropType: CropTypeId; capacity: number }) {
   const preset = CROP_TYPES[cropType];
   const meshRef = useRef<InstancedMesh>(null);
   const { world, rapier } = useRapier();

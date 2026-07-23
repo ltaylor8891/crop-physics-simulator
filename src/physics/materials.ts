@@ -9,4 +9,3 @@ export const Materials = {
   /** @deprecated Prefer CROP_TYPES presets; kept for Stage 6 debug balls. */
   debugBall: { friction: 0.5, restitution: 0.15 },
 } as const;
-

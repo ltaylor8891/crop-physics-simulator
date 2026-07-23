@@ -152,9 +152,7 @@ export function Toolbar() {
           }}
         />
       )}
-      {loadErrors && (
-        <LoadErrorDialog errors={loadErrors} onClose={() => setLoadErrors(null)} />
-      )}
+      {loadErrors && <LoadErrorDialog errors={loadErrors} onClose={() => setLoadErrors(null)} />}
     </header>
   );
 }

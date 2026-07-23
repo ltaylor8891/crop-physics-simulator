@@ -15,8 +15,7 @@ export interface CropTypePreset {
   id: CropTypeId;
   label: string;
   collider:
-    | { shape: 'ball'; radius: number }
-    | { shape: 'capsule'; halfHeight: number; radius: number };
+    { shape: 'ball'; radius: number } | { shape: 'capsule'; halfHeight: number; radius: number };
   /**
    * Default density (kg/m³) so a mid-range sphere of the type’s diameter
    * limits has mass close to the legacy preset mass.

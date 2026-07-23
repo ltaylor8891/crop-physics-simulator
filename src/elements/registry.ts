@@ -100,9 +100,7 @@ export const ELEMENT_TYPES: ElementType[] = [
  * Types, mesh, and `elevator.ts` remain for a quick restore — flip this set empty
  * and restore the schema elevator branch + `fileVersion` policy when re-enabling.
  */
-export const TEMPORARILY_DISABLED_ELEMENT_TYPES: ReadonlySet<ElementType> = new Set([
-  'elevator',
-]);
+export const TEMPORARILY_DISABLED_ELEMENT_TYPES: ReadonlySet<ElementType> = new Set(['elevator']);
 
 /** Library panel + placement order (excludes temporarily disabled types). */
 export const PLACEABLE_ELEMENT_TYPES: ElementType[] = ELEMENT_TYPES.filter(

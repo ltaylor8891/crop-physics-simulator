@@ -35,23 +35,15 @@ export function beltWorldVelocity(
 export function beltWorldNormal(inclineDeg: number, yawRadians: number): Vec3 {
   const incline = degreesToRadians(inclineDeg);
   // Local +Y after pitch about Z is (−sin θ, cos θ, 0).
-  return rotateYaw(
-    { x: -Math.sin(incline), y: Math.cos(incline), z: 0 },
-    yawRadians,
-  );
+  return rotateYaw({ x: -Math.sin(incline), y: Math.cos(incline), z: 0 }, yawRadians);
 }
 
 /**
  * Replace the tangential part of `current` with `surfaceVel`, keeping the
  * component along `beltNormal` (so gravity settle / bounce still work).
  */
-export function velocityWithBeltSurface(
-  current: Vec3,
-  surfaceVel: Vec3,
-  beltNormal: Vec3,
-): Vec3 {
-  const vn =
-    current.x * beltNormal.x + current.y * beltNormal.y + current.z * beltNormal.z;
+export function velocityWithBeltSurface(current: Vec3, surfaceVel: Vec3, beltNormal: Vec3): Vec3 {
+  const vn = current.x * beltNormal.x + current.y * beltNormal.y + current.z * beltNormal.z;
   return {
     x: surfaceVel.x + beltNormal.x * vn,
     y: surfaceVel.y + beltNormal.y * vn,

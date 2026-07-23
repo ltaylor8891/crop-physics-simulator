@@ -66,20 +66,13 @@ export function ElevatorMesh({ properties, selected }: ElevatorMeshProps) {
       </mesh>
 
       {/* Head house */}
-      <mesh
-        position={[HEAD_OVERHANG / 2, headY, 0]}
-        castShadow
-        receiveShadow
-      >
+      <mesh position={[HEAD_OVERHANG / 2, headY, 0]} castShadow receiveShadow>
         <boxGeometry args={[fx + HEAD_OVERHANG, headHeight, fz + 0.1]} />
         {material(HEAD_COLOR)}
       </mesh>
 
       {/* Discharge spout along local +X */}
-      <mesh
-        position={[spoutLength / 2, spoutY, 0]}
-        castShadow
-      >
+      <mesh position={[spoutLength / 2, spoutY, 0]} castShadow>
         <boxGeometry args={[spoutLength, 0.16, Math.min(fz * 0.45, 0.45)]} />
         {material(SPOUT_COLOR)}
       </mesh>

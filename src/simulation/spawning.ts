@@ -57,10 +57,7 @@ export function createSpawnerRuntimeState(): SpawnerRuntimeState {
  * World-space position on the spawner's emission face (origin = face centre),
  * jittered uniformly across `emitArea` in local XZ then yawed into world.
  */
-export function sampleEmitPosition(
-  spawner: SpawnerElement,
-  random: RandomFn = Math.random,
-): Vec3 {
+export function sampleEmitPosition(spawner: SpawnerElement, random: RandomFn = Math.random): Vec3 {
   const { emitArea } = spawner.properties;
   const localX = (random() - 0.5) * emitArea.x;
   const localZ = (random() - 0.5) * emitArea.z;
@@ -130,10 +127,7 @@ export function applyThrottleCreditCap(creditKg: number, unmetMassKg: number): n
 /**
  * Crop-count throttle (elevators). Caps leftover fractional credit.
  */
-export function applyThrottleCap(
-  fractionalRemainder: number,
-  unspawnedCount: number,
-): number {
+export function applyThrottleCap(fractionalRemainder: number, unspawnedCount: number): number {
   return Math.min(fractionalRemainder + unspawnedCount, THROTTLED_ACCUMULATOR_CAP);
 }
 

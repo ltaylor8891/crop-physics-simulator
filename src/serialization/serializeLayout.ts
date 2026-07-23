@@ -5,12 +5,7 @@
 import { isElementTypeEnabled } from '../elements/registry';
 import type { ElementId, SceneElement } from '../types/elements';
 import type { SimulationSettings } from '../types/settings';
-import {
-  APP_VERSION,
-  CURRENT_FILE_VERSION,
-  type LayoutCamera,
-  type LayoutFile,
-} from './types';
+import { APP_VERSION, CURRENT_FILE_VERSION, type LayoutCamera, type LayoutFile } from './types';
 
 export interface SerializeLayoutInput {
   sceneName: string;

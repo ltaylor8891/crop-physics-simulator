@@ -108,10 +108,7 @@ export function enqueueElevatorTransit(
 ): ElevatorRuntimeState {
   return {
     ...state,
-    queue: [
-      ...state.queue,
-      { cropType, readyAt: simulationTime + transitSeconds },
-    ],
+    queue: [...state.queue, { cropType, readyAt: simulationTime + transitSeconds }],
   };
 }
 
@@ -149,11 +146,7 @@ export function tickElevatorDischarge(
   const headType = queue[0]!.cropType;
   const headMass = defaultCropGeometry(headType).massKg;
   const rate = cropsPerSecond(elevator.properties.dischargeRateCap, headMass);
-  const { spawnCount, accumulator } = advanceSpawnAccumulator(
-    state.accumulator,
-    rate,
-    dtSeconds,
-  );
+  const { spawnCount, accumulator } = advanceSpawnAccumulator(state.accumulator, rate, dtSeconds);
 
   const toEmit = Math.min(spawnCount, readyCount);
   const discharges: ElevatorDischargePose[] = [];
@@ -187,9 +180,7 @@ function countReadyFromFront(
 }
 
 /** Total crops currently in transit across a set of elevator runtimes. */
-export function countInElevator(
-  states: Iterable<ElevatorRuntimeState>,
-): number {
+export function countInElevator(states: Iterable<ElevatorRuntimeState>): number {
   let n = 0;
   for (const state of states) {
     n += state.queue.length;

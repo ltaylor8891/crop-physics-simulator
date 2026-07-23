@@ -73,7 +73,11 @@ function emptyBucket(capacity: number): TypeBucket {
   };
 }
 
-function visualScale(radius: number, halfHeight: number, shape: 'ball' | 'capsule'): {
+function visualScale(
+  radius: number,
+  halfHeight: number,
+  shape: 'ball' | 'capsule',
+): {
   x: number;
   y: number;
   z: number;
@@ -302,20 +306,7 @@ class CropRuntime {
     const mesh = bucket.mesh;
     if (!mesh) return;
     for (let id = 0; id < bucket.pool.capacity; id++) {
-      this.writeInstanceMatrix(
-        mesh,
-        id,
-        0,
-        PARK_Y - id * 0.02,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-      );
+      this.writeInstanceMatrix(mesh, id, 0, PARK_Y - id * 0.02, 0, 0, 0, 0, 1, 0, 0, 0);
     }
     mesh.count = 0;
     mesh.instanceMatrix.needsUpdate = true;
@@ -406,12 +397,7 @@ class CropRuntime {
       rotationYaw: number;
       size: Vec3;
     }>,
-    isInside: (
-      point: Vec3,
-      position: Vec3,
-      yaw: number,
-      size: Vec3,
-    ) => boolean,
+    isInside: (point: Vec3, position: Vec3, yaw: number, size: Vec3) => boolean,
   ): { collectedKg: number; spilledKg: number; collectedByZoneId: Record<string, number> } {
     let collectedKg = 0;
     let spilledKg = 0;
@@ -453,12 +439,7 @@ class CropRuntime {
       rotationYaw: number;
       size: Vec3;
     }>,
-    isInside: (
-      point: Vec3,
-      position: Vec3,
-      yaw: number,
-      size: Vec3,
-    ) => boolean,
+    isInside: (point: Vec3, position: Vec3, yaw: number, size: Vec3) => boolean,
   ): Array<{ elevatorId: string; cropType: CropTypeId }> {
     const accepted: Array<{ elevatorId: string; cropType: CropTypeId }> = [];
     if (intakes.length === 0) return accepted;

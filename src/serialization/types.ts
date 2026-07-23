@@ -47,9 +47,7 @@ export interface ParseError {
   message: string;
 }
 
-export type ParseResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; errors: ParseError[] };
+export type ParseResult<T> = { ok: true; value: T } | { ok: false; errors: ParseError[] };
 
 export const DEFAULT_LAYOUT_CAMERA: LayoutCamera = {
   position: { x: 18, y: 14, z: 18 },

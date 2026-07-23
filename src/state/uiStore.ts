@@ -1,8 +1,5 @@
 import { create } from 'zustand';
-import {
-  DEFAULT_LAYOUT_CAMERA,
-  type LayoutCamera,
-} from '../serialization/types';
+import { DEFAULT_LAYOUT_CAMERA, type LayoutCamera } from '../serialization/types';
 import type { ElementId, ElementType } from '../types/elements';
 
 /** UI-only state: selection, placement mode, view options, camera snapshot for save. */

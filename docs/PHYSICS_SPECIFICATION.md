@@ -43,14 +43,14 @@ Rapier interaction groups (16-bit membership/filter):
 
 Default material values (plausible defaults, **not measured** — tune freely but record changes here):
 
-| Surface / body                              | Friction | Restitution |
-| ------------------------------------------- | -------- | ----------- |
-| Belt top surface                            | 0.9      | 0.0         |
-| Machine casing / skirts                     | 0.4      | 0.1         |
-| Ground plane                                | 0.6      | 0.2         |
-| Wheat-clump crop (ball; size varies)        | 0.5      | 0.15        |
-| Potato crop (capsule; size varies)          | 0.6      | 0.25        |
-| Sugar-beet crop (ball r≈0.09 m, 0.9 kg)     | 0.7      | 0.2         |
+| Surface / body                          | Friction | Restitution |
+| --------------------------------------- | -------- | ----------- |
+| Belt top surface                        | 0.9      | 0.0         |
+| Machine casing / skirts                 | 0.4      | 0.1         |
+| Ground plane                            | 0.6      | 0.2         |
+| Wheat-clump crop (ball; size varies)    | 0.5      | 0.15        |
+| Potato crop (capsule; size varies)      | 0.6      | 0.25        |
+| Sugar-beet crop (ball r≈0.09 m, 0.9 kg) | 0.7      | 0.2         |
 
 High belt friction + zero belt restitution is what makes surface-velocity conveyance behave like a real belt grip.
 

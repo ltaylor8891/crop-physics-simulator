@@ -63,7 +63,6 @@ export const useSimulationStore = create<SimulationState>((set) => ({
       statistics: ZERO_STATISTICS,
     }),
   setStatistics: (statistics) => set({ statistics }),
-  patchStatistics: (patch) =>
-    set((state) => ({ statistics: { ...state.statistics, ...patch } })),
+  patchStatistics: (patch) => set((state) => ({ statistics: { ...state.statistics, ...patch } })),
   resetStatistics: () => set({ statistics: ZERO_STATISTICS }),
 }));

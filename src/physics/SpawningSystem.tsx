@@ -126,8 +126,7 @@ export function SpawningSystem() {
     }
 
     const elevators = Object.values(elements).filter(
-      (el): el is ElevatorElement =>
-        el.type === 'elevator' && isElementTypeEnabled('elevator'),
+      (el): el is ElevatorElement => el.type === 'elevator' && isElementTypeEnabled('elevator'),
     );
 
     const intakes = elevators.map((el) => ({
@@ -163,12 +162,7 @@ export function SpawningSystem() {
         elevatorsRef.current.set(elev.id, runtime);
       }
 
-      const tick = tickElevatorDischarge(
-        runtime,
-        elev,
-        cropSpawnStats.simulationTime,
-        PHYSICS_DT,
-      );
+      const tick = tickElevatorDischarge(runtime, elev, cropSpawnStats.simulationTime, PHYSICS_DT);
       let discharged = 0;
 
       for (const pose of tick.discharges) {
@@ -194,10 +188,7 @@ export function SpawningSystem() {
       if (discharged < tick.requested) {
         const unmet = tick.discharges.slice(discharged);
         elevatorsRef.current.set(elev.id, {
-          accumulator: applyThrottleCap(
-            tick.accumulator,
-            tick.requested - discharged,
-          ),
+          accumulator: applyThrottleCap(tick.accumulator, tick.requested - discharged),
           queue: [
             ...unmet.map((d) => ({
               cropType: d.cropType,

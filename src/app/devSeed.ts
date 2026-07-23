@@ -44,7 +44,11 @@ export function applyDevSeed(search: string): void {
     store.addElement(spawner);
     if (spawner.type === 'spawner') {
       store.updateElement(spawner.id, {
-        position: { x: -5, y: flat.type === 'conveyor' ? flat.properties.beltHeight + 0.5 : 1.5, z: 3 },
+        position: {
+          x: -5,
+          y: flat.type === 'conveyor' ? flat.properties.beltHeight + 0.5 : 1.5,
+          z: 3,
+        },
         properties: {
           ...spawner.properties,
           cropType: 'potato',

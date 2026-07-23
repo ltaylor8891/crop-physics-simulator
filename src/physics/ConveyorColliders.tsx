@@ -118,9 +118,7 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
 
     const surfaceVel = surfaceVelRef.current;
     const speedSq =
-      surfaceVel.x * surfaceVel.x +
-      surfaceVel.y * surfaceVel.y +
-      surfaceVel.z * surfaceVel.z;
+      surfaceVel.x * surfaceVel.x + surfaceVel.y * surfaceVel.y + surfaceVel.z * surfaceVel.z;
     // Stopped belt: leave friction to hold (do not snap tangential vel to zero).
     if (speedSq < 1e-12) return;
 
@@ -146,7 +144,6 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
       body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     });
   });
-
 
   return (
     <>

@@ -1,10 +1,6 @@
 import { useRef } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
-import {
-  ELEMENT_DESCRIPTORS,
-  getElementBounds,
-  isElementTypeEnabled,
-} from '../elements/registry';
+import { ELEMENT_DESCRIPTORS, getElementBounds, isElementTypeEnabled } from '../elements/registry';
 import { useSceneStore } from '../state/sceneStore';
 import { useUiStore } from '../state/uiStore';
 import type { SceneElement } from '../types/elements';
