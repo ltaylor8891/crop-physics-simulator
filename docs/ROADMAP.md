@@ -106,7 +106,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: elevator mesh, intake sensor, transit queue with delay, rate-capped discharge with initial velocity, "in elevator" count in stats.
 - **Acceptance criteria**: crops entering the intake reappear at the discharge after `height/transportSpeed` seconds, capped at `dischargeRateCap`; behaviour matches `PHYSICS_SPECIFICATION.md` §Elevator.
 - **Dependencies**: Stage 9 (Stage 8 sufficient for a first pass).
-- **Status**: Complete. Parametric `ElevatorMesh`; software intake AABB; `elevator.ts` transit + rate-capped discharge; status **In elevator** count.
+- **Status**: Complete, but **temporarily withdrawn from the UI and save format** (`fileVersion` 3 strips elevators; KI-007). Implementation retained: parametric `ElevatorMesh`; software intake AABB; `elevator.ts` transit + rate-capped discharge; status **In elevator** count.
 
 ## Stage 12 — Saving and loading
 

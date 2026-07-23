@@ -78,4 +78,4 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 
 ## Closed Issues
 
-- None yet.
+Closed issues are kept in place above with **Status: Closed** for their diagnostic history: KI-002 (contact surface velocity — resolved via ADR-016), KI-008 (production crops never spawned — pool reset ordering, originally misdiagnosed as missing WASM).
