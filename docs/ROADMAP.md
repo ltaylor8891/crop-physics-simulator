@@ -50,7 +50,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: element registry/descriptors (`src/elements`), library panel wired to placement mode with ghost preview, grid snapping, selection + highlight, keyboard shortcuts (`Escape`, `Delete`, `Ctrl+D`, `R`), `sceneStore` actions.
 - **Acceptance criteria**: full placement workflow of `UI_UX_SPECIFICATION.md` works with placeholder box meshes for every element type; IDs conform to `DOMAIN_MODEL.md`.
 - **Dependencies**: Stage 3.
-- **Status**: Complete. Placement/selection/rotation/duplication/deletion verified in-browser; drag-move implemented but verified only by code review and unit-tested helpers — re-check by hand alongside Stage 5 (noted in `KNOWN_ISSUES.md` KI-004). The `F` (frame camera) and `?` (shortcut overlay) shortcuts are deferred.
+- **Status**: Complete. Placement/selection/rotation/duplication/deletion verified in-browser; drag-move hand-verified through extended real-world use (2026-07-23). The `F` (frame camera) and `?` (shortcut overlay) shortcuts remain deferred (KI-004).
 
 ## Stage 5 — Conveyor rendering
 
@@ -66,7 +66,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Deliverables**: Rapier world wiring, machine colliders with collision groups per `PHYSICS_SPECIFICATION.md`, contact surface velocity along the belt (flat + inclined), a temporary debug "drop test ball" button.
 - **Acceptance criteria**: test ball dropped on a running belt reaches belt speed and is carried to discharge, including on ±20° inclines; stopped belts hold the ball; ADR-006 consequences updated with the mechanism actually used.
 - **Dependencies**: Stage 5.
-- **Status**: Complete. Mechanism: fixed belt + per-step contact velocity injection (ADR-016; supersedes kinematic pin). Toolbar **Drop ball** / **Reset** enabled. Hand-verify conveyance on flat and inclined belts when next in the viewport (acceptance criterion is interactive).
+- **Status**: Complete. Mechanism: fixed belt + per-step contact velocity injection (ADR-016; supersedes kinematic pin). Toolbar **Drop ball** / **Reset** enabled. Conveyance and speed changes hand-verified through extended real-world use (2026-07-23, KI-005 closed).
 
 ## Stage 7 — Properties editor
 

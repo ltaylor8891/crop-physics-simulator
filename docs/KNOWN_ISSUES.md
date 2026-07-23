@@ -44,22 +44,18 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 - **Proposed resolution**: Consider Playwright smoke tests around Stage 15.
 - **Status**: Open
 
-### KI-004 — Drag-move and some shortcuts not yet hand-verified
+### KI-004 — `F` and `?` shortcuts not implemented
 
-- **Description**: Element drag-move (pointer capture, ground-ray following, build-area clamping) is implemented and its pure helpers are unit-tested, but it has not been exercised by hand in a browser; automated pointer-drag on the canvas was not possible with the available tooling. The `F` (frame camera on selection) and `?` (shortcut overlay) shortcuts from `UI_UX_SPECIFICATION.md` are not implemented yet.
+- **Description**: The `F` (frame camera on selection) and `?` (shortcut overlay) shortcuts from `UI_UX_SPECIFICATION.md` are not implemented. (Drag-move itself is hand-verified — see Closed Issues.)
 - **Severity**: Low
-- **Reproduction**: n/a — verification gap, not an observed defect.
-- **Proposed resolution**: Manually drag elements when next running the app (expected: element follows pointer on XZ, snaps at 0.5 m, camera stays still); implement `F` and `?` with the Stage 7 UI work.
+- **Proposed resolution**: Implement alongside the next UI pass.
 - **Status**: Open
 
 ### KI-005 — Stage 6 belt conveyance needs interactive hand-check
 
-- **Description**: Conveyor physics is implemented and unit-tested for velocity/orientation maths, but carrying a dropped ball to discharge on flat and ±20° belts has not been confirmed live in this session (browser automation unavailable).
+- **Description**: Conveyor physics is implemented and unit-tested for velocity/orientation maths; carrying crops to discharge and responding to speed changes had not been confirmed live.
 - **Severity**: Medium
-- **Reproduction**: `npm run dev` → place/select a conveyor → Play → Drop ball; confirm the ball rides to the discharge end. Repeat with incline ±20° and with belt speed 0 (ball should stay).
-- **Suspected cause**: n/a — verification gap.
-- **Proposed resolution**: Hand-check while starting Stage 7; note any defects here.
-- **Status**: Open
+- **Status**: Closed — verified 2026-07-23 by the user's own extended session (~8 hours) repeatedly repositioning conveyors and changing belt speeds with crops actively conveying, no issues observed. This is real-world use rather than the scripted ±20°-incline matrix originally proposed; re-open if incline-specific edge cases surface.
 
 ## Physics Inaccuracies (by design — see PHYSICS_SPECIFICATION)
 
@@ -78,4 +74,4 @@ Current bugs, incomplete features, limitations, and technical debt. Keep this ho
 
 ## Closed Issues
 
-Closed issues are kept in place above with **Status: Closed** for their diagnostic history: KI-002 (contact surface velocity — resolved via ADR-016), KI-008 (production crops never spawned — pool reset ordering, originally misdiagnosed as missing WASM).
+Closed issues are kept in place above with **Status: Closed** for their diagnostic history: KI-002 (contact surface velocity — resolved via ADR-016), KI-005 (belt conveyance — verified by extended real-world use), KI-008 (production crops never spawned — pool reset ordering, originally misdiagnosed as missing WASM).

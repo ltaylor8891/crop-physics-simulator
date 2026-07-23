@@ -28,8 +28,8 @@ _Last updated: 2026-07-22_
 
 ## Next Recommended Task
 
-1. **Stage 14 — Performance optimisation** when dense piles need another pass.
-2. Or Stage 15 release prep / hand-check after using the app on `main`.
+1. User has confirmed Stage 14 (performance) and Stage 15 (release prep) as accepted next priorities on `main`.
+2. In parallel, the user has requested a plan (not yet implementation) for 7 new feature ideas — grading screens, diverters/hoppers/chutes, ladder logic control, a live PLC bridge, restyled collectors, performance techniques, and spawner batch/state enhancements — explicitly scoped to a `develop` branch, kept separate from `main`. See `docs/DECISIONS.md` / `docs/ROADMAP.md` for whatever plan resulted; check `develop` branch state before continuing this work.
 
 ## Important Files
 
@@ -52,7 +52,7 @@ npm run typecheck && npm run lint && npm run format:check && npm run test && npm
 
 ## Known Errors
 
-- None from this fix. Open gaps: KI-004, KI-005; Stage 14 FPS hand-check. KI-008 closed for real (pool reset ordering, not WASM).
+- None outstanding from recent fixes. KI-004 narrowed to just the `F`/`?` shortcuts (drag-move itself hand-verified). KI-005 closed. KI-008 closed for real (pool reset ordering, not WASM). Remaining gap: Stage 14 FPS hand-check at 1000–2000 active crops on target hardware.
 
 ## Uncommitted Work
 
