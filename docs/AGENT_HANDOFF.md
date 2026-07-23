@@ -28,8 +28,8 @@ _Last updated: 2026-07-22_
 
 ## Next Recommended Task
 
-1. User has confirmed Stage 14 (performance) and Stage 15 (release prep) as accepted next priorities on `main`.
-2. In parallel, the user has requested a plan (not yet implementation) for 7 new feature ideas — grading screens, diverters/hoppers/chutes, ladder logic control, a live PLC bridge, restyled collectors, performance techniques, and spawner batch/state enhancements — explicitly scoped to a `develop` branch, kept separate from `main`. See `docs/DECISIONS.md` / `docs/ROADMAP.md` for whatever plan resulted; check `develop` branch state before continuing this work.
+1. Stage 14 (performance) and Stage 15 (release prep) are accepted next priorities on `main`.
+2. A phased feature program is planned (and approved) on the **`develop`** branch — grading screens, diverters/hoppers/chutes, ladder logic control, a stubbed PLC bridge, restyled collectors, performance, and spawner batch/state. The full plan with per-phase file touch-points lives in **`docs/DEVELOP_PROGRAM.md`** (on `develop`). **No phase is implemented yet** — the user drives which phase starts and when. Recommended order: A (conveyor legs/diverter) → B (chute/hopper) → C (grading screen) → D (control subsystem) → E (spawner batch) → F (collector restyle), with G (performance) interleaved.
 
 ## Important Files
 
