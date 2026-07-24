@@ -2,7 +2,7 @@
 
 Living plan for the feature program on the **`develop`** branch, kept isolated from `main` (which stays at Stages 1–13 + performance/release). This document is the approved, phased plan; **nothing here is implemented until the user requests a specific phase.** As each phase lands, fold its detail into the standard docs (`ROADMAP.md` stage, `DECISIONS.md` ADR, `PRODUCT_SCOPE.md`, `PHYSICS_SPECIFICATION.md`, `SAVE_FILE_FORMAT.md`, `CHANGELOG.md`) and trim it here to a pointer.
 
-_Last updated: 2026-07-23 — Phase A implemented on `develop` (roadmap Stage 16, ADR-018). Phases B–G planned, not started._
+_Last updated: 2026-07-23 — Phase A implemented on `develop` (roadmap Stage 16, ADR-018; `fileVersion` 5 after the diverter lateral-offset follow-up). Phase H (direct manipulation) added to the plan at the user's request. Phases B–H planned, not started._
 
 ## Context
 
@@ -21,6 +21,7 @@ The simulator currently models spawners → conveyors → zones with rigid-body 
 - **Collectors**: restyle the existing collection zone as a **wooden open-top crate**.
 - **Spawner**: add **batch mode** (volume + drop duration) and a **state function** so drops can be paused by a sensor / ladder logic.
 - **Performance**: advisory recommendations for scaling active-crop counts without losing realism.
+- **Direct manipulation**: allow belt-locked attachments (starting with the diverter) to be **dragged in the 3D view** as an alternative to typed property fields — the typed fields stay the source of truth; a drag writes the same properties.
 
 ## The established "new element type" pattern (reuse for every element below)
 
@@ -40,7 +41,7 @@ Adding an element type touches this fixed set (verified in the current code):
 
 ## Phase A — Conveyor enhancements (legs toggle, diverter attachment) — ✅ DONE
 
-Implemented on `develop` (roadmap Stage 16, ADR-018, `fileVersion` 4). Smallest, self-contained, no new simulation subsystem.
+Implemented on `develop` (roadmap Stage 16, ADR-018). Diverter shipped at `fileVersion` 4; a follow-up added the diverter's across-belt `lateralOffset` at `fileVersion` 5. Smallest, self-contained, no new simulation subsystem.
 
 - **Legs toggle**: add `showLegs: boolean` to `ConveyorProperties`; `PROPERTY_FIELDS.conveyor` boolean field; `ConveyorMesh.tsx` skips leg geometry when false (leg math already isolated in `conveyorGeometry.ts::computeLegs`). No physics change (legs are visual). Requires a save-format migration to default `showLegs: true` on V3 files.
 - **Diverter attachment**: add an optional `diverter?: { offsetAlongBelt: number; length: number; angleDeg: number }` to `ConveyorProperties` (an attachment, so it stays within the conveyor element per "locks to the belt surface"). Render an angled wall in `ConveyorMesh.tsx`; add a matching **fixed thin cuboid collider** in `ConveyorColliders.tsx` (in `MACHINE_COLLISION_GROUPS`), transformed by belt yaw/incline so it sits on the deck. Property fields for offset/length/angle. Diverter with `length = 0` (default) means "none".
@@ -107,12 +108,23 @@ Not an element; a menu of techniques to lift the active-crop ceiling without los
 
 - **Deliverable when chosen**: a Stage-14 performance ADR + measured before/after at 1000/2000/4000 crops. Feeds the existing Stage 14 on `main`.
 
+## Phase H — Direct manipulation (viewport drag handles for belt-locked attachments)
+
+Add drag-based editing in the 3D view as an **alternative** to the typed property fields, starting with the diverter (requested during Phase A review). The typed fields stay the single source of truth — a drag just writes the same `diverter.offsetAlongBelt` / `lateralOffset` (and optionally `angleDeg`) through `updateElement`, so no new state, save-format, or physics changes.
+
+- **Scope (first cut)**: when a conveyor is selected and its diverter has `length > 0`, render a manipulation handle on the wall. Dragging the position handle across the belt surface sets `offsetAlongBelt` + `lateralOffset` together; a rotate handle/ring sets `angleDeg`. The drag is **constrained to the belt's surface plane** (raycast against the belt plane at `beltHeight`/incline, not the ground), with the same 0.5 m / 15° snapping the placement flow uses and clamping to the belt extent.
+- **Reuse**: the existing element drag-move machinery (pointer capture, ray-follow, build-area clamp) in `PlacedElements.tsx` / `PlacementLayer.tsx`; the **invertible geometry** — run `diverterLocalCenter` / `diverterPlacement` in reverse to decompose a world hit on the belt plane back into `(offsetAlongBelt, lateralOffset)` (add a pure `diverterFromBeltPoint` helper in `conveyorGeometry.ts`, unit-tested); `updateElement` for the write.
+- **Generalize**: build the handle as a reusable `src/rendering/gizmos/` transform gizmo so it can later serve other belt-locked attachments and whole-element moves. Natural pairing: clear **KI-004** in the same UI pass (implement `F` frame-on-selection and `?` shortcut overlay).
+- **ADR**: ADR-025 "Direct-manipulation gizmos edit existing properties; typed fields remain the source of truth."
+- **Files**: new `src/rendering/gizmos/DiverterHandle.tsx` + a pure `diverterFromBeltPoint` (belt-plane raycast → offsets) helper and test in `conveyorGeometry.ts`; wiring in `PlacedElements.tsx`; a belt-surface raycast helper (reuse `beltOrientationQuaternion` / `beltVelocity.ts` maths). No serialization change.
+- **Dependencies**: Phase A (done). Independent of B–G; can land any time. Distinct from the **out-of-scope** graphical ladder editor — this is viewport gizmos for physical attachments, not rung authoring.
+
 ---
 
 ## Roadmap & docs impact (write when each phase is implemented)
 
-- New `docs/ROADMAP.md` stages 16–22 (one per phase A–G), each with objective/deliverables/acceptance criteria in the existing format.
-- New ADRs 018–024 in `docs/DECISIONS.md` as noted per phase.
+- New `docs/ROADMAP.md` stages 16–23 (one per phase A–H), each with objective/deliverables/acceptance criteria in the existing format.
+- New ADRs 018–025 in `docs/DECISIONS.md` as noted per phase.
 - `docs/PRODUCT_SCOPE.md`: expand the element library and add a "Control logic & external I/O" scope section (currently out of scope).
 - `docs/PHYSICS_SPECIFICATION.md`: grading-screen and chute/hopper behavior; sensor depth measurement.
 - `docs/SAVE_FILE_FORMAT.md` + `schemas/layout.schema.json` + `fileVersion` bump(s) + migrations for each phase that changes stored shapes (A, B, C, D, E).
@@ -120,7 +132,7 @@ Not an element; a menu of techniques to lift the active-crop ceiling without los
 
 ## Sequencing & dependencies
 
-A → B → C are independent of the control subsystem and can land in any order (A first as a small warm-up). **D is a prerequisite for E's state-gating** and for sensors monitoring B's hopper. F and G are independent throughout. Recommended order: **A, B, C, D, E, F**, with **G** interleaved whenever crop counts start to bite.
+A → B → C are independent of the control subsystem and can land in any order (A first as a small warm-up). **D is a prerequisite for E's state-gating** and for sensors monitoring B's hopper. F, G, and H are independent throughout (H depends only on A, already done). Recommended order: **A, B, C, D, E, F**, with **G** interleaved whenever crop counts start to bite and **H** whenever direct-manipulation editing is wanted.
 
 ## Verification (per phase, matches CI gate)
 
