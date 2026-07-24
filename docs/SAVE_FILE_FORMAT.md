@@ -2,7 +2,7 @@
 
 Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.json`](../schemas/layout.schema.json). Working example: [`examples/sample-layout.json`](../examples/sample-layout.json). Serialization code: `src/serialization/`.
 
-**Current file version: 4**
+**Current file version: 5**
 
 ## Principles
 
@@ -15,7 +15,7 @@ Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.j
 
 ```jsonc
 {
-  "fileVersion": 4,          // integer, required
+  "fileVersion": 5,          // integer, required
   "meta": { ... },           // scene metadata, required
   "settings": { ... },       // simulation settings, required
   "elements": [ ... ],       // scene elements, required (may be empty)
@@ -87,13 +87,14 @@ Dimensions are type-specific properties in metres: scalars (`length`, `width`, `
   "diverter": {
     // angled high-side wall on the belt surface; length 0 = none
     "offsetAlongBelt": 0, // m from the infeed end, 0–50
+    "lateralOffset": 0, // m across the belt from the centreline, -1.5–1.5
     "length": 0, // m, 0–20 (0 = no diverter)
     "angleDeg": 0, // degrees in the belt plane, -80–80
   },
 }
 ```
 
-`showLegs` and `diverter` were added in `fileVersion` 4; `migrateV3toV4` back-fills them on older conveyors (`showLegs: true`, `diverter` length 0).
+`showLegs` and `diverter` were added in `fileVersion` 4; `migrateV3toV4` back-fills them on older conveyors (`showLegs: true`, `diverter` length 0). `diverter.lateralOffset` was added in `fileVersion` 5; `migrateV4toV5` back-fills it to 0 (centred).
 
 ### `type: "elevator"` (removed in fileVersion 3)
 
@@ -142,7 +143,7 @@ Both use:
 
 - `fileVersion` is read **before** any other validation. Missing/non-integer → hard error.
 - `fileVersion` newer than the app supports → error "This layout was saved by a newer version" (no forward compatibility).
-- Older versions are migrated stepwise: `migrateV1toV2`, `migrateV2toV3`, `migrateV3toV4`, … each a pure function in `src/serialization/migrations.ts`, unit-tested with a frozen fixture of each historical version.
+- Older versions are migrated stepwise: `migrateV1toV2`, `migrateV2toV3`, `migrateV3toV4`, `migrateV4toV5`, … each a pure function in `src/serialization/migrations.ts`, unit-tested with a frozen fixture of each historical version.
 - Schema validation runs **after** migration, against the current version's schema.
 - Any addition/removal/semantic change to the format requires: bump `fileVersion`, add a migration, update this document + schema + sample layout, add a `CHANGELOG.md` entry under "Breaking save-format changes".
 

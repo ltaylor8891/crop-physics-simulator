@@ -80,6 +80,30 @@ export function migrateV3toV4(raw: Record<string, unknown>): Record<string, unkn
 }
 
 /**
+ * V4 → V5: the conveyor diverter gains `lateralOffset` (across-belt position),
+ * back-filled to 0 (centred) on existing diverters.
+ */
+export function migrateV4toV5(raw: Record<string, unknown>): Record<string, unknown> {
+  const elements = raw.elements;
+  if (!Array.isArray(elements)) {
+    return { ...raw, fileVersion: 5 };
+  }
+  const nextElements = elements.map((el) => {
+    if (!isRecord(el) || el.type !== 'conveyor' || !isRecord(el.properties)) return el;
+    const diverter = el.properties.diverter;
+    if (!isRecord(diverter)) return el;
+    return {
+      ...el,
+      properties: {
+        ...el.properties,
+        diverter: { lateralOffset: 0, ...diverter },
+      },
+    };
+  });
+  return { ...raw, fileVersion: 5, elements: nextElements };
+}
+
+/**
  * Apply stepwise migrations until `CURRENT_FILE_VERSION`.
  * Returns the migrated object or errors (e.g. unsupported future version).
  */
@@ -124,6 +148,10 @@ export function migrateLayout(
   if (v === 3) {
     current = migrateV3toV4(current);
     v = 4;
+  }
+  if (v === 4) {
+    current = migrateV4toV5(current);
+    v = 5;
   }
 
   if (v !== CURRENT_FILE_VERSION) {

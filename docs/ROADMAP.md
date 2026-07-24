@@ -144,7 +144,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 ## Stage 16 — Conveyor legs + diverter (develop feature program, Phase A)
 
 - **Objective**: enrich conveyors with a support-legs on/off toggle and a belt-locked diverter attachment (`docs/DEVELOP_PROGRAM.md` Phase A; ADR-018).
-- **Deliverables**: `ConveyorProperties.showLegs` and `ConveyorProperties.diverter`; property-panel fields; leg-suppression in `ConveyorMesh`; diverter wall mesh + fixed collider; `fileVersion` 4 with `migrateV3toV4`; schema + sample-layout update; unit tests for the new geometry and migration.
+- **Deliverables**: `ConveyorProperties.showLegs` and `ConveyorProperties.diverter` (along-belt, across-belt, length, angle); property-panel fields; leg-suppression in `ConveyorMesh`; diverter wall mesh + fixed collider; `fileVersion` 5 with `migrateV3toV4` + `migrateV4toV5`; schema + sample-layout update; unit tests for the new geometry and migrations.
 - **Acceptance criteria**: legs toggle hides/shows leg posts; a diverter with `length > 0` renders a wall on the belt and blocks crop (collider present); `length = 0` renders nothing; V3 files load via migration; full CI gate green.
 - **Dependencies**: main (Stages 1–13).
 - **Status**: Complete on `develop`. Verified: full gate green (typecheck/lint/format/test/build, 142 tests incl. new geometry + migration tests); production preview shows the new property fields editable and committing, and the legs toggle removing leg posts, with no console errors. A crisp close-up of the diverter wall was not capturable in the preview pane (small WebGL render), but its mesh/collider code path executes error-free and the geometry is unit-tested.

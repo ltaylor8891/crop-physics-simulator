@@ -1,13 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { CROP_TYPES } from '../elements/cropTypes';
-import { migrateLayout, migrateV1toV2, migrateV2toV3, migrateV3toV4 } from './migrations';
+import {
+  migrateLayout,
+  migrateV1toV2,
+  migrateV2toV3,
+  migrateV3toV4,
+  migrateV4toV5,
+} from './migrations';
 
 describe('migrateLayout', () => {
   it('migrates fileVersion 1 through to current', () => {
     const result = migrateLayout({ fileVersion: 1, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(4);
+    expect(result.value.fileVersion).toBe(5);
     expect(result.value.keep).toBe(true);
   });
 
@@ -15,14 +21,14 @@ describe('migrateLayout', () => {
     const result = migrateLayout({ fileVersion: 2, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(4);
+    expect(result.value.fileVersion).toBe(5);
   });
 
-  it('accepts current fileVersion 4 unchanged', () => {
-    const result = migrateLayout({ fileVersion: 4, keep: true });
+  it('accepts current fileVersion 5 unchanged', () => {
+    const result = migrateLayout({ fileVersion: 5, keep: true });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(4);
+    expect(result.value.fileVersion).toBe(5);
   });
 
   it('rejects non-integer fileVersion', () => {
@@ -31,7 +37,7 @@ describe('migrateLayout', () => {
   });
 
   it('rejects future versions', () => {
-    const result = migrateLayout({ fileVersion: 5 });
+    const result = migrateLayout({ fileVersion: 6 });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.errors[0]?.message).toMatch(/newer version/i);
@@ -127,5 +133,51 @@ describe('migrateV3toV4', () => {
       .properties;
     expect(props.showLegs).toBe(false);
     expect(props.diverter).toEqual({ offsetAlongBelt: 2, length: 1, angleDeg: 20 });
+  });
+});
+
+describe('migrateV4toV5', () => {
+  it('back-fills lateralOffset on the conveyor diverter', () => {
+    const migrated = migrateV4toV5({
+      fileVersion: 4,
+      elements: [
+        {
+          type: 'conveyor',
+          id: 'c1',
+          properties: {
+            showLegs: true,
+            diverter: { offsetAlongBelt: 3, length: 1.5, angleDeg: 35 },
+          },
+        },
+        { type: 'spawner', id: 's1', properties: { throughput: 40 } },
+      ],
+    });
+    expect(migrated.fileVersion).toBe(5);
+    const els = migrated.elements as Array<{ properties: Record<string, unknown> }>;
+    expect(els[0]!.properties.diverter).toEqual({
+      offsetAlongBelt: 3,
+      lateralOffset: 0,
+      length: 1.5,
+      angleDeg: 35,
+    });
+    expect(els[1]!.properties).toEqual({ throughput: 40 });
+  });
+
+  it('does not overwrite a lateralOffset already present', () => {
+    const migrated = migrateV4toV5({
+      fileVersion: 4,
+      elements: [
+        {
+          type: 'conveyor',
+          id: 'c1',
+          properties: {
+            diverter: { offsetAlongBelt: 0, lateralOffset: 0.5, length: 2, angleDeg: 0 },
+          },
+        },
+      ],
+    });
+    const props = (migrated.elements as Array<{ properties: Record<string, unknown> }>)[0]!
+      .properties;
+    expect((props.diverter as Record<string, unknown>).lateralOffset).toBe(0.5);
   });
 });

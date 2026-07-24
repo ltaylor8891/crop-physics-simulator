@@ -38,6 +38,8 @@ export interface ElementBase<TType extends ElementType, TProps> {
 export interface DiverterProperties {
   /** m along the belt from the infeed (−length/2) end (0–50). */
   offsetAlongBelt: number;
+  /** m across the belt from its centreline; +/− shift the wall toward a side (−1.5–1.5). */
+  lateralOffset: number;
   /** m, wall length; 0 = no diverter (0–20). */
   length: number;
   /** degrees, rotation in the belt plane about local +Y (−80–80). */

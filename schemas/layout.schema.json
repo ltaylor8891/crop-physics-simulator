@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/crop-physics-simulator/layout.schema.json",
-  "title": "Crop Physics Simulator Layout (fileVersion 4)",
+  "title": "Crop Physics Simulator Layout (fileVersion 5)",
   "description": "Versioned save-file format for simulator layouts. Human-readable specification: docs/SAVE_FILE_FORMAT.md",
   "type": "object",
   "additionalProperties": false,
   "required": ["fileVersion", "meta", "settings", "elements", "camera"],
   "properties": {
-    "fileVersion": { "const": 4 },
+    "fileVersion": { "const": 5 },
     "meta": {
       "type": "object",
       "additionalProperties": false,
@@ -175,9 +175,10 @@
     "diverterProperties": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["offsetAlongBelt", "length", "angleDeg"],
+      "required": ["offsetAlongBelt", "lateralOffset", "length", "angleDeg"],
       "properties": {
         "offsetAlongBelt": { "type": "number", "minimum": 0, "maximum": 50 },
+        "lateralOffset": { "type": "number", "minimum": -1.5, "maximum": 1.5 },
         "length": { "type": "number", "minimum": 0, "maximum": 20 },
         "angleDeg": { "type": "number", "minimum": -80, "maximum": 80 }
       }

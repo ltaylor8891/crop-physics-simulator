@@ -46,8 +46,8 @@ export function ConveyorMesh({ properties, selected }: ConveyorMeshProps) {
   );
   const chevrons = useMemo(() => computeChevronPositions(length), [length]);
   const diverterPlace = useMemo(
-    () => diverterPlacement(length, diverter.offsetAlongBelt),
-    [length, diverter.offsetAlongBelt],
+    () => diverterPlacement(length, diverter.offsetAlongBelt, diverter.lateralOffset),
+    [length, diverter.offsetAlongBelt, diverter.lateralOffset],
   );
 
   const emissive = selected ? SELECTION_COLOR : '#000000';
@@ -125,7 +125,7 @@ export function ConveyorMesh({ properties, selected }: ConveyorMeshProps) {
           {/* Diverter high-side wall on the belt surface (length 0 = none). */}
           {diverter.length > 0 && (
             <mesh
-              position={[diverterPlace.innerX, diverterPlace.innerY, 0]}
+              position={[diverterPlace.innerX, diverterPlace.innerY, diverterPlace.innerZ]}
               rotation={[0, degreesToRadians(diverter.angleDeg), 0]}
               castShadow
             >

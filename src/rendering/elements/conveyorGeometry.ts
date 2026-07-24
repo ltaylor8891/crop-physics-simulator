@@ -51,19 +51,27 @@ export interface DiverterPlacement {
   innerX: number;
   /** Belt-assembly-local Y of the wall centre (belt top at 0, wall sits above). */
   innerY: number;
+  /** Belt-assembly-local Z of the wall centre (belt centreline at 0, +/− toward a side). */
+  innerZ: number;
 }
 
 /**
  * Diverter wall centre in the belt-assembly inner frame (same frame as the belt
  * mesh: belt top at y = 0, belt spans x ∈ [−length/2, +length/2]). The wall sits
- * on the belt surface, `offsetAlongBelt` metres from the infeed (−length/2) end.
- * Rotation by `angleDeg` about local +Y is applied by the caller and does not
- * move the centre. Used by ConveyorMesh (renders in this frame directly).
+ * on the belt surface, `offsetAlongBelt` metres from the infeed (−length/2) end and
+ * `lateralOffset` metres across the belt from the centreline. Rotation by `angleDeg`
+ * about local +Y is applied by the caller and does not move the centre. Used by
+ * ConveyorMesh (renders in this frame directly).
  */
-export function diverterPlacement(length: number, offsetAlongBelt: number): DiverterPlacement {
+export function diverterPlacement(
+  length: number,
+  offsetAlongBelt: number,
+  lateralOffset: number,
+): DiverterPlacement {
   return {
     innerX: -length / 2 + offsetAlongBelt,
     innerY: DIVERTER_HEIGHT / 2,
+    innerZ: lateralOffset,
   };
 }
 
@@ -78,15 +86,17 @@ export function diverterLocalCenter(
   beltHeight: number,
   inclineRad: number,
   offsetAlongBelt: number,
+  lateralOffset: number,
 ): { x: number; y: number; z: number } {
   const d = offsetAlongBelt;
   const h = DIVERTER_HEIGHT / 2;
   const cos = Math.cos(inclineRad);
   const sin = Math.sin(inclineRad);
+  // Lateral offset is along the belt's local Z, unaffected by the incline pitch (about Z).
   return {
     x: -length / 2 + d * cos - h * sin,
     y: beltHeight + d * sin + h * cos,
-    z: 0,
+    z: lateralOffset,
   };
 }
 

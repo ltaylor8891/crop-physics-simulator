@@ -58,6 +58,7 @@ export const PROPERTY_FIELDS: Record<ElementType, PropertyFieldDef[]> = {
     { kind: 'boolean', path: 'skirts', label: 'Side skirts' },
     { kind: 'boolean', path: 'showLegs', label: 'Support legs' },
     numberField('diverter.offsetAlongBelt', 'Diverter position', 0, 50, 'm', 0.1),
+    numberField('diverter.lateralOffset', 'Diverter offset', -1.5, 1.5, 'm', 0.05),
     numberField('diverter.length', 'Diverter length', 0, 20, 'm', 0.1),
     numberField('diverter.angleDeg', 'Diverter angle', -80, 80, '°', 1),
   ],

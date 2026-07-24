@@ -36,7 +36,7 @@ Assume a desktop browser, mouse-and-keyboard interaction, and no prior 3D-softwa
 - Configurable **belt speed** in metres per minute (0–300 m/min), applied as contact surface velocity along the belt's forward axis.
 - Optional low side-skirts (visual + collider walls) to reduce side spillage; on by default.
 - Optional support legs, toggleable on/off, so belts can be stacked vertically without leg posts blocking crop passing underneath.
-- Optional **diverter**: an angled high-side wall that locks to the belt surface to deflect crop across it, with configurable position along the belt, length, and angle (length 0 = none).
+- Optional **diverter**: an angled high-side wall that locks to the belt surface to deflect crop across it, with configurable position along the belt, across-belt offset, length, and angle (length 0 = none).
 - Belt direction is visually indicated (arrow texture or chevron markers).
 - Crops resting on the belt move at belt speed; crops must not fall through the belt at any supported speed.
 

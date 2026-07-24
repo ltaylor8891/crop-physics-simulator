@@ -55,31 +55,42 @@ describe('computeLegs', () => {
 
 describe('diverterPlacement', () => {
   it('positions the wall from the infeed end along the belt', () => {
-    expect(diverterPlacement(6, 0).innerX).toBeCloseTo(-3, 10); // infeed end
-    expect(diverterPlacement(6, 3).innerX).toBeCloseTo(0, 10); // belt centre
-    expect(diverterPlacement(6, 6).innerX).toBeCloseTo(3, 10); // discharge end
+    expect(diverterPlacement(6, 0, 0).innerX).toBeCloseTo(-3, 10); // infeed end
+    expect(diverterPlacement(6, 3, 0).innerX).toBeCloseTo(0, 10); // belt centre
+    expect(diverterPlacement(6, 6, 0).innerX).toBeCloseTo(3, 10); // discharge end
   });
 
   it('sits the wall centre half its height above the belt surface', () => {
-    expect(diverterPlacement(6, 2).innerY).toBeCloseTo(DIVERTER_HEIGHT / 2, 10);
+    expect(diverterPlacement(6, 2, 0).innerY).toBeCloseTo(DIVERTER_HEIGHT / 2, 10);
+  });
+
+  it('shifts the wall across the belt by the lateral offset', () => {
+    expect(diverterPlacement(6, 2, 0).innerZ).toBe(0);
+    expect(diverterPlacement(6, 2, 0.5).innerZ).toBeCloseTo(0.5, 10);
+    expect(diverterPlacement(6, 2, -0.5).innerZ).toBeCloseTo(-0.5, 10);
   });
 });
 
 describe('diverterLocalCenter', () => {
   it('on a flat belt sits above the belt top at the offset position', () => {
-    const c = diverterLocalCenter(6, 0.75, 0, 3);
+    const c = diverterLocalCenter(6, 0.75, 0, 3, 0);
     expect(c.x).toBeCloseTo(0, 10); // -3 + 3
     expect(c.y).toBeCloseTo(0.75 + DIVERTER_HEIGHT / 2, 10);
     expect(c.z).toBe(0);
   });
 
   it('rises with the belt line up an incline', () => {
-    const flat = diverterLocalCenter(6, 0.75, 0, 4);
-    const inclined = diverterLocalCenter(6, 0.75, degreesToRadians(20), 4);
+    const flat = diverterLocalCenter(6, 0.75, 0, 4, 0);
+    const inclined = diverterLocalCenter(6, 0.75, degreesToRadians(20), 4, 0);
     // Same along-belt offset, but the pitched deck lifts the wall centre higher.
     expect(inclined.y).toBeGreaterThan(flat.y);
     // Its horizontal reach shortens as the belt tilts up (cos projection).
     expect(inclined.x).toBeLessThan(flat.x);
+  });
+
+  it('carries the lateral offset onto the local Z axis, independent of incline', () => {
+    expect(diverterLocalCenter(6, 0.75, 0, 3, 0.4).z).toBeCloseTo(0.4, 10);
+    expect(diverterLocalCenter(6, 0.75, degreesToRadians(25), 3, -0.4).z).toBeCloseTo(-0.4, 10);
   });
 });
 

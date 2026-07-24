@@ -103,6 +103,7 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
       beltHeight,
       degreesToRadians(inclineDeg),
       diverter.offsetAlongBelt,
+      diverter.lateralOffset,
     );
     const rotated = rotateYaw(local, rotationYaw);
     return { x: position.x + rotated.x, y: position.y + rotated.y, z: position.z + rotated.z };
@@ -111,6 +112,7 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
     beltHeight,
     inclineDeg,
     diverter.offsetAlongBelt,
+    diverter.lateralOffset,
     rotationYaw,
     position.x,
     position.y,
