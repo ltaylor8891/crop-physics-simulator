@@ -141,6 +141,10 @@ export interface HopperProperties {
   wallThickness: number;
   /** open the infeed (−X) side (backstop) vs. a fully enclosed box */
   backstopOnly: boolean;
+  /** m, height of the hopper base above ground so it can sit on a belt (0–5) */
+  mountHeight: number;
+  /** degrees, pitch about local Z to tilt onto a slope (−30–30) */
+  angleDeg: number;
 }
 
 export type ConveyorElement = ElementBase<'conveyor', ConveyorProperties>;

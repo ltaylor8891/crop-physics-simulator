@@ -24,7 +24,7 @@ _Last updated: 2026-07-22_
 
 ## Work Currently In Progress
 
-- `develop` feature program (`docs/DEVELOP_PROGRAM.md`). **Phases A and B complete**: A = conveyor legs toggle + diverter attachment (Stage 16, ADR-018); B = standalone chute + hopper elements (Stage 17, ADR-019). Save format now `fileVersion` 6. Phases C–H planned, not started. `main` is untouched.
+- `develop` feature program (`docs/DEVELOP_PROGRAM.md`). **Phases A and B complete**: A = conveyor legs toggle + diverter attachment (Stage 16, ADR-018); B = standalone chute + hopper elements (Stage 17, ADR-019), plus a user-requested follow-up (hopper mount height + tilt so it can sit on a belt; chute length narrowed to 0.1–1 m). Save format now `fileVersion` 7. Phases C–H planned, not started. `main` is untouched.
 
 ## Next Recommended Task
 
@@ -64,7 +64,7 @@ npm run typecheck && npm run lint && npm run format:check && npm run test && npm
 - 1 world unit = 1 metre; Y-up; flow along local +X; yaw radians CCW about +Y.
 - Fixed physics timestep 1/60 s; simulation on fixed steps only.
 - Crops: per-type pools; global `maxActiveCrops` cap (ADR-005); no Rapier render interpolation with pools (ADR-017).
-- Save format: versioned JSON, schema-validated; current `fileVersion` 6 (on `develop`; `main` is at 3).
+- Save format: versioned JSON, schema-validated; current `fileVersion` 7 (on `develop`; `main` is at 3).
 
 ## Suggested Starting Point for the Next Agent
 

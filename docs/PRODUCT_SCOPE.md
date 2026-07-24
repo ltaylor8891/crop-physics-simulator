@@ -43,13 +43,14 @@ Assume a desktop browser, mouse-and-keyboard interaction, and no prior 3D-softwa
 ## Chute Requirements
 
 - Passive, flat sloped surface that bridges a gap so crop slides/falls onto the next surface — no active carry.
-- Configurable **length**, **width**, downward **slope angle**, and **top height** (height of the high/infeed edge above ground) so it can meet an upstream conveyor's discharge.
+- Configurable **length** (0.1–1 m), **width**, downward **slope angle**, and **top height** (height of the high/infeed edge above ground) so it can meet an upstream conveyor's discharge.
 - Crops land on the deck and slide under gravity and friction; the deck is a solid collider crops cannot pass through.
 
 ## Hopper Requirements
 
 - Passive open-top box of static walls (no floor) that holds crop piling against it — e.g. a backstop at the top of an inclined conveyor.
 - Configurable **footprint**, wall **height**, and wall **thickness**. A **backstop-only** mode leaves the infeed side open; otherwise all four sides are walled.
+- A **mount height** raises the base off the ground and a **tilt angle** pitches it, so the hopper can be located on an inclined belt (its origin stays at ground level for placement/dragging).
 - No internal simulation; crop rests on whatever surface is below (belt or ground) and is contained by the walls. Sensors (later) monitor this volume to drive control logic.
 
 ## Elevator Requirements

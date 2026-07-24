@@ -1,5 +1,5 @@
 {
-  "fileVersion": 6,
+  "fileVersion": 7,
   "meta": {
     "name": "Sample intake line",
     "createdAt": "2026-07-21T19:00:00Z",
@@ -83,7 +83,7 @@
       "position": { "x": 5.2, "y": 0, "z": 0 },
       "rotationYaw": 0,
       "properties": {
-        "length": 2,
+        "length": 0.6,
         "width": 0.8,
         "angleDeg": 30,
         "topHeight": 0.9
@@ -99,7 +99,9 @@
         "footprint": { "x": 1.5, "z": 1.5 },
         "height": 0.8,
         "wallThickness": 0.05,
-        "backstopOnly": false
+        "backstopOnly": false,
+        "mountHeight": 0,
+        "angleDeg": 0
       }
     }
   ],

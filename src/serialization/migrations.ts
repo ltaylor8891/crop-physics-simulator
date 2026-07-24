@@ -113,6 +113,32 @@ export function migrateV5toV6(raw: Record<string, unknown>): Record<string, unkn
 }
 
 /**
+ * V6 → V7: hoppers gain `mountHeight` + `angleDeg` (default 0, i.e. grounded and
+ * level); the chute `length` range narrows to 0.1–1 m, so any wider saved chute is
+ * clamped into range rather than rejected by the stricter schema.
+ */
+export function migrateV6toV7(raw: Record<string, unknown>): Record<string, unknown> {
+  const elements = raw.elements;
+  if (!Array.isArray(elements)) {
+    return { ...raw, fileVersion: 7 };
+  }
+  const nextElements = elements.map((el) => {
+    if (!isRecord(el) || !isRecord(el.properties)) return el;
+    if (el.type === 'hopper') {
+      return { ...el, properties: { mountHeight: 0, angleDeg: 0, ...el.properties } };
+    }
+    if (el.type === 'chute' && typeof el.properties.length === 'number') {
+      const clamped = Math.min(1, Math.max(0.1, el.properties.length));
+      if (clamped !== el.properties.length) {
+        return { ...el, properties: { ...el.properties, length: clamped } };
+      }
+    }
+    return el;
+  });
+  return { ...raw, fileVersion: 7, elements: nextElements };
+}
+
+/**
  * Apply stepwise migrations until `CURRENT_FILE_VERSION`.
  * Returns the migrated object or errors (e.g. unsupported future version).
  */
@@ -165,6 +191,10 @@ export function migrateLayout(
   if (v === 5) {
     current = migrateV5toV6(current);
     v = 6;
+  }
+  if (v === 6) {
+    current = migrateV6toV7(current);
+    v = 7;
   }
 
   if (v !== CURRENT_FILE_VERSION) {

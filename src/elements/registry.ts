@@ -93,7 +93,7 @@ export const ELEMENT_DESCRIPTORS: Record<ElementType, ElementDescriptor> = {
     color: '#8a94a0',
     translucent: false,
     createDefaultProperties: () => ({
-      length: 3,
+      length: 0.6,
       width: 0.8,
       angleDeg: 30,
       topHeight: 1,
@@ -110,6 +110,8 @@ export const ELEMENT_DESCRIPTORS: Record<ElementType, ElementDescriptor> = {
       height: 0.8,
       wallThickness: 0.05,
       backstopOnly: false,
+      mountHeight: 0,
+      angleDeg: 0,
     }),
   },
 };

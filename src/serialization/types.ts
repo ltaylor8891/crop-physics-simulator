@@ -7,7 +7,7 @@ import type { SceneElement, Vec3 } from '../types/elements';
 import type { SimulationSettings } from '../types/settings';
 
 /** Current writer version; bump with a migration when the schema changes. */
-export const CURRENT_FILE_VERSION = 6;
+export const CURRENT_FILE_VERSION = 7;
 
 /** Matches package.json version; informational only in save files. */
 export const APP_VERSION = '0.1.0';
@@ -67,7 +67,16 @@ export interface LayoutFileV6 {
   camera: LayoutCamera;
 }
 
-export type LayoutFile = LayoutFileV6;
+/** V7: hopper gains `mountHeight` + `angleDeg`; chute `length` narrows to 0.1–1 m. */
+export interface LayoutFileV7 {
+  fileVersion: 7;
+  meta: LayoutMeta;
+  settings: SimulationSettings;
+  elements: SceneElement[];
+  camera: LayoutCamera;
+}
+
+export type LayoutFile = LayoutFileV7;
 
 export interface ParseError {
   path: string;

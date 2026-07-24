@@ -96,7 +96,7 @@ export const PROPERTY_FIELDS: Record<ElementType, PropertyFieldDef[]> = {
     numberField('size.z', 'Size Z', 0.5, 20, 'm', 0.1),
   ],
   chute: [
-    numberField('length', 'Length', 1, 20, 'm', 0.1),
+    numberField('length', 'Length', 0.1, 1, 'm', 0.05),
     numberField('width', 'Width', 0.3, 3, 'm', 0.05),
     numberField('angleDeg', 'Slope', 5, 60, '°', 1),
     numberField('topHeight', 'Top height', 0.2, 5, 'm', 0.05),
@@ -106,6 +106,8 @@ export const PROPERTY_FIELDS: Record<ElementType, PropertyFieldDef[]> = {
     numberField('footprint.z', 'Footprint Z', 0.5, 6, 'm', 0.1),
     numberField('height', 'Wall height', 0.3, 3, 'm', 0.05),
     numberField('wallThickness', 'Wall thickness', 0.02, 0.2, 'm', 0.01),
+    numberField('mountHeight', 'Mount height', 0, 5, 'm', 0.05),
+    numberField('angleDeg', 'Tilt angle', -30, 30, '°', 1),
     { kind: 'boolean', path: 'backstopOnly', label: 'Backstop only (open infeed)' },
   ],
 };

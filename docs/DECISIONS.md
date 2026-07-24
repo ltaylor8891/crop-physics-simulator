@@ -153,4 +153,5 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
   - Pure geometry (`chuteGeometry.ts`, `hopperGeometry.ts`) stays React/three-free and unit-tested; meshes and colliders consume the same helpers so visuals and physics stay in sync.
   - New element types are additive to the save format → `fileVersion` 6 with a no-op `migrateV5toV6` (stamps the version so files containing chute/hopper are correctly rejected by older apps).
   - The hopper is the volume Phase D sensors will monitor. "Match feeding conveyor width" for the chute is deferred (explicit `width` for now).
+  - Follow-up (`fileVersion` 7): the hopper gained `mountHeight` + `angleDeg` so it can be lifted and pitched onto a belt (origin stays at ground for dragging, mirroring how `beltHeight` lifts the conveyor deck); the chute `length` range was narrowed to 0.1–1 m per user feedback. Chute locate-to-conveyor conveniences remain deferred.
   - Code: full new-type pattern for `chute` and `hopper`; `ChuteMesh`/`HopperMesh`, `ChuteColliders`/`HopperColliders`, geometry helpers, serialization V6.

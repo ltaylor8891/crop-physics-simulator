@@ -8,6 +8,7 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Breaking save-format changes
 
+- `fileVersion` 7 (develop): hopper gains `mountHeight` + `angleDeg` (lift/tilt onto a belt); chute `length` narrows to 0.1–1 m. V6 files migrate via `migrateV6toV7`, back-filling the hopper fields to 0 and clamping any wider chute `length` into range.
 - `fileVersion` 6 (develop): adds standalone `chute` and `hopper` element types. Purely additive — V5 files migrate via a no-op `migrateV5toV6` (files that contain the new types are stamped V6 so older apps reject them).
 - `fileVersion` 5 (develop): the conveyor `diverter` gains `lateralOffset` (across-belt position). V4 files migrate via `migrateV4toV5`, back-filling `lateralOffset: 0` (centred).
 - `fileVersion` 4 (develop): conveyors require `showLegs` (boolean) and `diverter` (`{ offsetAlongBelt, length, angleDeg }`). V3 files migrate via `migrateV3toV4`, back-filling `showLegs: true` and a length-0 (absent) diverter.
@@ -30,7 +31,7 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 - Conveyor diverter (develop, Phase A): an optional angled high-side wall that locks to the belt surface to deflect crop across it — position along the belt, across-belt offset, length, and angle are configurable; length 0 = none. Rendered mesh plus a matching fixed collider (ADR-018).
 - Chute element (develop, Phase B): a passive sloped deck that bridges gaps so crop slides onto the next surface; configurable length, width, slope, and top height (ADR-019).
-- Hopper element (develop, Phase B): a passive open-top box of walls (no floor) that holds crop piling against it — configurable footprint, wall height/thickness, and a backstop-only mode that leaves the infeed side open (ADR-019).
+- Hopper element (develop, Phase B): a passive open-top box of walls (no floor) that holds crop piling against it — configurable footprint, wall height/thickness, a backstop-only mode that leaves the infeed side open, and a mount height + tilt angle so it can be lifted and pitched onto an inclined belt (ADR-019).
 - Conveyor support-legs toggle (develop, Phase A): turn leg posts off so belts can be stacked vertically without legs blocking crop passing underneath.
 - Scene statistics (roadmap Stage 13): rolling 10 s In/Out t/h windows, per collection-zone collected rate in the properties panel, status-bar FPS (physics step ms in tooltip), THROTTLED badge; Reset clears rolling windows.
 - Per-spawner crop size distribution and density: diameter min/max (mm) with bipolar bias, length as % of diameter with bias, and density (kg/m³). Mass = ρV; spawners use a kg-credit accumulator so t/h stays accurate with variable sizes. Crop-type diameter limits are fixed in code (potato 20–150 mm, etc.).

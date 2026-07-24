@@ -7,6 +7,7 @@ import {
   migrateV3toV4,
   migrateV4toV5,
   migrateV5toV6,
+  migrateV6toV7,
 } from './migrations';
 
 describe('migrateLayout', () => {
@@ -14,7 +15,7 @@ describe('migrateLayout', () => {
     const result = migrateLayout({ fileVersion: 1, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(6);
+    expect(result.value.fileVersion).toBe(7);
     expect(result.value.keep).toBe(true);
   });
 
@@ -22,14 +23,14 @@ describe('migrateLayout', () => {
     const result = migrateLayout({ fileVersion: 2, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(6);
+    expect(result.value.fileVersion).toBe(7);
   });
 
-  it('accepts current fileVersion 6 unchanged', () => {
-    const result = migrateLayout({ fileVersion: 6, keep: true });
+  it('accepts current fileVersion 7 unchanged', () => {
+    const result = migrateLayout({ fileVersion: 7, keep: true });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(6);
+    expect(result.value.fileVersion).toBe(7);
   });
 
   it('rejects non-integer fileVersion', () => {
@@ -38,7 +39,7 @@ describe('migrateLayout', () => {
   });
 
   it('rejects future versions', () => {
-    const result = migrateLayout({ fileVersion: 7 });
+    const result = migrateLayout({ fileVersion: 8 });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.errors[0]?.message).toMatch(/newer version/i);
@@ -192,5 +193,64 @@ describe('migrateV5toV6', () => {
     const migrated = migrateV5toV6({ fileVersion: 5, elements: els });
     expect(migrated.fileVersion).toBe(6);
     expect(migrated.elements).toEqual(els);
+  });
+});
+
+describe('migrateV6toV7', () => {
+  it('back-fills hopper mountHeight/angleDeg and clamps an over-long chute', () => {
+    const migrated = migrateV6toV7({
+      fileVersion: 6,
+      elements: [
+        {
+          type: 'hopper',
+          id: 'h1',
+          properties: {
+            footprint: { x: 1.5, z: 1.5 },
+            height: 0.8,
+            wallThickness: 0.05,
+            backstopOnly: false,
+          },
+        },
+        {
+          type: 'chute',
+          id: 'ch1',
+          properties: { length: 3, width: 0.8, angleDeg: 30, topHeight: 1 },
+        },
+      ],
+    });
+    expect(migrated.fileVersion).toBe(7);
+    const els = migrated.elements as Array<{ properties: Record<string, unknown> }>;
+    expect(els[0]!.properties.mountHeight).toBe(0);
+    expect(els[0]!.properties.angleDeg).toBe(0);
+    expect(els[1]!.properties.length).toBe(1); // clamped from 3 into 0.1–1
+  });
+
+  it('leaves an in-range chute and existing hopper values untouched', () => {
+    const migrated = migrateV6toV7({
+      fileVersion: 6,
+      elements: [
+        {
+          type: 'chute',
+          id: 'ch1',
+          properties: { length: 0.6, width: 0.8, angleDeg: 30, topHeight: 1 },
+        },
+        {
+          type: 'hopper',
+          id: 'h1',
+          properties: {
+            footprint: { x: 1, z: 1 },
+            height: 1,
+            wallThickness: 0.05,
+            backstopOnly: true,
+            mountHeight: 0.75,
+            angleDeg: 15,
+          },
+        },
+      ],
+    });
+    const els = migrated.elements as Array<{ properties: Record<string, unknown> }>;
+    expect(els[0]!.properties.length).toBe(0.6);
+    expect(els[1]!.properties.mountHeight).toBe(0.75);
+    expect(els[1]!.properties.angleDeg).toBe(15);
   });
 });

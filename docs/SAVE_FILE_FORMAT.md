@@ -2,7 +2,7 @@
 
 Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.json`](../schemas/layout.schema.json). Working example: [`examples/sample-layout.json`](../examples/sample-layout.json). Serialization code: `src/serialization/`.
 
-**Current file version: 6**
+**Current file version: 7**
 
 ## Principles
 
@@ -15,7 +15,7 @@ Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.j
 
 ```jsonc
 {
-  "fileVersion": 6,          // integer, required
+  "fileVersion": 7,          // integer, required
   "meta": { ... },           // scene metadata, required
   "settings": { ... },       // simulation settings, required
   "elements": [ ... ],       // scene elements, required (may be empty)
@@ -132,11 +132,11 @@ Both use:
 
 ### `type: "chute"`
 
-Added in `fileVersion` 6. A passive sloped deck; the high edge (infeed, −X) sits at `topHeight` and the deck slopes down toward the discharge.
+Added in `fileVersion` 6. A passive sloped deck; the high edge (infeed, −X) sits at `topHeight` and the deck slopes down toward the discharge. `length` narrowed to 0.1–1 m in `fileVersion` 7 (wider saved chutes are clamped by `migrateV6toV7`).
 
 ```jsonc
 {
-  "length": 3, // m, 1–20
+  "length": 0.6, // m, 0.1–1
   "width": 0.8, // m, 0.3–3
   "angleDeg": 30, // downward slope degrees, 5–60
   "topHeight": 1, // m, high-edge height above ground, 0.2–5
@@ -145,7 +145,7 @@ Added in `fileVersion` 6. A passive sloped deck; the high edge (infeed, −X) si
 
 ### `type: "hopper"`
 
-Added in `fileVersion` 6. A passive open-top box of walls (no floor).
+Added in `fileVersion` 6. A passive open-top box of walls (no floor). `mountHeight` + `angleDeg` were added in `fileVersion` 7 so it can be lifted and tilted onto a belt (`migrateV6toV7` back-fills both to 0).
 
 ```jsonc
 {
@@ -153,6 +153,8 @@ Added in `fileVersion` 6. A passive open-top box of walls (no floor).
   "height": 0.8, // m, wall height, 0.3–3
   "wallThickness": 0.05, // m, 0.02–0.2
   "backstopOnly": false, // true = infeed (−X) side left open
+  "mountHeight": 0, // m, base above ground, 0–5
+  "angleDeg": 0, // pitch/tilt degrees, -30–30
 }
 ```
 
@@ -169,7 +171,7 @@ Added in `fileVersion` 6. A passive open-top box of walls (no floor).
 
 - `fileVersion` is read **before** any other validation. Missing/non-integer → hard error.
 - `fileVersion` newer than the app supports → error "This layout was saved by a newer version" (no forward compatibility).
-- Older versions are migrated stepwise: `migrateV1toV2`, `migrateV2toV3`, `migrateV3toV4`, `migrateV4toV5`, `migrateV5toV6`, … each a pure function in `src/serialization/migrations.ts`, unit-tested with a frozen fixture of each historical version.
+- Older versions are migrated stepwise: `migrateV1toV2`, `migrateV2toV3`, `migrateV3toV4`, `migrateV4toV5`, `migrateV5toV6`, `migrateV6toV7`, … each a pure function in `src/serialization/migrations.ts`, unit-tested with a frozen fixture of each historical version.
 - Schema validation runs **after** migration, against the current version's schema.
 - Any addition/removal/semantic change to the format requires: bump `fileVersion`, add a migration, update this document + schema + sample layout, add a `CHANGELOG.md` entry under "Breaking save-format changes".
 

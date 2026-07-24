@@ -2,7 +2,7 @@
 
 Living plan for the feature program on the **`develop`** branch, kept isolated from `main` (which stays at Stages 1–13 + performance/release). This document is the approved, phased plan; **nothing here is implemented until the user requests a specific phase.** As each phase lands, fold its detail into the standard docs (`ROADMAP.md` stage, `DECISIONS.md` ADR, `PRODUCT_SCOPE.md`, `PHYSICS_SPECIFICATION.md`, `SAVE_FILE_FORMAT.md`, `CHANGELOG.md`) and trim it here to a pointer.
 
-_Last updated: 2026-07-24 — Phases A and B implemented on `develop` (roadmap Stages 16–17, ADR-018/019; `fileVersion` 6). Phase H (direct manipulation) added to the plan. Phases C–H planned, not started._
+_Last updated: 2026-07-24 — Phases A and B implemented on `develop` (roadmap Stages 16–17, ADR-018/019; `fileVersion` 7 after user feedback: hopper mount height + tilt, chute length 0.1–1 m). Phase H (direct manipulation) added to the plan. Phases C–H planned, not started._
 
 ## Context
 

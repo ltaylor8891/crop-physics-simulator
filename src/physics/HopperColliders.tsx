@@ -3,6 +3,7 @@ import { CuboidCollider, RigidBody } from '@react-three/rapier';
 import { hopperWalls } from '../rendering/elements/hopperGeometry';
 import { useSceneStore } from '../state/sceneStore';
 import type { HopperElement } from '../types/elements';
+import { beltOrientationQuaternion } from './beltVelocity';
 import { MACHINE_COLLISION_GROUPS } from './collisionGroups';
 import { Materials } from './materials';
 
@@ -29,18 +30,24 @@ export function HopperColliders() {
 
 function HopperCollider({ hopper }: { hopper: HopperElement }) {
   const { properties, position, rotationYaw } = hopper;
-  const { footprint, height, wallThickness, backstopOnly } = properties;
+  const { footprint, height, wallThickness, backstopOnly, mountHeight, angleDeg } = properties;
 
   const walls = useMemo(
     () => hopperWalls(footprint, height, wallThickness, backstopOnly),
     [footprint, height, wallThickness, backstopOnly],
   );
 
+  // Base lifted to `mountHeight`; walls yawed then pitched about local Z (tilt).
+  const orientation = useMemo(
+    () => beltOrientationQuaternion(rotationYaw, angleDeg),
+    [rotationYaw, angleDeg],
+  );
+
   return (
     <RigidBody
       type="fixed"
-      position={[position.x, position.y, position.z]}
-      rotation={[0, rotationYaw, 0]}
+      position={[position.x, position.y + mountHeight, position.z]}
+      quaternion={orientation}
       colliders={false}
     >
       {walls.map((wall, i) => (
