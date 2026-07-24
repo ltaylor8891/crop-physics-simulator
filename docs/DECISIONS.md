@@ -138,3 +138,19 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
   - Geometry maths (`diverterPlacement`, `diverterLocalCenter`) stays pure and unit-tested in `conveyorGeometry.ts`; the quaternion composition uses three.js in the collider component.
   - Only one attachment shape is supported for now; a second belt-locked attachment would extend the same pattern.
   - Code: `types/elements.ts`, `elements/registry.ts`, `elements/propertySchema.ts`, `rendering/elements/ConveyorMesh.tsx` + `conveyorGeometry.ts`, `physics/ConveyorColliders.tsx`, `serialization/migrations.ts`.
+
+## ADR-019 — Chute and hopper as passive static-collider elements
+
+- **Date**: 2026-07-24
+- **Status**: Accepted
+- **Context**: The `develop` program Phase B (`docs/DEVELOP_PROGRAM.md`) adds two standalone transfer aids. A **chute** is a flat sloped surface that bridges a gap so crop slides/falls onto the next surface; a **hopper** is an open-top box that holds crop piling against it (e.g. a backstop at the top of an inclined conveyor). Neither carries crop or runs any per-step logic — unlike the elevator's transit queue.
+- **Options considered**:
+  1. Model them as active elements with their own simulation state (like the elevator).
+  2. Model them as passive `fixed` colliders with no runtime state — crop interacts by ordinary gravity/friction/contact.
+- **Decision**: Option 2. Both are standalone element types built on the standard new-type pattern, but with **no `src/simulation/*` runtime** and no fixed-step hook. The chute is one pitched `fixed` cuboid slab (down-slope toward the discharge, pivoting about the infeed end like the conveyor belt slab); the hopper is one `fixed` body carrying the element's yaw with a cuboid collider per wall (back + two sides always, front wall only when fully enclosed; open top, **no floor** — crop rests on the belt/ground below). Both use `MACHINE_COLLISION_GROUPS` and `Materials.machine`.
+- **Consequences**:
+  - Simplest possible new elements — no determinism concerns, no runtime maps to prune.
+  - Pure geometry (`chuteGeometry.ts`, `hopperGeometry.ts`) stays React/three-free and unit-tested; meshes and colliders consume the same helpers so visuals and physics stay in sync.
+  - New element types are additive to the save format → `fileVersion` 6 with a no-op `migrateV5toV6` (stamps the version so files containing chute/hopper are correctly rejected by older apps).
+  - The hopper is the volume Phase D sensors will monitor. "Match feeding conveyor width" for the chute is deferred (explicit `width` for now).
+  - Code: full new-type pattern for `chute` and `hopper`; `ChuteMesh`/`HopperMesh`, `ChuteColliders`/`HopperColliders`, geometry helpers, serialization V6.

@@ -1,5 +1,5 @@
 {
-  "fileVersion": 5,
+  "fileVersion": 6,
   "meta": {
     "name": "Sample intake line",
     "createdAt": "2026-07-21T19:00:00Z",
@@ -74,6 +74,32 @@
       "rotationYaw": 0,
       "properties": {
         "size": { "x": 3, "y": 3, "z": 3 }
+      }
+    },
+    {
+      "id": "el_chute0000001",
+      "type": "chute",
+      "name": "Transfer chute",
+      "position": { "x": 5.2, "y": 0, "z": 0 },
+      "rotationYaw": 0,
+      "properties": {
+        "length": 2,
+        "width": 0.8,
+        "angleDeg": 30,
+        "topHeight": 0.9
+      }
+    },
+    {
+      "id": "el_hopper000001",
+      "type": "hopper",
+      "name": "Holding hopper",
+      "position": { "x": 8.5, "y": 0, "z": 4 },
+      "rotationYaw": 0,
+      "properties": {
+        "footprint": { "x": 1.5, "z": 1.5 },
+        "height": 0.8,
+        "wallThickness": 0.05,
+        "backstopOnly": false
       }
     }
   ],

@@ -25,7 +25,7 @@ Assume a desktop browser, mouse-and-keyboard interaction, and no prior 3D-softwa
 ## Element Library Requirements
 
 - A left-hand panel lists all placeable element types with name and icon/thumbnail.
-- Initial element types: **flat belt conveyor**, **inclined belt conveyor** (same element with pitch), **crop spawner**, **collection zone**. (**Bucket elevator** is temporarily unavailable — Stage 11 code retained for restore.)
+- Initial element types: **flat belt conveyor**, **inclined belt conveyor** (same element with pitch), **crop spawner**, **collection zone**, **chute**, **hopper**. (**Bucket elevator** is temporarily unavailable — Stage 11 code retained for restore.)
 - Placement: click an element in the library, then click a position on the ground plane (or on top of an existing element) to place it. Escape cancels placement.
 - Every placed element gets a unique stable ID and sensible default dimensions/properties.
 - Placed elements can be selected, moved, rotated (yaw), reconfigured, duplicated, and deleted.
@@ -39,6 +39,18 @@ Assume a desktop browser, mouse-and-keyboard interaction, and no prior 3D-softwa
 - Optional **diverter**: an angled high-side wall that locks to the belt surface to deflect crop across it, with configurable position along the belt, across-belt offset, length, and angle (length 0 = none).
 - Belt direction is visually indicated (arrow texture or chevron markers).
 - Crops resting on the belt move at belt speed; crops must not fall through the belt at any supported speed.
+
+## Chute Requirements
+
+- Passive, flat sloped surface that bridges a gap so crop slides/falls onto the next surface — no active carry.
+- Configurable **length**, **width**, downward **slope angle**, and **top height** (height of the high/infeed edge above ground) so it can meet an upstream conveyor's discharge.
+- Crops land on the deck and slide under gravity and friction; the deck is a solid collider crops cannot pass through.
+
+## Hopper Requirements
+
+- Passive open-top box of static walls (no floor) that holds crop piling against it — e.g. a backstop at the top of an inclined conveyor.
+- Configurable **footprint**, wall **height**, and wall **thickness**. A **backstop-only** mode leaves the infeed side open; otherwise all four sides are walled.
+- No internal simulation; crop rests on whatever surface is below (belt or ground) and is contained by the walls. Sensors (later) monitor this volume to drive control logic.
 
 ## Elevator Requirements
 

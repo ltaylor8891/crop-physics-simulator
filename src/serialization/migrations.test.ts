@@ -6,6 +6,7 @@ import {
   migrateV2toV3,
   migrateV3toV4,
   migrateV4toV5,
+  migrateV5toV6,
 } from './migrations';
 
 describe('migrateLayout', () => {
@@ -13,7 +14,7 @@ describe('migrateLayout', () => {
     const result = migrateLayout({ fileVersion: 1, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(5);
+    expect(result.value.fileVersion).toBe(6);
     expect(result.value.keep).toBe(true);
   });
 
@@ -21,14 +22,14 @@ describe('migrateLayout', () => {
     const result = migrateLayout({ fileVersion: 2, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(5);
+    expect(result.value.fileVersion).toBe(6);
   });
 
-  it('accepts current fileVersion 5 unchanged', () => {
-    const result = migrateLayout({ fileVersion: 5, keep: true });
+  it('accepts current fileVersion 6 unchanged', () => {
+    const result = migrateLayout({ fileVersion: 6, keep: true });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(5);
+    expect(result.value.fileVersion).toBe(6);
   });
 
   it('rejects non-integer fileVersion', () => {
@@ -37,7 +38,7 @@ describe('migrateLayout', () => {
   });
 
   it('rejects future versions', () => {
-    const result = migrateLayout({ fileVersion: 6 });
+    const result = migrateLayout({ fileVersion: 7 });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.errors[0]?.message).toMatch(/newer version/i);
@@ -179,5 +180,17 @@ describe('migrateV4toV5', () => {
     const props = (migrated.elements as Array<{ properties: Record<string, unknown> }>)[0]!
       .properties;
     expect((props.diverter as Record<string, unknown>).lateralOffset).toBe(0.5);
+  });
+});
+
+describe('migrateV5toV6', () => {
+  it('stamps the version and leaves existing elements untouched (chute/hopper additive)', () => {
+    const els = [
+      { type: 'conveyor', id: 'c1', properties: { length: 6 } },
+      { type: 'collectionZone', id: 'z1', properties: { size: { x: 2, y: 2, z: 2 } } },
+    ];
+    const migrated = migrateV5toV6({ fileVersion: 5, elements: els });
+    expect(migrated.fileVersion).toBe(6);
+    expect(migrated.elements).toEqual(els);
   });
 });

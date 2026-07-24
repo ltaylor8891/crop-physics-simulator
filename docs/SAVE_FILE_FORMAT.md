@@ -2,7 +2,7 @@
 
 Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.json`](../schemas/layout.schema.json). Working example: [`examples/sample-layout.json`](../examples/sample-layout.json). Serialization code: `src/serialization/`.
 
-**Current file version: 5**
+**Current file version: 6**
 
 ## Principles
 
@@ -15,7 +15,7 @@ Versioned JSON layout format. Machine-readable schema: [`schemas/layout.schema.j
 
 ```jsonc
 {
-  "fileVersion": 5,          // integer, required
+  "fileVersion": 6,          // integer, required
   "meta": { ... },           // scene metadata, required
   "settings": { ... },       // simulation settings, required
   "elements": [ ... ],       // scene elements, required (may be empty)
@@ -130,6 +130,32 @@ Both use:
 }
 ```
 
+### `type: "chute"`
+
+Added in `fileVersion` 6. A passive sloped deck; the high edge (infeed, −X) sits at `topHeight` and the deck slopes down toward the discharge.
+
+```jsonc
+{
+  "length": 3, // m, 1–20
+  "width": 0.8, // m, 0.3–3
+  "angleDeg": 30, // downward slope degrees, 5–60
+  "topHeight": 1, // m, high-edge height above ground, 0.2–5
+}
+```
+
+### `type: "hopper"`
+
+Added in `fileVersion` 6. A passive open-top box of walls (no floor).
+
+```jsonc
+{
+  "footprint": { "x": 1.5, "z": 1.5 }, // m, each 0.5–6
+  "height": 0.8, // m, wall height, 0.3–3
+  "wallThickness": 0.05, // m, 0.02–0.2
+  "backstopOnly": false, // true = infeed (−X) side left open
+}
+```
+
 ## Camera State (`camera`)
 
 ```jsonc
@@ -143,7 +169,7 @@ Both use:
 
 - `fileVersion` is read **before** any other validation. Missing/non-integer → hard error.
 - `fileVersion` newer than the app supports → error "This layout was saved by a newer version" (no forward compatibility).
-- Older versions are migrated stepwise: `migrateV1toV2`, `migrateV2toV3`, `migrateV3toV4`, `migrateV4toV5`, … each a pure function in `src/serialization/migrations.ts`, unit-tested with a frozen fixture of each historical version.
+- Older versions are migrated stepwise: `migrateV1toV2`, `migrateV2toV3`, `migrateV3toV4`, `migrateV4toV5`, `migrateV5toV6`, … each a pure function in `src/serialization/migrations.ts`, unit-tested with a frozen fixture of each historical version.
 - Schema validation runs **after** migration, against the current version's schema.
 - Any addition/removal/semantic change to the format requires: bump `fileVersion`, add a migration, update this document + schema + sample layout, add a `CHANGELOG.md` entry under "Breaking save-format changes".
 

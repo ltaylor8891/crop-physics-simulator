@@ -104,6 +104,15 @@ export function migrateV4toV5(raw: Record<string, unknown>): Record<string, unkn
 }
 
 /**
+ * V5 → V6: adds the standalone `chute` and `hopper` element types. Purely additive —
+ * older files contain neither, so no element transform is needed; the version is
+ * stamped so files that DO contain them are marked V6 (and rejected by older apps).
+ */
+export function migrateV5toV6(raw: Record<string, unknown>): Record<string, unknown> {
+  return { ...raw, fileVersion: 6 };
+}
+
+/**
  * Apply stepwise migrations until `CURRENT_FILE_VERSION`.
  * Returns the migrated object or errors (e.g. unsupported future version).
  */
@@ -152,6 +161,10 @@ export function migrateLayout(
   if (v === 4) {
     current = migrateV4toV5(current);
     v = 5;
+  }
+  if (v === 5) {
+    current = migrateV5toV6(current);
+    v = 6;
   }
 
   if (v !== CURRENT_FILE_VERSION) {

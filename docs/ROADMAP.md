@@ -20,6 +20,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 14  | Performance optimisation            | Not started |
 | 15  | Testing and release preparation     | Not started |
 | 16  | Conveyor legs + diverter (develop)  | Complete    |
+| 17  | Chute + hopper elements (develop)   | Complete    |
 
 ## Stage 1 — Repository and design documentation
 
@@ -148,3 +149,11 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Acceptance criteria**: legs toggle hides/shows leg posts; a diverter with `length > 0` renders a wall on the belt and blocks crop (collider present); `length = 0` renders nothing; V3 files load via migration; full CI gate green.
 - **Dependencies**: main (Stages 1–13).
 - **Status**: Complete on `develop`. Verified: full gate green (typecheck/lint/format/test/build, 142 tests incl. new geometry + migration tests); production preview shows the new property fields editable and committing, and the legs toggle removing leg posts, with no console errors. A crisp close-up of the diverter wall was not capturable in the preview pane (small WebGL render), but its mesh/collider code path executes error-free and the geometry is unit-tested.
+
+## Stage 17 — Chute + hopper elements (develop feature program, Phase B)
+
+- **Objective**: two standalone passive transfer elements — a sloped **chute** and an open-top **hopper** backstop (`docs/DEVELOP_PROGRAM.md` Phase B; ADR-019).
+- **Deliverables**: `chute` and `hopper` element types (full new-type pattern); `ChuteMesh`/`HopperMesh` + pure `chuteGeometry.ts`/`hopperGeometry.ts`; `ChuteColliders`/`HopperColliders` (fixed colliders, `MACHINE_COLLISION_GROUPS`); property-panel fields; `fileVersion` 6 with a no-op `migrateV5toV6`; schema + sample-layout update; unit tests for geometry and migration.
+- **Acceptance criteria**: both types placeable from the library; a chute renders a pitched deck crops slide down; a hopper renders open-top walls (front wall omitted in backstop-only mode) with no floor; a layout containing both saves/loads and validates; full CI gate green.
+- **Dependencies**: main (Stages 1–13). Independent of the control subsystem.
+- **Status**: Complete on `develop`. Verified: full gate green (typecheck — exhaustive element switches force complete wiring; lint; format:check; 152 tests incl. new geometry, migration, and schema-validation/round-trip of a sample containing a chute and hopper; build). Library shows Chute + Hopper; a production scene containing both loads through the real drag-drop → parse → validate → render path with no error and no console errors. A rendered close-up of the meshes / live physics was not captured — the preview pane captures only a narrow strip that clips the canvas and a second WebGL context stalled — but the load path, geometry, and serialization are all proven.

@@ -16,7 +16,8 @@ export interface AxisXZ {
   z: number;
 }
 
-export type ElementType = 'conveyor' | 'elevator' | 'spawner' | 'collectionZone' | 'despawnZone';
+export type ElementType =
+  'conveyor' | 'elevator' | 'spawner' | 'collectionZone' | 'despawnZone' | 'chute' | 'hopper';
 
 export interface ElementBase<TType extends ElementType, TProps> {
   id: ElementId;
@@ -110,11 +111,51 @@ export interface ZoneProperties {
   size: Vec3;
 }
 
+/**
+ * Chute: a passive, flat sloped surface that bridges a gap so crop slides/falls
+ * onto the next surface. The high edge (infeed, −X) sits at `topHeight`; the deck
+ * slopes down toward the discharge (+X) by `angleDeg`. No active carry.
+ */
+export interface ChuteProperties {
+  /** m, deck length along local X (1–20) */
+  length: number;
+  /** m, deck width (0.3–3) */
+  width: number;
+  /** degrees, downward slope of the deck (5–60) */
+  angleDeg: number;
+  /** m, height of the high (infeed) edge above ground (0.2–5) */
+  topHeight: number;
+}
+
+/**
+ * Hopper: a passive open-top box of static walls (no floor) that holds crop piling
+ * against it — e.g. a backstop at the top of an inclined conveyor. `backstopOnly`
+ * leaves the infeed (−X) side open; otherwise all four sides are walled.
+ */
+export interface HopperProperties {
+  /** m footprint (each 0.5–6) */
+  footprint: AxisXZ;
+  /** m, wall height (0.3–3) */
+  height: number;
+  /** m, wall thickness (0.02–0.2) */
+  wallThickness: number;
+  /** open the infeed (−X) side (backstop) vs. a fully enclosed box */
+  backstopOnly: boolean;
+}
+
 export type ConveyorElement = ElementBase<'conveyor', ConveyorProperties>;
 export type ElevatorElement = ElementBase<'elevator', ElevatorProperties>;
 export type SpawnerElement = ElementBase<'spawner', SpawnerProperties>;
 export type CollectionZoneElement = ElementBase<'collectionZone', ZoneProperties>;
 export type DespawnZoneElement = ElementBase<'despawnZone', ZoneProperties>;
+export type ChuteElement = ElementBase<'chute', ChuteProperties>;
+export type HopperElement = ElementBase<'hopper', HopperProperties>;
 
 export type SceneElement =
-  ConveyorElement | ElevatorElement | SpawnerElement | CollectionZoneElement | DespawnZoneElement;
+  | ConveyorElement
+  | ElevatorElement
+  | SpawnerElement
+  | CollectionZoneElement
+  | DespawnZoneElement
+  | ChuteElement
+  | HopperElement;

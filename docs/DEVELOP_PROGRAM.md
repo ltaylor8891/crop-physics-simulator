@@ -2,7 +2,7 @@
 
 Living plan for the feature program on the **`develop`** branch, kept isolated from `main` (which stays at Stages 1–13 + performance/release). This document is the approved, phased plan; **nothing here is implemented until the user requests a specific phase.** As each phase lands, fold its detail into the standard docs (`ROADMAP.md` stage, `DECISIONS.md` ADR, `PRODUCT_SCOPE.md`, `PHYSICS_SPECIFICATION.md`, `SAVE_FILE_FORMAT.md`, `CHANGELOG.md`) and trim it here to a pointer.
 
-_Last updated: 2026-07-23 — Phase A implemented on `develop` (roadmap Stage 16, ADR-018; `fileVersion` 5 after the diverter lateral-offset follow-up). Phase H (direct manipulation) added to the plan at the user's request. Phases B–H planned, not started._
+_Last updated: 2026-07-24 — Phases A and B implemented on `develop` (roadmap Stages 16–17, ADR-018/019; `fileVersion` 6). Phase H (direct manipulation) added to the plan. Phases C–H planned, not started._
 
 ## Context
 
@@ -48,9 +48,9 @@ Implemented on `develop` (roadmap Stage 16, ADR-018). Diverter shipped at `fileV
 - **ADR**: ADR-018 "Conveyor attachments modeled as optional sub-properties, not separate elements".
 - **Files**: `src/types/elements.ts`, `src/elements/registry.ts`, `src/elements/propertySchema.ts`, `src/rendering/elements/ConveyorMesh.tsx` + `conveyorGeometry.ts`, `src/physics/ConveyorColliders.tsx`, serialization (version bump + migration), tests beside `conveyorGeometry.ts`.
 
-## Phase B — Standalone transfer elements (chute, hopper)
+## Phase B — Standalone transfer elements (chute, hopper) — ✅ DONE
 
-Both are new standalone element types (full pattern, sections 1–7). Both are **passive static colliders** — no per-step simulation state, simpler than elevators.
+Implemented on `develop` (roadmap Stage 17, ADR-019, `fileVersion` 6). Both are new standalone element types (full pattern, sections 1–7). Both are **passive static colliders** — no per-step simulation state, simpler than elevators.
 
 - **Chute** (`type: 'chute'`): properties `length`, `angleDeg`, plus an optional `feedConveyorId` (or width taken from a `width` property defaulted to match a typical belt; simplest first cut is an explicit `width` field, with "match feeding conveyor" as a follow-on convenience). A tilted fixed cuboid/ramp collider (`MACHINE_COLLISION_GROUPS`) with a flat surface mesh. Crops land and slide by gravity + friction — no active carry.
 - **Hopper** (`type: 'hopper'`): properties `footprint: AxisXZ`, `height`, `wallThickness`. Four fixed wall colliders forming an open-top box (a backstop), open on the infeed side or fully enclosed per a `backstopOnly: boolean`. Holds piling crop; no active logic. This is the volume sensors will monitor in Phase D.

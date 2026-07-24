@@ -86,6 +86,32 @@ export const ELEMENT_DESCRIPTORS: Record<ElementType, ElementDescriptor> = {
       size: { x: 2, y: 2, z: 2 },
     }),
   },
+  chute: {
+    type: 'chute',
+    label: 'Chute',
+    defaultY: 0,
+    color: '#8a94a0',
+    translucent: false,
+    createDefaultProperties: () => ({
+      length: 3,
+      width: 0.8,
+      angleDeg: 30,
+      topHeight: 1,
+    }),
+  },
+  hopper: {
+    type: 'hopper',
+    label: 'Hopper',
+    defaultY: 0,
+    color: '#6f7a86',
+    translucent: false,
+    createDefaultProperties: () => ({
+      footprint: { x: 1.5, z: 1.5 },
+      height: 0.8,
+      wallThickness: 0.05,
+      backstopOnly: false,
+    }),
+  },
 };
 
 /** All known element types (includes temporarily disabled ones). */
@@ -95,6 +121,8 @@ export const ELEMENT_TYPES: ElementType[] = [
   'spawner',
   'collectionZone',
   'despawnZone',
+  'chute',
+  'hopper',
 ];
 
 /**
@@ -148,6 +176,20 @@ export function getElementBounds(element: SceneElement): { size: Vec3; center: V
       return {
         size: { x: size.x, y: size.y, z: size.z },
         center: { x: 0, y: size.y / 2, z: 0 },
+      };
+    }
+    case 'chute': {
+      const { length, width, topHeight } = element.properties;
+      return {
+        size: { x: length, y: topHeight, z: width },
+        center: { x: 0, y: topHeight / 2, z: 0 },
+      };
+    }
+    case 'hopper': {
+      const { footprint, height } = element.properties;
+      return {
+        size: { x: footprint.x, y: height, z: footprint.z },
+        center: { x: 0, y: height / 2, z: 0 },
       };
     }
   }

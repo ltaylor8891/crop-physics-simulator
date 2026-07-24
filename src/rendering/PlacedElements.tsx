@@ -5,7 +5,9 @@ import { useSceneStore } from '../state/sceneStore';
 import { useUiStore } from '../state/uiStore';
 import type { SceneElement } from '../types/elements';
 import { clampToBuildArea, snapPositionXZ } from '../utilities/snap';
+import { ChuteMesh } from './elements/ChuteMesh';
 import { ConveyorMesh } from './elements/ConveyorMesh';
+import { HopperMesh } from './elements/HopperMesh';
 import { intersectGround } from './groundRay';
 
 const SELECTION_COLOR = '#4f9cf0';
@@ -101,6 +103,10 @@ function PlacedElement({ element }: { element: SceneElement }) {
     >
       {element.type === 'conveyor' ? (
         <ConveyorMesh properties={element.properties} selected={selected} />
+      ) : element.type === 'chute' ? (
+        <ChuteMesh properties={element.properties} selected={selected} />
+      ) : element.type === 'hopper' ? (
+        <HopperMesh properties={element.properties} selected={selected} />
       ) : (
         <mesh
           position={[bounds.center.x, bounds.center.y, bounds.center.z]}

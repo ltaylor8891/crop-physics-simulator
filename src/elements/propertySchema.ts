@@ -95,6 +95,19 @@ export const PROPERTY_FIELDS: Record<ElementType, PropertyFieldDef[]> = {
     numberField('size.y', 'Size Y', 0.5, 20, 'm', 0.1),
     numberField('size.z', 'Size Z', 0.5, 20, 'm', 0.1),
   ],
+  chute: [
+    numberField('length', 'Length', 1, 20, 'm', 0.1),
+    numberField('width', 'Width', 0.3, 3, 'm', 0.05),
+    numberField('angleDeg', 'Slope', 5, 60, '°', 1),
+    numberField('topHeight', 'Top height', 0.2, 5, 'm', 0.05),
+  ],
+  hopper: [
+    numberField('footprint.x', 'Footprint X', 0.5, 6, 'm', 0.1),
+    numberField('footprint.z', 'Footprint Z', 0.5, 6, 'm', 0.1),
+    numberField('height', 'Wall height', 0.3, 3, 'm', 0.05),
+    numberField('wallThickness', 'Wall thickness', 0.02, 0.2, 'm', 0.01),
+    { kind: 'boolean', path: 'backstopOnly', label: 'Backstop only (open infeed)' },
+  ],
 };
 
 /** Build area half-extent for editable position fields (docs/UI_UX_SPECIFICATION.md). */

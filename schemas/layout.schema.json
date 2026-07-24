@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/crop-physics-simulator/layout.schema.json",
-  "title": "Crop Physics Simulator Layout (fileVersion 5)",
+  "title": "Crop Physics Simulator Layout (fileVersion 6)",
   "description": "Versioned save-file format for simulator layouts. Human-readable specification: docs/SAVE_FILE_FORMAT.md",
   "type": "object",
   "additionalProperties": false,
   "required": ["fileVersion", "meta", "settings", "elements", "camera"],
   "properties": {
-    "fileVersion": { "const": 5 },
+    "fileVersion": { "const": 6 },
     "meta": {
       "type": "object",
       "additionalProperties": false,
@@ -168,6 +168,50 @@
           "properties": {
             "type": { "const": "despawnZone" },
             "properties": { "$ref": "#/$defs/zoneProperties" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "properties"],
+          "properties": {
+            "type": { "const": "chute" },
+            "properties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["length", "width", "angleDeg", "topHeight"],
+              "properties": {
+                "length": { "type": "number", "minimum": 1, "maximum": 20 },
+                "width": { "type": "number", "minimum": 0.3, "maximum": 3 },
+                "angleDeg": { "type": "number", "minimum": 5, "maximum": 60 },
+                "topHeight": { "type": "number", "minimum": 0.2, "maximum": 5 }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "properties"],
+          "properties": {
+            "type": { "const": "hopper" },
+            "properties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["footprint", "height", "wallThickness", "backstopOnly"],
+              "properties": {
+                "footprint": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["x", "z"],
+                  "properties": {
+                    "x": { "type": "number", "minimum": 0.5, "maximum": 6 },
+                    "z": { "type": "number", "minimum": 0.5, "maximum": 6 }
+                  }
+                },
+                "height": { "type": "number", "minimum": 0.3, "maximum": 3 },
+                "wallThickness": { "type": "number", "minimum": 0.02, "maximum": 0.2 },
+                "backstopOnly": { "type": "boolean" }
+              }
+            }
           }
         }
       ]
