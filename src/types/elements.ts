@@ -17,7 +17,14 @@ export interface AxisXZ {
 }
 
 export type ElementType =
-  'conveyor' | 'elevator' | 'spawner' | 'collectionZone' | 'despawnZone' | 'chute' | 'hopper';
+  | 'conveyor'
+  | 'elevator'
+  | 'spawner'
+  | 'collectionZone'
+  | 'despawnZone'
+  | 'chute'
+  | 'hopper'
+  | 'gradingScreen';
 
 export interface ElementBase<TType extends ElementType, TProps> {
   id: ElementId;
@@ -147,6 +154,31 @@ export interface HopperProperties {
   angleDeg: number;
 }
 
+/**
+ * Grading screen: a conveyor-like deck that carries crop by belt surface velocity
+ * AND grades by size. Crops with sampled diameter below `apertureMm` progressively
+ * fall through the deck at their own location (weighted toward the infeed by
+ * `frontBias`); oversized crop rides to the discharge. See ADR-020.
+ */
+export interface GradingScreenProperties {
+  /** m, along local X (1–50) */
+  length: number;
+  /** m (0.3–3) */
+  width: number;
+  /** m, top of deck surface above ground (0.2–5) */
+  beltHeight: number;
+  /** degrees, pitch about local Z (−30–30) */
+  inclineDeg: number;
+  /** m/min (0–300) */
+  beltSpeed: number;
+  /** mm — crops with sampled diameter below this fall through (1–200) */
+  apertureMm: number;
+  /** −100…100; 0 = even along the deck, positive concentrates fall-through at the infeed */
+  frontBias: number;
+  /** side-skirt walls (visual) */
+  skirts: boolean;
+}
+
 export type ConveyorElement = ElementBase<'conveyor', ConveyorProperties>;
 export type ElevatorElement = ElementBase<'elevator', ElevatorProperties>;
 export type SpawnerElement = ElementBase<'spawner', SpawnerProperties>;
@@ -154,6 +186,7 @@ export type CollectionZoneElement = ElementBase<'collectionZone', ZoneProperties
 export type DespawnZoneElement = ElementBase<'despawnZone', ZoneProperties>;
 export type ChuteElement = ElementBase<'chute', ChuteProperties>;
 export type HopperElement = ElementBase<'hopper', HopperProperties>;
+export type GradingScreenElement = ElementBase<'gradingScreen', GradingScreenProperties>;
 
 export type SceneElement =
   | ConveyorElement
@@ -162,4 +195,5 @@ export type SceneElement =
   | CollectionZoneElement
   | DespawnZoneElement
   | ChuteElement
-  | HopperElement;
+  | HopperElement
+  | GradingScreenElement;

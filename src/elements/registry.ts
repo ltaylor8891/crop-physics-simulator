@@ -114,6 +114,23 @@ export const ELEMENT_DESCRIPTORS: Record<ElementType, ElementDescriptor> = {
       angleDeg: 0,
     }),
   },
+  gradingScreen: {
+    type: 'gradingScreen',
+    label: 'Grading screen',
+    defaultY: 0,
+    color: '#5b6b78',
+    translucent: false,
+    createDefaultProperties: () => ({
+      length: 4,
+      width: 0.8,
+      beltHeight: 0.75,
+      inclineDeg: 0,
+      beltSpeed: 90,
+      apertureMm: 40,
+      frontBias: 0,
+      skirts: true,
+    }),
+  },
 };
 
 /** All known element types (includes temporarily disabled ones). */
@@ -125,6 +142,7 @@ export const ELEMENT_TYPES: ElementType[] = [
   'despawnZone',
   'chute',
   'hopper',
+  'gradingScreen',
 ];
 
 /**
@@ -192,6 +210,13 @@ export function getElementBounds(element: SceneElement): { size: Vec3; center: V
       return {
         size: { x: footprint.x, y: height, z: footprint.z },
         center: { x: 0, y: height / 2, z: 0 },
+      };
+    }
+    case 'gradingScreen': {
+      const { length, width, beltHeight } = element.properties;
+      return {
+        size: { x: length, y: beltHeight, z: width },
+        center: { x: 0, y: beltHeight / 2, z: 0 },
       };
     }
   }

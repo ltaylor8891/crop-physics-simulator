@@ -8,6 +8,7 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Breaking save-format changes
 
+- `fileVersion` 8 (develop): adds the standalone `gradingScreen` element type. Purely additive — V7 files migrate via a no-op `migrateV7toV8` (files that contain a grading screen are stamped V8 so older apps reject them).
 - `fileVersion` 7 (develop): hopper gains `mountHeight` + `angleDeg` (lift/tilt onto a belt); chute `length` narrows to 0.1–1 m. V6 files migrate via `migrateV6toV7`, back-filling the hopper fields to 0 and clamping any wider chute `length` into range.
 - `fileVersion` 6 (develop): adds standalone `chute` and `hopper` element types. Purely additive — V5 files migrate via a no-op `migrateV5toV6` (files that contain the new types are stamped V6 so older apps reject them).
 - `fileVersion` 5 (develop): the conveyor `diverter` gains `lateralOffset` (across-belt position). V4 files migrate via `migrateV4toV5`, back-filling `lateralOffset: 0` (centred).
@@ -29,6 +30,7 @@ Sections used per release: **Added** · **Changed** · **Fixed** · **Breaking s
 
 ### Added
 
+- Grading screen (develop, Phase C): a conveyor-like deck that carries crop and grades by size — undersized crop (below the configurable aperture) progressively drops straight through at its own location, weighted toward the infeed by a front-bias control, while oversized crop rides to the discharge. Reports cumulative graded mass in the status bar (ADR-020). Shared belt-carry logic extracted to `physics/beltCarry.ts`.
 - Conveyor diverter (develop, Phase A): an optional angled high-side wall that locks to the belt surface to deflect crop across it — position along the belt, across-belt offset, length, and angle are configurable; length 0 = none. Rendered mesh plus a matching fixed collider (ADR-018).
 - Chute element (develop, Phase B): a passive sloped deck that bridges gaps so crop slides onto the next surface; configurable length, width, slope, and top height (ADR-019).
 - Hopper element (develop, Phase B): a passive open-top box of walls (no floor) that holds crop piling against it — configurable footprint, wall height/thickness, a backstop-only mode that leaves the infeed side open, and a mount height + tilt angle so it can be lifted and pitched onto an inclined belt (ADR-019).

@@ -10,6 +10,7 @@ import { CROP_TYPES, sphereVolumeM3 } from '../elements/cropTypes';
 import { useSimulationStore } from '../state/simulationStore';
 import type { CropTypeId, Vec3 } from '../types/elements';
 import { CropPool, type CropSlotId } from './CropPool';
+import type { GradeDeckContact, GradeScreenSpec } from './gradingScreen';
 import { RollingMassWindow } from './rollingWindow';
 
 export interface CropActivation {
@@ -31,6 +32,8 @@ export interface CropHandle {
 }
 
 const PARK_Y = -100;
+/** Grading-screen deck thickness (matches BELT_THICKNESS) for the drop-through target. */
+const GRADE_DECK_THICKNESS = 0.08;
 /** Reference mesh/collider size in CropBodies — visuals scale relative to this. */
 export const CROP_MESH_REF_RADIUS = 0.05;
 export const CROP_MESH_REF_HALF_HEIGHT = 0.05;
@@ -463,6 +466,53 @@ class CropRuntime {
     }
     return accepted;
   }
+
+  /**
+   * Grading screens (ADR-020): undersized crop resting on a deck progressively drops
+   * straight through at its own XZ, weighted toward the infeed by `frontBias`.
+   * Oversized crop is left to ride the belt to the discharge. Geometry + probability
+   * are injected (pure, from gradingScreen.ts). Returns the mass that fell through.
+   */
+  tickGradingScreens(
+    screens: ReadonlyArray<GradeScreenSpec>,
+    deckContact: (point: Vec3, screen: GradeScreenSpec) => GradeDeckContact,
+    probability: (alongFraction: number, frontBias: number, dtSeconds: number) => number,
+    dtSeconds: number,
+    random: () => number,
+  ): { gradedKg: number } {
+    let gradedKg = 0;
+    if (screens.length === 0) return { gradedKg };
+
+    for (const type of CROP_TYPE_IDS) {
+      const bucket = this.buckets[type];
+      for (const id of [...bucket.pool.activeIds()]) {
+        const body = bucket.bodies[id];
+        if (!body || !body.isEnabled()) continue;
+        const t = body.translation();
+        const point = { x: t.x, y: t.y, z: t.z };
+        const radius = bucket.contactRadii[id] ?? CROP_MESH_REF_RADIUS;
+        const diameterMm = radius * 2 * 1000;
+
+        for (const screen of screens) {
+          if (diameterMm >= screen.apertureMm) continue; // oversized rides on
+          const contact = deckContact(point, screen);
+          if (!contact.onDeck) continue;
+          if (random() >= probability(contact.alongFraction, screen.frontBias, dtSeconds)) continue;
+
+          // Drop straight through at the crop's XZ, just below the deck slab.
+          const targetY = contact.surfaceY - GRADE_DECK_THICKNESS - radius - 0.02;
+          body.setTranslation({ x: t.x, y: targetY, z: t.z }, true);
+          body.setLinvel({ x: 0, y: -0.5, z: 0 }, true);
+          body.setAngvel({ x: 0, y: 0, z: 0 }, true);
+          body.wakeUp();
+          bucket.floorContactAt[id] = null;
+          gradedKg += bucket.pool.getSlot(id).massKg;
+          break; // fell through one screen; done with this crop this step
+        }
+      }
+    }
+    return { gradedKg };
+  }
 }
 
 /** Process-wide runtime used by the physics step and UI reset. */
@@ -473,6 +523,8 @@ export const cropSpawnStats = {
   massSpawnedKg: 0,
   spilledMassKg: 0,
   collectedMassKg: 0,
+  /** Cumulative mass that has dropped through grading screens (diagnostic). */
+  gradedMassKg: 0,
   statsAge: 0,
   simulationTime: 0,
   /** Rolling 10 s window of spawned mass (throughput in). */
@@ -496,6 +548,7 @@ export const cropSpawnStats = {
     this.massSpawnedKg = 0;
     this.spilledMassKg = 0;
     this.collectedMassKg = 0;
+    this.gradedMassKg = 0;
     this.statsAge = 0;
     this.simulationTime = 0;
     this.lastPhysicsStepMs = 0;

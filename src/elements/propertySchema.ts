@@ -110,6 +110,16 @@ export const PROPERTY_FIELDS: Record<ElementType, PropertyFieldDef[]> = {
     numberField('angleDeg', 'Tilt angle', -30, 30, '°', 1),
     { kind: 'boolean', path: 'backstopOnly', label: 'Backstop only (open infeed)' },
   ],
+  gradingScreen: [
+    numberField('length', 'Length', 1, 50, 'm', 0.1),
+    numberField('width', 'Width', 0.3, 3, 'm', 0.05),
+    numberField('beltHeight', 'Deck height', 0.2, 5, 'm', 0.05),
+    numberField('inclineDeg', 'Incline', -30, 30, '°', 1),
+    numberField('beltSpeed', 'Belt speed', 0, 300, 'm/min', 1),
+    numberField('apertureMm', 'Aperture', 1, 200, 'mm', 1),
+    numberField('frontBias', 'Front bias', -100, 100, '', 1),
+    { kind: 'boolean', path: 'skirts', label: 'Side skirts' },
+  ],
 };
 
 /** Build area half-extent for editable position fields (docs/UI_UX_SPECIFICATION.md). */

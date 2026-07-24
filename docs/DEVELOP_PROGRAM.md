@@ -2,7 +2,7 @@
 
 Living plan for the feature program on the **`develop`** branch, kept isolated from `main` (which stays at Stages 1–13 + performance/release). This document is the approved, phased plan; **nothing here is implemented until the user requests a specific phase.** As each phase lands, fold its detail into the standard docs (`ROADMAP.md` stage, `DECISIONS.md` ADR, `PRODUCT_SCOPE.md`, `PHYSICS_SPECIFICATION.md`, `SAVE_FILE_FORMAT.md`, `CHANGELOG.md`) and trim it here to a pointer.
 
-_Last updated: 2026-07-24 — Phases A and B implemented on `develop` (roadmap Stages 16–17, ADR-018/019; `fileVersion` 7 after user feedback: hopper mount height + tilt, chute length 0.1–1 m). Phase H (direct manipulation) added to the plan. Phases C–H planned, not started._
+_Last updated: 2026-07-24 — Phases A, B, and C implemented on `develop` (roadmap Stages 16–18, ADR-018/019/020; `fileVersion` 8). Phase H (direct manipulation) added to the plan. Phases D–H planned, not started._
 
 ## Context
 
@@ -57,9 +57,9 @@ Implemented on `develop` (roadmap Stage 17, ADR-019, `fileVersion` 6). Both are 
 - **ADR**: ADR-019 "Chute and hopper as passive static-collider elements".
 - **Files**: full new-type pattern for each; new `src/rendering/elements/ChuteMesh.tsx`, `HopperMesh.tsx` (+ geometry helpers), `src/physics/ChuteColliders.tsx`, `HopperColliders.tsx`.
 
-## Phase C — Grading screen
+## Phase C — Grading screen — ✅ DONE
 
-New standalone element that **carries like a belt** (reuse the `ConveyorColliders` contact-velocity mechanism) **and grades by size**.
+Implemented on `develop` (roadmap Stage 18, ADR-020, `fileVersion` 8). New standalone element that **carries like a belt** (reuses the extracted `beltCarry.ts` contact-velocity mechanism) **and grades by size**.
 
 - **Type** `type: 'gradingScreen'`: properties `length`, `width`, `beltHeight`, `inclineDeg`, `beltSpeed`, `apertureMm` (crops with sampled diameter < aperture are eligible to fall through), `frontBias` (−100…100; how strongly fall-through concentrates toward the infeed vs. spreads evenly), `skirts`.
 - **Physics/sim**: a `GradingScreenColliders.tsx` applies belt contact velocity to crops on its deck (factor the shared belt-velocity logic out of `ConveyorColliders.tsx` into a reusable helper in `src/physics/beltVelocity.ts` — that module already exists for the maths). Each step, a new pure `src/simulation/gradingScreen.ts` scans active crops within the deck footprint. An undersized crop (sampled diameter < `apertureMm`) is **not removed on contact**; instead it is carried along by the belt and, each step it remains on the deck, has a **per-step fall-through probability** so removal is distributed along the deck length. The probability is weighted by normalized position along the belt (local +X): higher near the **infeed**, tapering toward the discharge (a tunable `frontBias`), so more small crop drops early — matching real screening. When a crop is selected to fall, it is **released from its slot and re-spawned at its own current XZ**, just below the deck plane, with a small downward velocity (drop straight through where it sat) — **not** teleported to a fixed discharge point. Oversized crop rides to the discharge normally. Undersized-through mass is tallied into statistics ("graded off").

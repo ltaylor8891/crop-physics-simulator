@@ -7,6 +7,7 @@ import type { SceneElement } from '../types/elements';
 import { clampToBuildArea, snapPositionXZ } from '../utilities/snap';
 import { ChuteMesh } from './elements/ChuteMesh';
 import { ConveyorMesh } from './elements/ConveyorMesh';
+import { GradingScreenMesh } from './elements/GradingScreenMesh';
 import { HopperMesh } from './elements/HopperMesh';
 import { intersectGround } from './groundRay';
 
@@ -107,6 +108,8 @@ function PlacedElement({ element }: { element: SceneElement }) {
         <ChuteMesh properties={element.properties} selected={selected} />
       ) : element.type === 'hopper' ? (
         <HopperMesh properties={element.properties} selected={selected} />
+      ) : element.type === 'gradingScreen' ? (
+        <GradingScreenMesh properties={element.properties} selected={selected} />
       ) : (
         <mesh
           position={[bounds.center.x, bounds.center.y, bounds.center.z]}

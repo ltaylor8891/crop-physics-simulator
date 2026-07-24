@@ -79,6 +79,17 @@ Buckets are not simulated. The elevator is a state machine per crop:
 
 Consequence: elevators never jam or spill internally. This is a deliberate simplification; note it in any statistics interpretation.
 
+## Grading Screen **[approximation]** (ADR-020)
+
+The deck is a `fixed` belt collider that carries crop by contact surface velocity exactly like a conveyor (shared `physics/beltCarry.ts`). Rapier has no per-body-size collision filtering, so size grading is not a permeable collider; instead, each fixed step:
+
+1. `cropRuntime.tickGradingScreens` scans active crops. A crop resting on the deck (within its footprint and a small band above the surface — `gradingDeckContact`) whose sampled diameter is **below `apertureMm`** is eligible to fall through; larger crop is left to ride the belt to the discharge.
+2. An eligible crop drops through with per-step probability `1 − e^(−rate·dt)`, where `rate = GRADE_BASE_RATE_PER_S × weight`, and `weight` tilts linearly along the deck by `frontBias` (positive → higher near the infeed, zero at the discharge). The draw uses an injected `RandomFn`.
+3. A drawn crop is **teleported straight down** to just below the deck slab at its current XZ, with a small downward velocity — it then falls under gravity onto whatever is placed below. This preserves the crop's identity/mass (chosen over release + re-spawn).
+4. Fallen-through mass accumulates into the diagnostic **graded** statistic; the crop continues to exist (it is not removed by grading).
+
+Consequence: grading is progressive and position-biased but statistical, not a true mesh sieve; the fall-through rate is a fixed base rate tunable only by `frontBias` (and which crops are eligible, via `apertureMm`). Skirts on the screen are visual-only in this phase.
+
 ## Floor-Contact Detection and Despawn
 
 - The ground plane has a thin sensor layer just above it (or uses contact events from the floor collider).

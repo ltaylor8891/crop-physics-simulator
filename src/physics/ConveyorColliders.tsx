@@ -18,14 +18,13 @@ import {
 import { useSceneStore } from '../state/sceneStore';
 import type { ConveyorElement, Vec3 } from '../types/elements';
 import { degreesToRadians } from '../utilities/units';
+import { applyBeltCarry } from './beltCarry';
 import {
   beltColliderLocalCenter,
   beltOrientationQuaternion,
   beltWorldNormal,
   beltWorldVelocity,
-  isBeltTopContact,
   rotateYaw,
-  velocityWithBeltSurface,
 } from './beltVelocity';
 import { MACHINE_COLLISION_GROUPS } from './collisionGroups';
 import { Materials } from './materials';
@@ -151,34 +150,7 @@ function ConveyorCollider({ conveyor }: { conveyor: ConveyorElement }) {
   useAfterPhysicsStep(() => {
     const collider = beltColliderRef.current;
     if (!collider) return;
-
-    const surfaceVel = surfaceVelRef.current;
-    const speedSq =
-      surfaceVel.x * surfaceVel.x + surfaceVel.y * surfaceVel.y + surfaceVel.z * surfaceVel.z;
-    // Stopped belt: leave friction to hold (do not snap tangential vel to zero).
-    if (speedSq < 1e-12) return;
-
-    const normal = normalRef.current;
-    world.contactPairsWith(collider, (other) => {
-      const body = other.parent();
-      if (!body || !body.isDynamic() || !body.isEnabled()) return;
-
-      // Only top-surface contacts — side/end hits must not get belt speed
-      // (piles near discharge / overlapping collection zones were jumping).
-      let onTop = false;
-      world.contactPair(collider, other, (manifold, flipped) => {
-        if (manifold.numContacts() <= 0) return;
-        const n = manifold.normal();
-        if (isBeltTopContact(n, normal, flipped)) onTop = true;
-      });
-      if (!onTop) return;
-
-      const current = body.linvel();
-      const next = velocityWithBeltSurface(current, surfaceVel, normal);
-      body.setLinvel(next, true);
-      // Surface-velocity carriage — kill spin so crops are conveyed, not rolling.
-      body.setAngvel({ x: 0, y: 0, z: 0 }, true);
-    });
+    applyBeltCarry(world, collider, surfaceVelRef.current, normalRef.current);
   });
 
   return (

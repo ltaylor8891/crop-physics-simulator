@@ -25,7 +25,7 @@ Assume a desktop browser, mouse-and-keyboard interaction, and no prior 3D-softwa
 ## Element Library Requirements
 
 - A left-hand panel lists all placeable element types with name and icon/thumbnail.
-- Initial element types: **flat belt conveyor**, **inclined belt conveyor** (same element with pitch), **crop spawner**, **collection zone**, **chute**, **hopper**. (**Bucket elevator** is temporarily unavailable — Stage 11 code retained for restore.)
+- Initial element types: **flat belt conveyor**, **inclined belt conveyor** (same element with pitch), **crop spawner**, **collection zone**, **chute**, **hopper**, **grading screen**. (**Bucket elevator** is temporarily unavailable — Stage 11 code retained for restore.)
 - Placement: click an element in the library, then click a position on the ground plane (or on top of an existing element) to place it. Escape cancels placement.
 - Every placed element gets a unique stable ID and sensible default dimensions/properties.
 - Placed elements can be selected, moved, rotated (yaw), reconfigured, duplicated, and deleted.
@@ -52,6 +52,13 @@ Assume a desktop browser, mouse-and-keyboard interaction, and no prior 3D-softwa
 - Configurable **footprint**, wall **height**, and wall **thickness**. A **backstop-only** mode leaves the infeed side open; otherwise all four sides are walled.
 - A **mount height** raises the base off the ground and a **tilt angle** pitches it, so the hopper can be located on an inclined belt (its origin stays at ground level for placement/dragging).
 - No internal simulation; crop rests on whatever surface is below (belt or ground) and is contained by the walls. Sensors (later) monitor this volume to drive control logic.
+
+## Grading Screen Requirements
+
+- Carries crop like a belt conveyor (same length/width/deck-height/incline/belt-speed controls) **and** grades by size.
+- Configurable **aperture** (mm): crops with sampled diameter below the aperture are eligible to fall through the deck; larger crop rides to the discharge.
+- Undersized crop falls through **progressively along the deck at its own location** (not all at once, and not teleported to a fixed point) — dropping straight down onto whatever is placed below. A **front-bias** control concentrates the fall-through toward the infeed (or evens it out).
+- Mass that has fallen through is reported as a cumulative **graded** figure in the statistics (diagnostic; the crop continues to exist below the deck).
 
 ## Elevator Requirements
 

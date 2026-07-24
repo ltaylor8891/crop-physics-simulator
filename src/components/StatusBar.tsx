@@ -30,6 +30,11 @@ export function StatusBar() {
         Out {statistics.throughputCollectedTph.toFixed(1)} t/h
       </span>
       <span>Spilled {spillPercent.toFixed(1)} %</span>
+      {statistics.gradedMassKg > 0 && (
+        <span title="Cumulative mass separated by grading screens">
+          Graded {(statistics.gradedMassKg / 1000).toFixed(2)} t
+        </span>
+      )}
       <span title={`Physics step ${statistics.physicsStepMs.toFixed(2)} ms`}>
         {Math.round(statistics.fps)} FPS
       </span>

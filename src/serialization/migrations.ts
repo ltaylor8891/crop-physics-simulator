@@ -139,6 +139,15 @@ export function migrateV6toV7(raw: Record<string, unknown>): Record<string, unkn
 }
 
 /**
+ * V7 → V8: adds the standalone `gradingScreen` element type. Purely additive — older
+ * files contain none, so no element transform is needed; the version is stamped so
+ * files that DO contain grading screens are marked V8 (and rejected by older apps).
+ */
+export function migrateV7toV8(raw: Record<string, unknown>): Record<string, unknown> {
+  return { ...raw, fileVersion: 8 };
+}
+
+/**
  * Apply stepwise migrations until `CURRENT_FILE_VERSION`.
  * Returns the migrated object or errors (e.g. unsupported future version).
  */
@@ -195,6 +204,10 @@ export function migrateLayout(
   if (v === 6) {
     current = migrateV6toV7(current);
     v = 7;
+  }
+  if (v === 7) {
+    current = migrateV7toV8(current);
+    v = 8;
   }
 
   if (v !== CURRENT_FILE_VERSION) {

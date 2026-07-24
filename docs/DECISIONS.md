@@ -155,3 +155,20 @@ Significant decisions, newest last. Statuses: **Proposed**, **Accepted**, **Supe
   - The hopper is the volume Phase D sensors will monitor. "Match feeding conveyor width" for the chute is deferred (explicit `width` for now).
   - Follow-up (`fileVersion` 7): the hopper gained `mountHeight` + `angleDeg` so it can be lifted and pitched onto a belt (origin stays at ground for dragging, mirroring how `beltHeight` lifts the conveyor deck); the chute `length` range was narrowed to 0.1–1 m per user feedback. Chute locate-to-conveyor conveniences remain deferred.
   - Code: full new-type pattern for `chute` and `hopper`; `ChuteMesh`/`HopperMesh`, `ChuteColliders`/`HopperColliders`, geometry helpers, serialization V6.
+
+## ADR-020 — Grading screen: belt-carry + progressive, size-gated drop-through at the crop location
+
+- **Date**: 2026-07-24
+- **Status**: Accepted
+- **Context**: The `develop` program Phase C (`docs/DEVELOP_PROGRAM.md`) adds a grading screen that both carries crop like a belt and separates by size: undersized crop must fall through progressively along the deck (more near the infeed), at the crop's own location — not all removed on contact, and not teleported to a fixed discharge. Rapier has no per-body-size collision filtering, so a truly permeable mesh collider is not available.
+- **Options considered**:
+  1. A permeable collider that physically passes small bodies through gaps (no Rapier support; would need per-body collision-group toggling — a large spike).
+  2. Remove undersized crop on contact and re-emit below (instant, not progressive; changes crop identity).
+  3. Belt-carry the crop on a solid deck and apply a per-step, position-weighted fall-through probability; when a crop is drawn, drop it straight down at its current XZ.
+- **Decision**: Option 3. The deck is a `fixed` belt collider carrying crop via the shared `applyBeltCarry` (ADR-016). Each fixed step, `cropRuntime.tickGradingScreens` scans active crops; an undersized crop (sampled diameter < `apertureMm`) resting on the deck has a fall-through probability `1 − e^(−rate·dt)` with `rate` weighted along the deck by `frontBias` (higher near the infeed). A drawn crop is **teleported** straight down to just below the deck slab at its current XZ with a small downward velocity — chosen over release+re-spawn because it preserves the crop's identity, mass, and size for the same visible result. Oversized crop rides to the discharge. Fallen-through mass is tallied as a diagnostic "graded" statistic (the crop lives on and lands on whatever is below). The draw uses an injected `RandomFn` so the geometry + probability in `gradingScreen.ts` stay pure and unit-tested; the tick is injected like `zoneVolume.isPointInsideZone`.
+- **Consequences**:
+  - No permeable-collider spike; behaviour matches the product intent (progressive, front-biased, at the crop's location).
+  - Determinism follows the project pattern (seedable `RandomFn`); tests assert the geometry, the probability distribution, and the drop-through integration (undersized falls, oversized stays, mass tallied).
+  - New element type is additive to the save format → `fileVersion` 8 with a no-op `migrateV7toV8`.
+  - Skirts on the screen are visual-only in this phase (deck collider + belt-carry are the physics); a `frontBias`-only distribution and a fixed base rate are the tunables (base rate can become a property later).
+  - Code: full new-type pattern for `gradingScreen`; `gradingScreen.ts` (+ test), `cropRuntime.tickGradingScreens` (+ integration test), `physics/beltCarry.ts` (extracted shared belt-carry, now used by `ConveyorColliders` too), `GradingScreenColliders`, `GradingScreenMesh`, `SpawningSystem` hook (grading after despawn, before spawners), `gradedMassKg` statistic.

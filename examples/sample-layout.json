@@ -1,5 +1,5 @@
 {
-  "fileVersion": 7,
+  "fileVersion": 8,
   "meta": {
     "name": "Sample intake line",
     "createdAt": "2026-07-21T19:00:00Z",
@@ -102,6 +102,23 @@
         "backstopOnly": false,
         "mountHeight": 0,
         "angleDeg": 0
+      }
+    },
+    {
+      "id": "el_gradescreen1",
+      "type": "gradingScreen",
+      "name": "Sizing screen",
+      "position": { "x": 4.5, "y": 0, "z": -4 },
+      "rotationYaw": 0,
+      "properties": {
+        "length": 4,
+        "width": 0.8,
+        "beltHeight": 0.75,
+        "inclineDeg": 0,
+        "beltSpeed": 90,
+        "apertureMm": 40,
+        "frontBias": 20,
+        "skirts": true
       }
     }
   ],

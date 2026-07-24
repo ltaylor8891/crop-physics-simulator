@@ -15,6 +15,8 @@ export interface SceneStatistics {
   /** Rolling 10 s collected t/h keyed by collection-zone element id. */
   collectedTphByZoneId: Record<string, number>;
   spilledMassKg: number;
+  /** Cumulative mass separated by grading screens (drop-through). */
+  gradedMassKg: number;
   throttled: boolean;
   /** Smoothed render FPS. */
   fps: number;
@@ -30,6 +32,7 @@ const ZERO_STATISTICS: SceneStatistics = {
   throughputCollectedTph: 0,
   collectedTphByZoneId: {},
   spilledMassKg: 0,
+  gradedMassKg: 0,
   throttled: false,
   fps: 0,
   physicsStepMs: 0,

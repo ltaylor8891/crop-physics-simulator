@@ -8,6 +8,7 @@ import {
   migrateV4toV5,
   migrateV5toV6,
   migrateV6toV7,
+  migrateV7toV8,
 } from './migrations';
 
 describe('migrateLayout', () => {
@@ -15,7 +16,7 @@ describe('migrateLayout', () => {
     const result = migrateLayout({ fileVersion: 1, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(7);
+    expect(result.value.fileVersion).toBe(8);
     expect(result.value.keep).toBe(true);
   });
 
@@ -23,14 +24,14 @@ describe('migrateLayout', () => {
     const result = migrateLayout({ fileVersion: 2, keep: true, elements: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(7);
+    expect(result.value.fileVersion).toBe(8);
   });
 
-  it('accepts current fileVersion 7 unchanged', () => {
-    const result = migrateLayout({ fileVersion: 7, keep: true });
+  it('accepts current fileVersion 8 unchanged', () => {
+    const result = migrateLayout({ fileVersion: 8, keep: true });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.fileVersion).toBe(7);
+    expect(result.value.fileVersion).toBe(8);
   });
 
   it('rejects non-integer fileVersion', () => {
@@ -39,7 +40,7 @@ describe('migrateLayout', () => {
   });
 
   it('rejects future versions', () => {
-    const result = migrateLayout({ fileVersion: 8 });
+    const result = migrateLayout({ fileVersion: 9 });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.errors[0]?.message).toMatch(/newer version/i);
@@ -192,6 +193,15 @@ describe('migrateV5toV6', () => {
     ];
     const migrated = migrateV5toV6({ fileVersion: 5, elements: els });
     expect(migrated.fileVersion).toBe(6);
+    expect(migrated.elements).toEqual(els);
+  });
+});
+
+describe('migrateV7toV8', () => {
+  it('stamps the version and leaves existing elements untouched (gradingScreen additive)', () => {
+    const els = [{ type: 'conveyor', id: 'c1', properties: { length: 6 } }];
+    const migrated = migrateV7toV8({ fileVersion: 7, elements: els });
+    expect(migrated.fileVersion).toBe(8);
     expect(migrated.elements).toEqual(els);
   });
 });

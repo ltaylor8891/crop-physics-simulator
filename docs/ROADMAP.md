@@ -21,6 +21,7 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 | 15  | Testing and release preparation     | Not started |
 | 16  | Conveyor legs + diverter (develop)  | Complete    |
 | 17  | Chute + hopper elements (develop)   | Complete    |
+| 18  | Grading screen (develop)            | Complete    |
 
 ## Stage 1 — Repository and design documentation
 
@@ -157,3 +158,11 @@ Development stages, in order. Statuses: **Not started** · **In progress** · **
 - **Acceptance criteria**: both types placeable from the library; a chute renders a pitched deck crops slide down; a hopper renders open-top walls (front wall omitted in backstop-only mode) with no floor; a layout containing both saves/loads and validates; full CI gate green.
 - **Dependencies**: main (Stages 1–13). Independent of the control subsystem.
 - **Status**: Complete on `develop` and **user-verified in the app** (both interact with crop correctly). Follow-up applied per user feedback (`fileVersion` 7): hopper gained a **mount height** + **tilt angle** so it can be lifted/pitched onto a belt; chute **length** range narrowed to 0.1–1 m (over-long saved chutes are clamped by `migrateV6toV7`). Full gate green (154 tests). Chute locate-to-conveyor conveniences remain deferred (Phase B "match feeding conveyor width" / a later manipulation pass).
+
+## Stage 18 — Grading screen (develop feature program, Phase C)
+
+- **Objective**: a screen that carries crop like a belt and separates by size — undersized crop progressively drops through at its own location (`docs/DEVELOP_PROGRAM.md` Phase C; ADR-020).
+- **Deliverables**: `gradingScreen` element type (full new-type pattern); `GradingScreenMesh`; `GradingScreenColliders` (deck belt-carry via the extracted `physics/beltCarry.ts`, now shared with conveyors); pure `simulation/gradingScreen.ts` (deck contact + fall probability); `cropRuntime.tickGradingScreens` (size-gated drop-through, injected + deterministic); `SpawningSystem` hook (after despawn, before spawners); `gradedMassKg` statistic + status-bar readout; `fileVersion` 8 with a no-op `migrateV7toV8`; schema + sample-layout update; unit + integration tests.
+- **Acceptance criteria**: undersized crop (diameter < aperture) progressively falls straight through, weighted toward the infeed by `frontBias`; oversized crop rides to the discharge; the deck carries crop at belt speed; a layout with a grading screen saves/loads and validates; full CI gate green.
+- **Dependencies**: main (Stages 1–13); reuses the belt-carry mechanism (ADR-016).
+- **Status**: Complete on `develop`. Verified: full gate green (typecheck — exhaustive element switches; lint; format:check; 165 tests incl. deck-contact geometry, fall-probability distribution, and a deterministic drop-through integration test proving undersized crop teleports below the deck while oversized stays and mass is tallied; build). Library shows Grading screen; an inclined + rotated grading-screen scene loads through the real parse/validate path and its colliders mount with no console errors. A live in-browser watch of crops falling through was not captured this session — the preview pane's render loop would not tick (0 FPS) — but the drop-through logic is covered by the integration test.

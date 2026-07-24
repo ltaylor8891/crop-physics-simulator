@@ -13,6 +13,11 @@ import {
   type ElevatorRuntimeState,
 } from '../simulation/elevator';
 import {
+  gradeFallProbability,
+  gradingDeckContact,
+  type GradeScreenSpec,
+} from '../simulation/gradingScreen';
+import {
   applyThrottleCap,
   applyThrottleCreditCap,
   createSpawnerRuntimeState,
@@ -23,7 +28,12 @@ import { isPointInsideZone } from '../simulation/zoneVolume';
 import { useSceneStore } from '../state/sceneStore';
 import { useSimulationStore } from '../state/simulationStore';
 import { isElementTypeEnabled } from '../elements/registry';
-import type { ElementId, ElevatorElement, SpawnerElement } from '../types/elements';
+import type {
+  ElementId,
+  ElevatorElement,
+  GradingScreenElement,
+  SpawnerElement,
+} from '../types/elements';
 import { kgPerSecondToTonnesPerHour } from '../utilities/flow';
 
 const PHYSICS_DT = 1 / 60;
@@ -206,6 +216,30 @@ export function SpawningSystem() {
       }
     }
 
+    // Grading screens: undersized crop on a deck progressively drops through (ADR-020).
+    const screens: GradeScreenSpec[] = Object.values(elements)
+      .filter((el): el is GradingScreenElement => el.type === 'gradingScreen')
+      .map((el) => ({
+        position: el.position,
+        rotationYaw: el.rotationYaw,
+        length: el.properties.length,
+        width: el.properties.width,
+        beltHeight: el.properties.beltHeight,
+        inclineDeg: el.properties.inclineDeg,
+        apertureMm: el.properties.apertureMm,
+        frontBias: el.properties.frontBias,
+      }));
+    if (screens.length > 0) {
+      const graded = cropRuntime.tickGradingScreens(
+        screens,
+        gradingDeckContact,
+        gradeFallProbability,
+        PHYSICS_DT,
+        Math.random,
+      );
+      cropSpawnStats.gradedMassKg += graded.gradedKg;
+    }
+
     const spawners = Object.values(elements).filter(
       (el): el is SpawnerElement => el.type === 'spawner',
     );
@@ -288,6 +322,7 @@ export function SpawningSystem() {
         inElevator,
         totalMassSpawnedKg: cropSpawnStats.massSpawnedKg,
         spilledMassKg: cropSpawnStats.spilledMassKg,
+        gradedMassKg: cropSpawnStats.gradedMassKg,
         throughputInTph: kgPerSecondToTonnesPerHour(
           cropSpawnStats.inWindow.rateKgPerSecond(simTime),
         ),

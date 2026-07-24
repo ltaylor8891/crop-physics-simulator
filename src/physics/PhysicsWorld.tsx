@@ -4,6 +4,7 @@ import { ChuteColliders } from './ChuteColliders';
 import { ConveyorColliders } from './ConveyorColliders';
 import { CropBodies } from './CropBodies';
 import { DebugBalls } from './DebugBalls';
+import { GradingScreenColliders } from './GradingScreenColliders';
 import { GroundCollider } from './GroundCollider';
 import { HopperColliders } from './HopperColliders';
 import { SpawningSystem } from './SpawningSystem';
@@ -30,6 +31,7 @@ export function PhysicsWorld() {
       <ConveyorColliders />
       <ChuteColliders />
       <HopperColliders />
+      <GradingScreenColliders />
       <CropBodies />
       <SpawningSystem />
       <DebugBalls />

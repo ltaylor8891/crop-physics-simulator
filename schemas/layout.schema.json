@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/crop-physics-simulator/layout.schema.json",
-  "title": "Crop Physics Simulator Layout (fileVersion 7)",
+  "title": "Crop Physics Simulator Layout (fileVersion 8)",
   "description": "Versioned save-file format for simulator layouts. Human-readable specification: docs/SAVE_FILE_FORMAT.md",
   "type": "object",
   "additionalProperties": false,
   "required": ["fileVersion", "meta", "settings", "elements", "camera"],
   "properties": {
-    "fileVersion": { "const": 7 },
+    "fileVersion": { "const": 8 },
     "meta": {
       "type": "object",
       "additionalProperties": false,
@@ -219,6 +219,37 @@
                 "backstopOnly": { "type": "boolean" },
                 "mountHeight": { "type": "number", "minimum": 0, "maximum": 5 },
                 "angleDeg": { "type": "number", "minimum": -30, "maximum": 30 }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "properties"],
+          "properties": {
+            "type": { "const": "gradingScreen" },
+            "properties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "length",
+                "width",
+                "beltHeight",
+                "inclineDeg",
+                "beltSpeed",
+                "apertureMm",
+                "frontBias",
+                "skirts"
+              ],
+              "properties": {
+                "length": { "type": "number", "minimum": 1, "maximum": 50 },
+                "width": { "type": "number", "minimum": 0.3, "maximum": 3 },
+                "beltHeight": { "type": "number", "minimum": 0.2, "maximum": 5 },
+                "inclineDeg": { "type": "number", "minimum": -30, "maximum": 30 },
+                "beltSpeed": { "type": "number", "minimum": 0, "maximum": 300 },
+                "apertureMm": { "type": "number", "minimum": 1, "maximum": 200 },
+                "frontBias": { "type": "number", "minimum": -100, "maximum": 100 },
+                "skirts": { "type": "boolean" }
               }
             }
           }
